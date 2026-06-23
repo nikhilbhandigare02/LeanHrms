@@ -94,6 +94,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppraisalBL.cs" />
     <Compile Include="assignRightsBL.cs" />
     <Compile Include="AssignRoleBL.cs" />
     <Compile Include="Class1.cs" />

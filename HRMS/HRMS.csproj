@@ -1727,8 +1727,10 @@
     <Content Include="View\Authentication\logout.aspx" />
     <Content Include="View\Authentication\setPassword.aspx" />
     <Content Include="View\Authentication\verifyOTP.aspx" />
+    <Content Include="View\Modules\AddAppraisalForm.aspx" />
     <Content Include="View\Modules\AddBioxiasalaryform.aspx" />
     <Content Include="View\Modules\AddEmployee.aspx" />
+    <Content Include="View\Modules\AppraisalDetails.aspx" />
     <Content Include="View\Modules\EmployeeRegistration.aspx" />
     <Content Include="View\Modules\EmployeeList.aspx" />
     <Content Include="View\Modules\EmployeeLeaveList.aspx" />
@@ -1826,6 +1828,13 @@
     <Compile Include="View\Layout\Site1.Master.designer.cs">
       <DependentUpon>Site1.Master</DependentUpon>
     </Compile>
+    <Compile Include="View\Modules\AddAppraisalForm.aspx.cs">
+      <DependentUpon>AddAppraisalForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddAppraisalForm.aspx.designer.cs">
+      <DependentUpon>AddAppraisalForm.aspx</DependentUpon>
+    </Compile>
     <Compile Include="View\Modules\AddBioxiasalaryform.aspx.cs">
       <DependentUpon>AddBioxiasalaryform.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1836,6 +1845,13 @@
     <Compile Include="View\Modules\AddEmployee.aspx.cs">
       <DependentUpon>AddEmployee.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AppraisalDetails.aspx.cs">
+      <DependentUpon>AppraisalDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AppraisalDetails.aspx.designer.cs">
+      <DependentUpon>AppraisalDetails.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\EmployeeRegistration.aspx.cs">
       <DependentUpon>EmployeeRegistration.aspx</DependentUpon>

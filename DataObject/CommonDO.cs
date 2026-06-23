@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,7 @@ namespace DataObject
     }
     public class ResponseDO
     {
+        public int Status { get; set; }
         public string Result { get; set; }
         public String message { get; set; }
         public string Remarks { get; set; }

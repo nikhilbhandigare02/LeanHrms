@@ -1125,7 +1125,7 @@
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="1">Save</button></div>
                 </section>
-
+                <%--//////--%>
                 <section class="wizard-step collapsed pending" data-step="2">
                     <div class="card-heading">
                         <div><span class="accordion-number">2</span><h2>Employment Information</h2><p>Set the employee lifecycle, joining, probation, and separation attributes.</p></div>

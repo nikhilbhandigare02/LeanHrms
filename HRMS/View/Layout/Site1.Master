@@ -1,0 +1,1346 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="Lean.View.Layout.Site1" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+
+    <meta charset="utf-8" />
+    <title>Alphonsol - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../../assets/libs/jquery/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <%--<script>
+        function showpageAccessSavedMessage(status, remark) {
+            Swal.fire({
+
+                icon: status === "Success" ? "success" : "error",
+                text: remark,
+                timer: 4000,
+                showConfirmButton: false
+            });
+        }
+    </script>--%>
+    <script type="text/javascript">
+        window.onload = function () {
+            // Function to get query parameters from the URL
+            function getQueryParam(param) {
+                var urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+
+            // Get 'status' and 'remark' from query parameters
+            var status = getQueryParam('status');
+            var remark = getQueryParam('remark');
+
+            // If status and remark are present, show the popup
+            if (status && remark) {
+                showpageAccessSavedMessage(status, remark);
+            }
+        };
+</script>
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="../../assets/images/faviconicon.png" />
+    <!-- Bootstrap Css -->
+    <!-- Bootstrap Css -->
+    <link href="../../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- App Css-->
+    <link href="../../assets/css/app.min.css" rel="stylesheet" type="text/css" />
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body data-sidebar="light">
+    <form runat="server" id="form1">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
+        <!-- Begin page -->
+        <div id="layout-wrapper">
+            <header id="page-topbar">
+                <div class="navbar-header">
+                    <div class="d-flex">
+                        <!-- LOGO -->
+                        <div class="navbar-brand-box">
+                            <%--<a href="" class="logo logo-dark">
+                                <span class="logo-sm">
+                                    <img src="../../assets/images/logo.svg" alt="" height="22">
+                                </span>
+                                <span class="logo-lg">
+                                    <img src="../../assets/images/logo-dark.png" alt="" height="17">
+                                </span>
+                            </a>--%>
+                            <%-- <asp:LinkButton runat="server" ID="Logo" OnClick="Logo_Click" class="logo logo-dark">
+                                <span class="logo-sm">
+                                    <img src="../../assets/images/faviconicon.png" alt="" height="22">
+                                </span>
+
+                                <span class="logo-lg logo-background">
+                                    <img src="../../assets/images/alphonsol_logo.png" alt="" height="35">
+                                </span>
+                            </asp:LinkButton>--%>
+                            <asp:LinkButton runat="server" ID="Logo" OnClick="Logo_Click" class="logo logo-dark">
+                                <span class="logo-sm">
+                                    <asp:Image runat="server" ID="imgLogoSmall" Height="22" />
+                                </span>
+                                <span class="logo-lg logo-background" style="float: left;">
+                                    <asp:Image runat="server" ID="imgLogoLarge" Height="35" />
+                                </span>
+                            </asp:LinkButton>
+
+                        </div>
+
+                        <button type="button" class="btn btn-sm font-size-16 header-item waves-effect sidebar-toggle-btn" id="vertical-menu-btn" aria-label="Toggle sidebar">
+                            <i class="fa fa-fw fa-bars"></i>
+                        </button>
+
+                        <!-- App Search-->
+                        <%-- <div class="app-search d-none d-lg-block">
+                            <div class="position-relative">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="bx bx-search-alt"></span>
+                            </div>
+                        </div>--%>
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="d-inline-block my-auto">
+                            <%--<asp:ScriptManager ID="ScriptManager1" runat="server" EnablePartialRendering="true" />--%>
+
+                            <asp:UpdatePanel ID="TimerUpdatePanel" runat="server">
+                                <ContentTemplate>
+                                    <asp:Label ID="txtTimer" runat="server" Text="" Style="color: #000000; font-size: 14px;"></asp:Label>
+                                    <asp:Timer ID="Timer1" runat="server" Interval="1000" OnTick="Timer1_Tick"></asp:Timer>
+                                </ContentTemplate>
+                            </asp:UpdatePanel>
+
+                        </div>
+                        <%--<div class="dropdown d-inline-block d-lg-none ms-2">
+                            <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="mdi mdi-magnify"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                                aria-labelledby="page-header-search-dropdown">
+
+                                <div class="p-3">
+                                    <div class="form-group m-0">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>--%>
+
+                        <div class="dropdown d-none d-lg-inline-block ms-1">
+                            <%-- <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen">
+                                <i class="bx bx-fullscreen"></i>
+                            </button>--%>
+                        </div>
+
+                        <div class="dropdown d-inline-block">
+                            <%-- <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-bell bx-tada"></i>
+                                <span class="badge bg-danger rounded-pill">3</span>
+                            </button>--%>
+                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                                aria-labelledby="page-header-notifications-dropdown">
+                                <div class="p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="m-0" key="t-notifications">Notifications </h6>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="#!" class="small" key="t-view-all">View All</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-simplebar style="max-height: 230px;">
+                                </div>
+                                <div class="p-2 border-top d-grid">
+                                    <a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)">
+                                        <i class="mdi mdi-arrow-right-circle me-1"></i><span key="t-view-more">View More..</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown d-inline-block">
+                            <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <%-- <img class="rounded-circle header-profile-user" src="../../assets/images/users/avatar-1.jpg"
+                                     alt="Header Avatar">--%>
+                                <%--   <span id="usernamePlaceholder" class="d-none d-xl-inline-block ms-1" key="t-henry">Henry</span>--%>
+                                <asp:Label runat="server" ID="txtuserName" class="d-none d-xl-inline-block ms-1" Style="color: #000000; font-size: 14px;" />
+                                <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <!-- item-->
+                                <!-- item-->
+                                <%--<a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle me-1"></i><span key="t-profile">Profile</span></a>
+ <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings">Settings</span></a>--%>
+                                <a class="dropdown-item" href="/view/authentication/changePassword.aspx"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i><span key="t-lock-screen">Change Password</span></a>
+                                <a class="dropdown-item" href="/view/modules/LeaveConfiguration.aspx"><i class="bx bx-cog font-size-16 align-middle me-1"></i><span>Configuration</span></a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="/view/authentication/logout.aspx">
+                                    <i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i>
+                                    <span key="t-logout">Logout</span>
+                                </a>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ========== Left Sidebar Start ========== -->
+            <div class="vertical-menu">
+                <div data-simplebar class="h-100">
+                    <div id="sidebar-menu">
+                        <ul class="metismenu list-unstyled" id="side-menu">
+                            <li class="menu-title" key="t-menu">Menu</li>
+                            <li>
+                                <a href="/View/Modules/Home.aspx" class="waves-effect">
+                                    <i class="bx bx-home-circle"></i>
+                                    <span>Home</span>
+                                </a>
+                            </li>
+                            <asp:Repeater ID="rptMainAndSubMenu" runat="server" OnItemDataBound="rptMainAndSubMenu_ItemDataBound">
+                                <ItemTemplate>
+                                    <li runat="server" visible='<%# !string.Equals((Eval("Menu") ?? "").ToString().Trim(), "Home", StringComparison.OrdinalIgnoreCase) && !((Eval("MenuLink") ?? "").ToString().ToLower().Contains("/view/modules/home.aspx")) %>'>
+                                        <a href='<%#Eval("MenuLink").ToString() != "" ? Eval("MenuLink") : "javascript:void(0);"  %>' class='<%#Eval("MenuLink").ToString() != "" ?"" : "has-arrow waves-effect" %>'>
+                                            <i class='<%# Eval("Icon") %>'></i>
+                                            <span key="t-dashboards"><%# Eval("Menu") %></span>
+                                        </a>
+                                        <ul class="sub-menu" aria-expanded="true">
+                                            <asp:Repeater ID="rptSubMenu" runat="server">
+                                                <ItemTemplate>
+                                                    <li>
+                                                        <asp:PlaceHolder runat="server" Visible='<%# ((Eval("SubMenu") ?? "").ToString().Trim().ToLower() == "document") %>'>
+                                                            <a href="javascript:void(0);" class="has-arrow" key="t-default">Document</a>
+                                                            <ul class="sub-menu" aria-expanded="true">
+                                                                <li>
+                                                                    <a href='<%# (Eval("SubMenuLink") != null && !string.IsNullOrWhiteSpace(Eval("SubMenuLink").ToString())) ? Eval("SubMenuLink").ToString() : "/View/Modules/useruploaddocuments.aspx" %>' key="t-default">Upload Document</a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="/View/Modules/viewdetailsforprobationperiod.aspx" key="t-default">Update Probation Period</a>
+                                                                </li>
+                                                            </ul>
+                                                        </asp:PlaceHolder>
+                                                        <asp:PlaceHolder runat="server" Visible='<%# !((Eval("SubMenu") ?? "").ToString().Trim().ToLower() == "document") && !((Eval("SubMenu") ?? "").ToString().Trim().ToLower() == "update probation period") %>'>
+                                                            <asp:HyperLink ID="SubMenuLink" runat="server" Text='<%# Eval("SubMenu") %>' Key="t-default"
+                                                                NavigateUrl='<%# (Eval("SubMenuLink") != null && !string.IsNullOrWhiteSpace(Eval("SubMenuLink").ToString())) ? Eval("SubMenuLink").ToString() : "" %>'>
+                                                            </asp:HyperLink>
+                                                        </asp:PlaceHolder>
+
+                                                        <%--<ul class="sub-sub-menu" aria-expanded="true">
+                                                            <asp:Repeater ID="rptSubSubMenu" runat="server">
+                                                                <ItemTemplate>
+                                                                    <li>
+                                                                        <asp:HyperLink ID="SubSubMenuLink" runat="server" Text='<%# Eval("SubSubMenu") %>'
+                                                                            NavigateUrl='<%# Eval("SubSubMenuLink") %>' Key="t-default"></asp:HyperLink>
+                                                                    </li>
+                                                                </ItemTemplate>
+                                                            </asp:Repeater>
+                                                        </ul>--%>
+                                                    </li>
+                                                </ItemTemplate>
+                                            </asp:Repeater>
+                                        </ul>
+
+                                    </li>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Left Sidebar End -->
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+
+            <div class="main-content">
+                <div class="page-content">
+                    <div class="container-fluid">
+                        <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                    <h4 class="mb-sm-0 font-size-18"></h4>
+
+                                    <%--  <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Test</a></li>
+                                            <li class="breadcrumb-item active">testing</li>
+                                        </ol>
+                                    </div>--%>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end page title -->
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </div>
+                    <!-- container-fluid -->
+                </div>
+                <footer class="footer">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <script>document.write(new Date().getFullYear())</script>
+                                © Alphonsol.
+                           
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-sm-end d-none d-sm-block">
+                                    Design & Developed by Alphonsol
+                               
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </form>
+
+    <!-- Right Sidebar -->
+    <div class="right-bar">
+        <div data-simplebar class="h-100">
+            <div class="rightbar-title d-flex align-items-center px-3 py-4">
+
+                <h5 class="m-0 me-2">Settings</h5>
+
+                <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
+                    <i class="mdi mdi-close noti-icon"></i>
+                </a>
+            </div>
+
+            <!-- Settings -->
+            <hr class="mt-0" />
+            <h6 class="text-center mb-0">Choose Layouts</h6>
+
+            <div class="p-4">
+                <div class="mb-2">
+                    <img src="../../assets/images/layouts/layout-1.jpg" class="img-thumbnail" alt="layout images">
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="light-mode-switch" checked>
+                    <label class="form-check-label" for="light-mode-switch">Light Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="../../assets/images/layouts/layout-2.jpg" class="img-thumbnail" alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="dark-mode-switch">
+                    <label class="form-check-label" for="dark-mode-switch">Dark Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="../../assets/images/layouts/layout-3.jpg" class="img-thumbnail" alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input theme-choice" type="checkbox" id="rtl-mode-switch">
+                    <label class="form-check-label" for="rtl-mode-switch">RTL Mode</label>
+                </div>
+
+                <div class="mb-2">
+                    <img src="../../assets/images/layouts/layout-4.jpg" class="img-thumbnail" alt="layout images">
+                </div>
+                <div class="form-check form-switch mb-5">
+                    <input class="form-check-input theme-choice" type="checkbox" id="dark-rtl-mode-switch">
+                    <label class="form-check-label" for="dark-rtl-mode-switch">Dark RTL Mode</label>
+                </div>
+            </div>
+
+        </div>
+        <!-- end slimscroll-menu-->
+    </div>
+    <!-- /Right-bar -->
+    <!-- Right bar overlay-->
+    <div class="rightbar-overlay"></div>
+    <!-- JAVASCRIPT -->
+
+
+    <script src="../../assets/libs/jquery/jquery.min.js"></script>
+    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/libs/metismenu/metisMenu.min.js"></script>
+    <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="../../assets/libs/node-waves/waves.min.js"></script>
+
+    <!-- apexcharts -->
+    <script src="../../assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- dashboard init -->
+    <script src="../../assets/js/pages/dashboard.init.js"></script>
+
+    <!-- App js -->
+    <script src="../../assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        function showpageAccessSavedMessage(status, remark) {
+            Swal.fire({
+
+                icon: status === "Success" ? "success" : "error",
+                text: remark,
+                timer: 4000,
+                showConfirmButton: false
+            });
+        }
+</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var username = sessionStorage.getItem('username');
+            if (username) {
+                document.getElementById('usernamePlaceholder').textContent = username;
+            }
+        });
+        /$(document).ready(function () { $('.selectBox').SumoSelect(); });/
+        function blockSpecialChar(e) {
+            var k;
+            document.all ? k = e.keyCode : k = e.which;
+            return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || k == 55 || (k >= 48 && k <= 57) || k == 45);
+        }
+        function setTwoNumberDecimal(event) {
+            this.value = parseFloat(this.value).toFixed(2);
+        }
+
+        function getHrmsFileName(path) {
+            path = (path || '').toLowerCase().split('?')[0].replace(/\\/g, '/');
+            var parts = path.split('/');
+            var fileName = parts.length ? parts[parts.length - 1] : path;
+            return fileName.replace(/\.aspx$/i, '');
+        }
+
+        function isHrmsCurrentMenuLink(href, label) {
+            href = (href || '').toLowerCase();
+            label = (label || '').toLowerCase();
+            if (!href) {
+                return false;
+            }
+
+            var currentPath = (window.location.pathname || '').toLowerCase();
+            var currentQuery = (window.location.search || '').toLowerCase();
+            var currentFile = getHrmsFileName(currentPath);
+            var hrefPath = href.replace(/^https?:\/\/[^/]+/i, '').split('?')[0].toLowerCase();
+            var hrefFile = getHrmsFileName(hrefPath);
+            var hrefQuery = href.indexOf('?') >= 0 ? href.substring(href.indexOf('?')).toLowerCase() : '';
+
+            if (label.indexOf('employee registration') >= 0 && currentFile === 'employeeregistration') {
+                return true;
+            }
+
+            if (label.indexOf('employee list') >= 0 && currentFile === 'viewuser' && currentQuery.indexOf('flow=employee') >= 0) {
+                return true;
+            }
+
+            if (label.indexOf('remuneration form') >= 0 && currentFile === 'remunerationform') {
+                return true;
+            }
+
+            if (label.indexOf('remuneration details') >= 0 && currentFile === 'remunerationdetails') {
+                return true;
+            }
+
+            if (label.indexOf('document') >= 0 && (currentFile === 'useruploaddocuments' || currentFile === 'adduserdocuments' || currentFile === 'viewuserdocuments' || currentFile === 'viewdetailsforprobationperiod')) {
+                return true;
+            }
+
+            if (label.indexOf('employee leave') >= 0 && (currentFile === 'employeeleavelist' || currentFile === 'employeeleaveview')) {
+                return true;
+            }
+
+            if (label.indexOf('salary slip') >= 0 && (currentFile === 'salaryslip' || currentFile === 'uploadexcelforsalary' || currentFile === 'addsalaryslipdata')) {
+                return true;
+            }
+
+            if (label.indexOf('holiday') >= 0 && currentFile === 'holidaylist') {
+                return true;
+            }
+
+            if (label.indexOf('resignation') >= 0 && currentFile === 'resignationlist') {
+                return true;
+            }
+
+            if (label.indexOf('user details') >= 0 && (currentFile === 'viewuser' || currentFile === 'adduser' || currentFile === 'addusermain') && currentQuery.indexOf('flow=employee') < 0) {
+                return true;
+            }
+
+            if (href === 'javascript:void(0);' || href === '#') {
+                return false;
+            }
+
+            if (currentFile && hrefFile && currentFile === hrefFile) {
+                if (currentFile === 'viewuser') {
+                    if (currentQuery.indexOf('flow=employee') >= 0) {
+                        return hrefQuery.indexOf('flow=employee') >= 0 || label.indexOf('employee list') >= 0;
+                    }
+
+                    if (hrefQuery.indexOf('flow=employee') >= 0 || label.indexOf('employee list') >= 0) {
+                        return false;
+                    }
+                }
+
+                if (hrefQuery && hrefQuery.indexOf('flow=employee') >= 0) {
+                    return currentQuery.indexOf('flow=employee') >= 0;
+                }
+
+                if (href.indexOf('viewuser') >= 0 && label.indexOf('employee list') >= 0) {
+                    return currentQuery.indexOf('flow=employee') >= 0;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        function setupHrmsSidebarClickMemory() {
+            document.querySelectorAll('#side-menu a').forEach(function (link) {
+                if (link.getAttribute('data-hrms-click-memory') === 'true') {
+                    return;
+                }
+
+                link.setAttribute('data-hrms-click-memory', 'true');
+                link.addEventListener('click', function (event) {
+                    if (link.closest('.sub-menu')) {
+                        event.stopPropagation();
+                    }
+
+                    var href = (link.getAttribute('href') || '').trim();
+                    var currentLi = link.closest('li');
+                    var directSubMenu = currentLi ? currentLi.querySelector(':scope > .sub-menu') : null;
+
+                    if (directSubMenu && isHrmsSidebarCollapsed()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        expandHrmsSidebarForMenu();
+                        setHrmsClickedSidebarState(link);
+                        openHrmsDirectSubMenu(link);
+                        return;
+                    }
+
+                    if (!href || href === '#' || href.toLowerCase() === 'javascript:void(0);') {
+                        return;
+                    }
+
+                    try {
+                        sessionStorage.setItem('hrmsActiveSidebarHref', href.toLowerCase());
+                        sessionStorage.setItem('hrmsActiveSidebarLabel', (link.textContent || '').trim().toLowerCase());
+                    } catch (e) { }
+
+                    setHrmsClickedSidebarState(link);
+                });
+            });
+        }
+
+        function isHrmsSidebarCollapsed() {
+            return document.body.classList.contains('vertical-collpsed') ||
+                (window.innerWidth <= 992 && !document.body.classList.contains('sidebar-enable'));
+        }
+
+        function expandHrmsSidebarForMenu() {
+            document.body.classList.remove('vertical-collpsed');
+
+            if (window.innerWidth <= 992) {
+                document.body.classList.add('sidebar-enable');
+            }
+        }
+
+        function openHrmsDirectSubMenu(link) {
+            var currentLi = link ? link.closest('li') : null;
+            var subMenu = currentLi ? currentLi.querySelector(':scope > .sub-menu') : null;
+
+            if (!currentLi || !subMenu) {
+                return;
+            }
+
+            currentLi.classList.add('mm-active');
+            link.classList.add('active');
+            link.setAttribute('aria-expanded', 'true');
+            subMenu.classList.add('mm-show');
+            subMenu.setAttribute('aria-expanded', 'true');
+            subMenu.style.display = 'block';
+        }
+
+        function setHrmsClickedSidebarState(link) {
+            if (!link || !link.closest('#side-menu')) {
+                return;
+            }
+
+            document.querySelectorAll('#side-menu a.active').forEach(function (activeLink) {
+                activeLink.classList.remove('active');
+                activeLink.setAttribute('aria-expanded', 'false');
+            });
+
+            document.querySelectorAll('#side-menu li.hrms-pill-active').forEach(function (item) {
+                item.classList.remove('hrms-pill-active');
+            });
+
+            link.classList.add('active');
+            var currentLi = link.closest('li');
+            if (currentLi) {
+                currentLi.classList.add('hrms-pill-active');
+            }
+
+            var parentSubMenu = link.closest('.sub-menu');
+            while (parentSubMenu) {
+                parentSubMenu.classList.add('mm-show');
+                parentSubMenu.setAttribute('aria-expanded', 'true');
+                parentSubMenu.style.display = 'block';
+
+                var parentLi = parentSubMenu.parentElement;
+                if (parentLi) {
+                    parentLi.classList.add('mm-active');
+                    var parentLink = parentLi.querySelector(':scope > a');
+                    if (parentLink) {
+                        parentLink.classList.add('active');
+                        parentLink.setAttribute('aria-expanded', 'true');
+                    }
+                }
+
+                parentSubMenu = parentLi ? parentLi.parentElement.closest('.sub-menu') : null;
+            }
+        }
+
+        function isHrmsRememberedMenuLink(href, label) {
+            try {
+                var savedHref = (sessionStorage.getItem('hrmsActiveSidebarHref') || '').toLowerCase();
+                var savedLabel = (sessionStorage.getItem('hrmsActiveSidebarLabel') || '').toLowerCase();
+                href = (href || '').toLowerCase();
+                label = (label || '').toLowerCase();
+
+                if (savedHref && savedHref === href) {
+                    return isHrmsCurrentMenuLink(savedHref, label || savedLabel);
+                }
+
+                if (savedLabel && savedLabel === label && isHrmsCurrentMenuLink(savedHref, savedLabel)) {
+                    return true;
+                }
+            } catch (e) { }
+
+            return false;
+        }
+
+        function highlightHrmsTopLevelLinks() {
+            document.querySelectorAll('#side-menu > li > a').forEach(function (link) {
+                var item = link.parentElement;
+                if (!item || item.querySelector(':scope > .sub-menu')) {
+                    return;
+                }
+
+                var href = (link.getAttribute('href') || '').toLowerCase();
+                var label = (link.textContent || '').trim().toLowerCase();
+                if (isHrmsCurrentMenuLink(href, label) || isHrmsRememberedMenuLink(href, label)) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        function applyHrmsSidebarTimelineMenus() {
+            document.querySelectorAll('#side-menu li').forEach(function (item) {
+                item.classList.remove('hrms-pill-active');
+                item.classList.remove('mm-active');
+            });
+
+            document.querySelectorAll('#side-menu a').forEach(function (link) {
+                link.classList.remove('active');
+                link.setAttribute('aria-expanded', 'false');
+            });
+
+            document.querySelectorAll('#side-menu .sub-menu').forEach(function (subMenu) {
+                subMenu.classList.remove('mm-show');
+                subMenu.setAttribute('aria-expanded', 'false');
+                subMenu.style.display = 'none';
+            });
+
+            document.querySelectorAll('#side-menu li').forEach(function (item) {
+                var subMenu = item.querySelector(':scope > .sub-menu');
+                if (subMenu) {
+                    item.classList.add('hrms-timeline-menu');
+                }
+
+                if (item.parentElement && item.parentElement.classList.contains('sub-menu')) {
+                    item.classList.add('hrms-pill-item');
+                }
+            });
+
+            var activeLinks = [];
+            document.querySelectorAll('#side-menu .sub-menu a, #side-menu > li > a').forEach(function (link) {
+                var href = (link.getAttribute('href') || '').toLowerCase();
+                var label = (link.textContent || '').trim().toLowerCase();
+                if (isHrmsCurrentMenuLink(href, label) || isHrmsRememberedMenuLink(href, label)) {
+                    activeLinks.push(link);
+                }
+            });
+
+            activeLinks.forEach(function (link) {
+                link.classList.add('active');
+
+                var currentLi = link.closest('li');
+                if (currentLi) {
+                    currentLi.classList.add('hrms-pill-active');
+                }
+
+                var parentSubMenu = link.closest('.sub-menu');
+                while (parentSubMenu) {
+                    parentSubMenu.classList.add('mm-show');
+                    parentSubMenu.setAttribute('aria-expanded', 'true');
+                    parentSubMenu.style.display = 'block';
+
+                    var parentLi = parentSubMenu.parentElement;
+                    if (parentLi) {
+                        parentLi.classList.add('mm-active');
+                        var parentLink = parentLi.querySelector(':scope > a');
+                        if (parentLink) {
+                            parentLink.classList.add('active');
+                            parentLink.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+
+                    parentSubMenu = parentLi ? parentLi.parentElement.closest('.sub-menu') : null;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setupHrmsSidebarClickMemory();
+            applyHrmsSidebarTimelineMenus();
+            highlightHrmsTopLevelLinks();
+            document.documentElement.classList.add('hrms-sidebar-ready');
+
+            window.setTimeout(function () {
+                applyHrmsSidebarTimelineMenus();
+                highlightHrmsTopLevelLinks();
+                document.documentElement.classList.add('hrms-sidebar-ready');
+            }, 80);
+        });
+        //$('#txtOccupancy').on('keypress', function (event) {
+        //    var regex = new RegExp("[a-zA-Z0-9,.-\\s]+$");
+        //    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        //    if (!regex.test(key)) {
+        //        event.preventDefault();
+        //        return false;
+        //    }
+        //});
+    </script>
+
+    <%--<style>
+        .navbar-brand-box {
+            display: flex;
+            justify-content: space-between; /* Aligns items to both ends */
+            align-items: center; /* Centers items vertically */
+            margin-left: 0px;
+        }
+
+        .logo-background {
+            background-color: white;
+            display: inline-block;
+            padding: 5px 10px; /* Horizontal padding for left and right sides */
+            border-radius: 5px; /* Optional: Adds rounded corners */
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
+        }
+    </style>--%>
+    <style>
+        :root {
+            --hrms-primary: #2563EB;
+            --hrms-primary-soft: #EFF6FF;
+            --hrms-sidebar-text: #526077;
+            --hrms-sidebar-strong: #172033;
+            --hrms-sidebar-line: #E8EEF7;
+        }
+
+        #page-topbar {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E8EEF7;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .navbar-header {
+            min-height: 70px;
+        }
+
+        .navbar-brand-box {
+            align-items: center;
+            background: #FFFFFF;
+            display: flex;
+            height: 70px;
+            justify-content: flex-start;
+            overflow: hidden;
+            padding: 0 20px;
+            transition: width .2s ease, padding .2s ease;
+            width: 224px;
+        }
+
+        .navbar-brand-box .logo {
+            align-items: center;
+            display: flex;
+            height: 48px;
+            justify-content: center;
+            line-height: normal;
+            width: 100%;
+        }
+
+        .logo-background {
+            align-items: center;
+            display: flex;
+            height: 44px;
+            justify-content: flex-start;
+            max-width: 210px;
+            padding: 0;
+            transition: max-width .2s ease, padding .2s ease;
+            width: 100%;
+        }
+
+        .logo-background img {
+            max-height: 40px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .logo-sm {
+            align-items: center;
+            display: none;
+            justify-content: center;
+            width: 44px;
+        }
+
+        .logo-sm img {
+            max-height: 24px;
+            max-width: 30px;
+            object-fit: contain;
+        }
+
+        .sidebar-toggle-btn {
+            align-items: center;
+            background: #F8FAFF;
+            border: 1px solid #DCE8FF;
+            border-radius: 10px;
+            color: var(--hrms-primary);
+            display: inline-flex;
+            height: 38px;
+            justify-content: center;
+            margin-left: 2px;
+            margin-right: 10px;
+            margin-top: 6px;
+            padding: 0 !important;
+            transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+            width: 38px;
+        }
+
+        .sidebar-toggle-btn:hover,
+        .sidebar-toggle-btn:focus {
+            background: var(--hrms-primary);
+            border-color: var(--hrms-primary);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+        .sidebar-toggle-btn i {
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        body.vertical-collpsed .navbar-brand-box {
+            padding: 0 !important;
+            width: 0 !important;
+        }
+
+        body.vertical-collpsed .navbar-brand-box .logo,
+        body.vertical-collpsed .navbar-brand-box .logo-lg,
+        body.vertical-collpsed .navbar-brand-box .logo-sm {
+            display: none;
+        }
+
+        body.vertical-collpsed .sidebar-toggle-btn {
+            margin-left: 16px;
+        }
+
+        body.vertical-collpsed .vertical-menu {
+            bottom: 0;
+            overflow: hidden;
+            position: fixed !important;
+            top: 70px;
+            width: 70px !important;
+            z-index: 1001;
+        }
+
+        body.vertical-collpsed #sidebar-menu {
+            padding: 18px 8px 24px;
+            overflow: hidden;
+        }
+
+        body.vertical-collpsed #sidebar-menu .menu-title,
+        body.vertical-collpsed #sidebar-menu .menu-title:after,
+        body.vertical-collpsed #sidebar-menu ul li a span,
+        body.vertical-collpsed #sidebar-menu .has-arrow:after,
+        body.vertical-collpsed #sidebar-menu .sub-menu {
+            display: none !important;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a {
+            align-items: center;
+            border-radius: 12px;
+            display: flex;
+            gap: 0;
+            height: 48px;
+            justify-content: center;
+            margin: 8px 0;
+            min-height: 48px;
+            padding: 0 !important;
+            transform: none !important;
+            width: 48px;
+        }
+
+        body.vertical-collpsed #sidebar-menu ul li a i {
+            margin: 0;
+            min-width: 0;
+        }
+
+        .vertical-menu {
+            background: #FFFFFF;
+            border-right: 1px solid var(--hrms-sidebar-line);
+            box-shadow: 12px 0 30px rgba(15, 23, 42, 0.04);
+        }
+
+        #sidebar-menu {
+            padding: 18px 12px 24px;
+        }
+
+        #sidebar-menu .menu-title {
+            color: var(--hrms-primary) !important;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0;
+            padding: 10px 12px 14px !important;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        #sidebar-menu .menu-title:after {
+            content: "";
+            display: block;
+            width: 34px;
+            height: 3px;
+            border-radius: 999px;
+            background: var(--hrms-primary);
+            margin-top: 7px;
+            opacity: .9;
+        }
+
+        #sidebar-menu ul li a {
+            min-height: 44px;
+            border-radius: 12px;
+            color: var(--hrms-sidebar-text) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            margin: 3px 0;
+            padding: 10px 12px !important;
+            position: relative;
+            transition: background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+        }
+
+        #sidebar-menu ul li a i {
+            color: #7A8493;
+            font-size: 18px;
+            min-width: 20px;
+            text-align: center;
+            transition: color .18s ease, transform .18s ease;
+        }
+
+        #sidebar-menu ul li a:hover,
+        #sidebar-menu ul li.mm-active > a,
+        #sidebar-menu ul li a.active {
+            background: var(--hrms-primary-soft);
+            color: var(--hrms-primary) !important;
+            box-shadow: inset 3px 0 0 var(--hrms-primary);
+            transform: translateX(2px);
+        }
+
+        #sidebar-menu ul li a:hover i,
+        #sidebar-menu ul li.mm-active > a i,
+        #sidebar-menu ul li a.active i {
+            color: var(--hrms-primary);
+            transform: scale(1.04);
+        }
+
+        #sidebar-menu .has-arrow:after {
+            border-color: currentColor;
+            right: 14px;
+            transition: transform .18s ease;
+        }
+
+        #sidebar-menu li.mm-active > .has-arrow:after {
+            transform: rotate(135deg);
+        }
+
+        #sidebar-menu .sub-menu {
+            margin: 4px 0 8px 21px;
+            padding-left: 13px !important;
+            border-left: 1px dashed #D8E2F1;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity .14s ease, transform .14s ease;
+        }
+
+        html:not(.hrms-sidebar-ready) #sidebar-menu .sub-menu,
+        html:not(.hrms-sidebar-ready) #sidebar-menu ul li a {
+            transition: none !important;
+        }
+
+        #sidebar-menu .sub-menu:not(.mm-show) {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(-3px);
+        }
+
+        #sidebar-menu .sub-menu.mm-show {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #sidebar-menu .sub-menu li a {
+            min-height: 36px;
+            border-radius: 10px;
+            color: #66758A !important;
+            font-size: 13px;
+            font-weight: 650;
+            margin: 2px 0;
+            padding: 8px 12px !important;
+        }
+
+        #sidebar-menu .sub-menu li a:hover,
+        #sidebar-menu .sub-menu li a.active {
+            background: #F4F8FF;
+            color: var(--hrms-primary) !important;
+            box-shadow: none;
+            transform: translateX(2px);
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > a {
+            background: #F1F5FF;
+            color: var(--hrms-primary) !important;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > a i {
+            color: var(--hrms-primary);
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu {
+            border-left: 0;
+            margin: 0;
+            padding-left: 0 !important;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu.mm-show {
+            border-left: 2px solid #D7E2F4;
+            margin: 6px 0 14px 21px;
+            padding: 4px 0 6px 16px !important;
+            position: relative;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu li.hrms-pill-item {
+            position: relative;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu li.hrms-pill-item:before {
+            display: none;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu.mm-show li.hrms-pill-item:before {
+            background: #FFFFFF;
+            border: 2px solid #B7C6D9;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px #FFFFFF;
+            content: "";
+            display: none;
+            height: 9px;
+            left: -21px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 9px;
+            z-index: 1;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu li.hrms-pill-item a {
+            border-radius: 13px;
+            font-size: 13px;
+            line-height: 1.2;
+            margin: 2px 0;
+            min-height: 40px;
+            padding: 10px 14px !important;
+            white-space: nowrap;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu.mm-show li.hrms-pill-item a {
+            margin: 6px 0;
+        }
+
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu.mm-show li.hrms-pill-item.hrms-pill-active a,
+        #sidebar-menu li.hrms-onboarding-menu > .sub-menu.mm-show li.hrms-pill-item a.active {
+            background: linear-gradient(90deg, #EEF4FF 0%, #F6F9FF 100%);
+            color: var(--hrms-primary) !important;
+            font-weight: 900;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+            transform: none;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu {
+            border-left: 0;
+            margin: 0;
+            padding-left: 0 !important;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu.mm-show {
+            border-left: 2px solid #D7E2F4;
+            margin: 6px 0 14px 21px;
+            padding: 4px 0 6px 16px !important;
+            position: relative;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu li.hrms-pill-item {
+            position: relative;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu li.hrms-pill-item a {
+            border-radius: 13px;
+            font-size: 13px;
+            line-height: 1.2;
+            margin: 2px 0;
+            min-height: 40px;
+            padding: 10px 14px !important;
+            white-space: nowrap;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu.mm-show li.hrms-pill-item a {
+            margin: 6px 0;
+        }
+
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu.mm-show li.hrms-pill-item.hrms-pill-active a,
+        #sidebar-menu li.hrms-timeline-menu > .sub-menu.mm-show li.hrms-pill-item a.active {
+            background: linear-gradient(90deg, #EEF4FF 0%, #F6F9FF 100%);
+            color: var(--hrms-primary) !important;
+            font-weight: 900;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+            transform: none;
+        }
+
+        #sidebar-menu ul li a span {
+            flex: 1 1 auto;
+            line-height: 1.25;
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        body[data-sidebar="light"] .mm-active {
+            color: var(--hrms-primary) !important;
+        }
+
+        @media (max-width: 992px) {
+            #page-topbar {
+                background: #FFFFFF;
+                border-bottom-color: #E8EEF7;
+                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+            }
+
+            .navbar-header {
+                min-height: 56px;
+                padding: 0 14px;
+            }
+
+            .navbar-header > .d-flex:first-child {
+                align-items: center;
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+
+            .navbar-brand-box {
+                flex: 1 1 auto;
+                background: transparent;
+                height: 56px;
+                min-width: 0;
+                order: 2;
+                padding: 0;
+                width: auto !important;
+            }
+
+            .navbar-brand-box .logo {
+                height: 56px;
+                justify-content: flex-start;
+            }
+
+            .logo span.logo-lg,
+            .navbar-brand-box .logo-lg,
+            .navbar-brand-box .logo-background {
+                display: flex !important;
+            }
+
+            .logo span.logo-sm,
+            .navbar-brand-box .logo-sm {
+                display: none !important;
+            }
+
+            .logo-background {
+                height: 40px;
+                max-width: 190px;
+            }
+
+            .logo-background img {
+                max-height: 30px;
+            }
+
+            .sidebar-toggle-btn {
+                background: #F8FAFF;
+                border-color: #DCE8FF;
+                border-radius: 8px;
+                box-shadow: none;
+                color: var(--hrms-primary);
+                flex: 0 0 32px;
+                height: 32px;
+                margin: 0 12px 0 0;
+                order: 1;
+                width: 32px;
+            }
+
+            .sidebar-toggle-btn:hover,
+            .sidebar-toggle-btn:focus {
+                background: var(--hrms-primary);
+                border-color: var(--hrms-primary);
+                box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+                color: #FFFFFF;
+                transform: translateY(-1px);
+            }
+
+            body.sidebar-enable .navbar-brand-box {
+                flex: 1 1 auto;
+                padding: 0 !important;
+                width: auto !important;
+            }
+
+            body.sidebar-enable .sidebar-toggle-btn {
+                margin-left: 0;
+            }
+
+            body.sidebar-enable .vertical-menu {
+                width: 300px !important;
+            }
+
+            body.sidebar-enable #sidebar-menu {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            body.sidebar-enable #sidebar-menu .menu-title {
+                display: block !important;
+            }
+
+            body.sidebar-enable #sidebar-menu .menu-title:after {
+                display: block !important;
+            }
+
+            body.sidebar-enable #sidebar-menu ul li a {
+                gap: 12px;
+                padding-left: 14px !important;
+                padding-right: 18px !important;
+                width: auto;
+            }
+
+            body.sidebar-enable #sidebar-menu ul li a span {
+                display: inline-block !important;
+                white-space: normal;
+                word-break: normal;
+            }
+
+            body.sidebar-enable #sidebar-menu .has-arrow:after {
+                display: block !important;
+                right: 12px;
+            }
+
+            body.sidebar-enable #sidebar-menu .sub-menu.mm-show {
+                display: block !important;
+            }
+
+            body:not(.sidebar-enable) .vertical-menu {
+                bottom: 0;
+                overflow: hidden;
+                position: fixed !important;
+                top: 70px;
+                width: 70px !important;
+                z-index: 1001;
+            }
+
+            body:not(.sidebar-enable) #sidebar-menu {
+                padding: 18px 8px 24px;
+                overflow: hidden;
+            }
+
+            body:not(.sidebar-enable) #sidebar-menu .menu-title,
+            body:not(.sidebar-enable) #sidebar-menu .menu-title:after,
+            body:not(.sidebar-enable) #sidebar-menu ul li a span,
+            body:not(.sidebar-enable) #sidebar-menu .has-arrow:after,
+            body:not(.sidebar-enable) #sidebar-menu .sub-menu {
+                display: none !important;
+            }
+
+            body:not(.sidebar-enable) #sidebar-menu ul li a {
+                align-items: center;
+                border-radius: 12px;
+                display: flex;
+                gap: 0;
+                height: 48px;
+                justify-content: center;
+                margin: 8px 0;
+                min-height: 48px;
+                padding: 0 !important;
+                transform: none !important;
+                width: 48px;
+            }
+
+            body:not(.sidebar-enable) #sidebar-menu ul li a i {
+                margin: 0;
+                min-width: 0;
+            }
+        }
+    </style>
+
+
+    <%-- <style>
+     .navbar-brand-box {
+         display: flex;
+         justify-content: space-between; /* Aligns items to both ends */
+         align-items: center; /* Centers items vertically */
+         margin-left: -7px;
+         height: 50px;
+          background-color: white;
+         
+     }
+
+     .logo-background {
+         background-color: white;
+         display: inline-block;
+         padding: 5px 10px; /* Horizontal padding for left and right sides */
+         border-radius: 5px; /* Optional: Adds rounded corners */
+         box-shadow: 0 0 3px rgba(0, 0, 0, 0.1); 
+    <%-- }
+ </style>--%>
+</body>
+</html>

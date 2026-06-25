@@ -1,4 +1,4 @@
-﻿using DataObject;
+﻿﻿using DataObject;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Utilities;
 using System;
@@ -349,15 +349,13 @@ namespace ProcessModel
 
             return listdata;
         }
-        public List<RemunerationDO> GetRemunerationDetails(string type, int? month, int? year)
+        public List<RemunerationDO> GetRemunerationDetails(int? year)
         {
             List<RemunerationDO> listdata = new List<RemunerationDO>();
             List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
 
             try
             {
-                mysqlParameters.Add(DataClass.GetParameter("@p_Type", type));
-                mysqlParameters.Add(DataClass.GetParameter("@p_Month", month));
                 mysqlParameters.Add(DataClass.GetParameter("@p_Year", year));
 
                 using (var reader = DataClass.GetDataReaderFromSpWithParam(
@@ -369,16 +367,20 @@ namespace ProcessModel
                     {
                         RemunerationDO item = new RemunerationDO
                         {
-                            employeeCode = reader["employeeCode"] != DBNull.Value ? Convert.ToInt32(reader["employeeCode"]) : 0,
-                            Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString() : string.Empty,
-                            MonthlyCTC = reader["MonthlyCTC"] != DBNull.Value
-    ? Convert.ToDecimal(reader["MonthlyCTC"])
-    : (decimal?)null,
-
-                            YearlyCTC = reader["YearlyCTC"] != DBNull.Value
-    ? Convert.ToDecimal(reader["YearlyCTC"])
-    : (decimal?)null,
-
+                            remuneration_id = reader["remuneration_id"] != DBNull.Value ? Convert.ToInt32(reader["remuneration_id"]) : 0,
+                            salary_structure_id = reader["salary_structure_id"] != DBNull.Value ? reader["salary_structure_id"].ToString() : null,
+                            user_id = reader["user_id"] != DBNull.Value ? Convert.ToInt32(reader["user_id"]) : 0,
+                            emp_code = reader["emp_code"] != DBNull.Value ? reader["emp_code"].ToString() : string.Empty,
+                            user_fullname = reader["user_fullname"] != DBNull.Value ? reader["user_fullname"].ToString() : string.Empty,
+                            effective_from_date = reader["effective_from_date"] != DBNull.Value ? Convert.ToDateTime(reader["effective_from_date"]) : (DateTime?)null,
+                            effective_to_date = reader["effective_to_date"] != DBNull.Value ? Convert.ToDateTime(reader["effective_to_date"]) : (DateTime?)null,
+                            employee_category = reader["employee_category"] != DBNull.Value ? reader["employee_category"].ToString() : string.Empty,
+                            ctc_amount = reader["ctc_amount"] != DBNull.Value ? Convert.ToDecimal(reader["ctc_amount"]) : (decimal?)null,
+                            gross_salary = reader["gross_salary"] != DBNull.Value ? Convert.ToDecimal(reader["gross_salary"]) : (decimal?)null,
+                            monthly_salary = reader["monthly_salary"] != DBNull.Value ? Convert.ToDecimal(reader["monthly_salary"]) : (decimal?)null,
+                            annual_salary = reader["annual_salary"] != DBNull.Value ? Convert.ToDecimal(reader["annual_salary"]) : (decimal?)null,
+                            salary_status = reader["salary_status"] != DBNull.Value ? reader["salary_status"].ToString() : string.Empty,
+                            inserted_date = reader["inserted_date"] != DBNull.Value ? Convert.ToDateTime(reader["inserted_date"]) : (DateTime?)null
                         };
 
                         listdata.Add(item);

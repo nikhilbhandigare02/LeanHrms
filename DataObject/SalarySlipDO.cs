@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,15 +113,20 @@ namespace DataObject
     }
     public class RemunerationDO
     {
-        public int UserId { get; set; }
-        public int employeeCode { get; set; }
-        public string Username { get; set; }
-
-        public int? Month { get; set; }
-        public int? Year { get; set; }
-
-        public decimal? MonthlyCTC { get; set; }
-        public decimal? YearlyCTC { get; set; }
+        public int remuneration_id { get; set; }
+        public string salary_structure_id { get; set; }
+        public int user_id { get; set; }
+        public string emp_code { get; set; }
+        public string user_fullname { get; set; }
+        public DateTime? effective_from_date { get; set; }
+        public DateTime? effective_to_date { get; set; }
+        public string employee_category { get; set; }
+        public decimal? ctc_amount { get; set; }
+        public decimal? gross_salary { get; set; }
+        public decimal? monthly_salary { get; set; }
+        public decimal? annual_salary { get; set; }
+        public string salary_status { get; set; }
+        public DateTime? inserted_date { get; set; }
     }
 
     [Serializable]   // ⭐ REQUIRED for ViewState
@@ -130,6 +135,13 @@ namespace DataObject
         public string ComponentName { get; set; }
         public decimal Amount { get; set; }
         public bool IsDeduction { get; set; }
+    }
+
+    public class RemunerationComponent
+    {
+        public int Id { get; set; }
+        public string Text { get; set; }
+        public string ComponentType { get; set; }
     }
     public class AppraisalDO
     {

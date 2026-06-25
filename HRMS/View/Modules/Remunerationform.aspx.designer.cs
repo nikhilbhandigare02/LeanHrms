@@ -13,294 +13,132 @@ namespace HRMS.View.Modules
 
     public partial class Remunerationform
     {
-        /// <summary>
-        /// hfComponentOptions control.
-        /// </summary>
-        protected global::System.Web.UI.WebControls.HiddenField hfComponentOptions;
 
         /// <summary>
-        /// hfDynamicComponents control.
-        /// </summary>
-        protected global::System.Web.UI.WebControls.HiddenField hfDynamicComponents;
-
-        /// <summary>
-        /// ddl_username control.
+        /// UpdatePanel1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddl_username;
+        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
 
         /// <summary>
-        /// ddl_empcode control.
+        /// btnBack control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddl_empcode;
+        protected global::System.Web.UI.WebControls.Button btnBack;
 
         /// <summary>
-        /// ddldesign control.
+        /// ddlEmployee control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddldesign;
+        protected global::System.Web.UI.WebControls.DropDownList ddlEmployee;
 
         /// <summary>
-        /// ddlMonth control.
+        /// txtSalaryStructureID control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlMonth;
+        protected global::System.Web.UI.WebControls.TextBox txtSalaryStructureID;
 
         /// <summary>
-        /// ddlYear control.
+        /// txtEffectiveFromDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlYear;
+        protected global::System.Web.UI.WebControls.TextBox txtEffectiveFromDate;
 
         /// <summary>
-        /// txtBasicSalary control.
+        /// txtEffectiveToDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtBasicSalary;
+        protected global::System.Web.UI.WebControls.TextBox txtEffectiveToDate;
 
         /// <summary>
-        /// txtProfessionalTax control.
+        /// ddlEmployeeCategory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtProfessionalTax;
+        protected global::System.Web.UI.WebControls.DropDownList ddlEmployeeCategory;
 
         /// <summary>
-        /// txtHRA control.
+        /// ddlStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtHRA;
+        protected global::System.Web.UI.WebControls.DropDownList ddlStatus;
 
         /// <summary>
-        /// txtSpecial control.
+        /// txtCTCAmount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSpecial;
+        protected global::System.Web.UI.WebControls.TextBox txtCTCAmount;
 
         /// <summary>
-        /// txtTotalEarnings control.
+        /// txtGrossSalary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTotalEarnings;
+        protected global::System.Web.UI.WebControls.TextBox txtGrossSalary;
 
         /// <summary>
-        /// txtTotalDeductions control.
+        /// txtMonthlySalary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTotalDeductions;
+        protected global::System.Web.UI.WebControls.TextBox txtMonthlySalary;
 
         /// <summary>
-        /// txtNetPay control.
+        /// txtAnnualSalary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNetPay;
+        protected global::System.Web.UI.WebControls.TextBox txtAnnualSalary;
 
         /// <summary>
-        /// btnShowAdditional control.
+        /// rptEarnings control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnShowAdditional;
+        protected global::System.Web.UI.WebControls.Repeater rptEarnings;
 
         /// <summary>
-        /// btnshowApprisal control.
+        /// rptDeductions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnshowApprisal;
-
-        /// <summary>
-        /// pnlAppraisal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlAppraisal;
-
-        /// <summary>
-        /// txtRevisedSalary control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtRevisedSalary;
-
-        /// <summary>
-        /// txtLastAppraisalDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtLastAppraisalDate;
-
-        /// <summary>
-        /// txtCurrentAppraisalDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCurrentAppraisalDate;
-
-        /// <summary>
-        /// txtAppraisalPercent control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtAppraisalPercent;
-
-        /// <summary>
-        /// txtIncrementAmount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtIncrementAmount;
-
-        /// <summary>
-        /// hfIncrementAmount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfIncrementAmount;
-
-        /// <summary>
-        /// upAdditionalComponents control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.UpdatePanel upAdditionalComponents;
-
-        /// <summary>
-        /// pnlAdditionalComponents control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlAdditionalComponents;
-
-        /// <summary>
-        /// ddl_component control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddl_component;
-
-        /// <summary>
-        /// ddl_componentModal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddl_componentModal;
-
-        /// <summary>
-        /// btnAddComponent control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAddComponent;
-
-        /// <summary>
-        /// rptComponents control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptComponents;
-
-        /// <summary>
-        /// txtTotalEarningsSummary control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTotalEarningsSummary;
-
-        /// <summary>
-        /// txtTotalDeductionsSummary control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTotalDeductionsSummary;
-
-        /// <summary>
-        /// txtNetPaySummary control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNetPaySummary;
-
-        /// <summary>
-        /// btnReset control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReset;
+        protected global::System.Web.UI.WebControls.Repeater rptDeductions;
 
         /// <summary>
         /// btnSave control.

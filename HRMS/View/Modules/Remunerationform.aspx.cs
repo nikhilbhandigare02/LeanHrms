@@ -1,14 +1,9 @@
-﻿using DataObject;
+﻿﻿﻿﻿﻿using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Web;
-using System.Web.Script.Services;
-using System.Web.Script.Serialization;
-using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -16,989 +11,686 @@ namespace HRMS.View.Modules
 {
     public partial class Remunerationform : System.Web.UI.Page
     {
-        public class ComponentSaveResponse
+        renumarationBL obj = new renumarationBL();
+        List<RemunerationComponent> allComponents;
+        protected int? RemunerationId
         {
-            public bool success { get; set; }
-            public string message { get; set; }
-            public int id { get; set; }
-            public string text { get; set; }
-            public string componentType { get; set; }
+            get { return ViewState["RemunerationId"] as int?; }
+            set { ViewState["RemunerationId"] = value; }
         }
-
-        [WebMethod(EnableSession = true)]
-        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static ComponentSaveResponse SaveNewSalaryComponent(string componentName, string componentType)
+        protected string Mode
         {
-            try
-            {
-                string safeName = Convert.ToString(componentName ?? string.Empty).Trim();
-                string safeType = Convert.ToString(componentType ?? string.Empty).Trim().ToUpperInvariant();
-                if (string.IsNullOrWhiteSpace(safeName))
-                {
-                    return new ComponentSaveResponse { success = false, message = "Component name is required." };
-                }
-                if (safeType != "EARNING" && safeType != "DEDUCTION")
-                {
-                    return new ComponentSaveResponse { success = false, message = "Invalid component type." };
-                }
-
-                int insertedBy = 0;
-                if (HttpContext.Current != null && HttpContext.Current.Session != null)
-                {
-                    int.TryParse(Convert.ToString(HttpContext.Current.Session["userId"] ?? "0"), out insertedBy);
-                }
-
-                SalarySlipBL bl = new SalarySlipBL();
-                UserDetailsDO result = bl.InsertSalaryComponent(safeName, safeType, insertedBy);
-                bool ok = result != null && string.Equals(Convert.ToString(result.Status), "Success", StringComparison.OrdinalIgnoreCase);
-
-                return new ComponentSaveResponse
-                {
-                    success = ok,
-                    message = result != null ? Convert.ToString(result.Remarks) : "Unable to save component.",
-                    id = result != null ? result.UserId : 0,
-                    text = safeName,
-                    componentType = safeType
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ComponentSaveResponse { success = false, message = ex.Message };
-            }
-        }
-
-        protected string UserId = null;
-        private static bool IsSaveSuccessful(string status, string remark)
-        {
-            string normalizedStatus = (status ?? string.Empty).Trim();
-            string normalizedRemark = (remark ?? string.Empty).Trim();
-
-            return string.Equals(normalizedStatus, "Success", StringComparison.OrdinalIgnoreCase)
-                || normalizedRemark.IndexOf("created", StringComparison.OrdinalIgnoreCase) >= 0
-                || normalizedRemark.IndexOf("saved", StringComparison.OrdinalIgnoreCase) >= 0;
+            get { return (ViewState["Mode"] as string) ?? "add"; }
+            set { ViewState["Mode"] = value; }
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            UserId = Convert.ToString(Session["userId"]);
-            int userId = 0;
-            BindComponents();
             if (!IsPostBack)
             {
-
-                if (Session["userId"] == null)
+                // Check query string
+                if (!string.IsNullOrEmpty(Request.QueryString["id"]))
                 {
-                    Response.Redirect("~/view/authentication/login.aspx", false);
-                    return;
+                    RemunerationId = Convert.ToInt32(Request.QueryString["id"]);
+                }
+                if (!string.IsNullOrEmpty(Request.QueryString["mode"]))
+                {
+                    Mode = Request.QueryString["mode"].ToLower();
                 }
 
-                if (Request.QueryString["user_id"] != null)
-                {
-                    userId = Convert.ToInt32(Request.QueryString["user_id"]);
-                }
-                else
-                {
-                    userId = 0;
-                }
-
-                BindUsername();
-                BindYears();
-                BindMonths();
-                BindEmployeeCode();
-                BindSavedComponentsForEdit();
-
-
-            }
-        }
-        protected override void OnPreRender(EventArgs e)
-        {
-            if (ddl_componentModal.Items.Count <= 1)
-            {
                 BindComponents();
-            }
-            base.OnPreRender(e);
-        }
-        public void BindComponents()
-        {
-            List<DropDownData> list1 = new List<DropDownData>();
-            CommonBL commonbl = new CommonBL();
-            try
-            {
-                list1 = commonbl.dropdownComponent_Forremuneration();
-                if (list1 != null && list1.Count > 0)
-                {
-                    ddl_component.DataSource = list1;
-                    ddl_component.DataTextField = "Text";
-                    ddl_component.DataValueField = "Id";
+                BindStatusDropdown();
+                BindEmployeeCategoryDropdown();
+                BindEmployees();
 
-                    ddl_componentModal.DataSource = list1;
-                    ddl_componentModal.DataTextField = "Text";
-                    ddl_componentModal.DataValueField = "Id";
+                if (RemunerationId.HasValue && (Mode == "view" || Mode == "edit"))
+                {
+                    LoadRemunerationData(RemunerationId.Value);
+                    ApplyModeSettings();
                 }
                 else
                 {
-                    ddl_component.DataSource = null;
-                    ddl_componentModal.DataSource = null;
+                    GenerateSalaryStructureID();
+                    btnSave.Text = "Save";
+                    btnSave.Visible = true;
                 }
-                ddl_component.DataBind();
-                ddl_component.Items.Insert(0, new ListItem("-- Please Select --", ""));
+            }
+        }
 
-                ddl_componentModal.DataBind();
-                ddl_componentModal.Items.Insert(0, new ListItem("-- Please Select --", ""));
+        private void ApplyModeSettings()
+        {
+            // Employee name and structure ID are always non-editable in view/edit modes
+            ddlEmployee.Enabled = false;
+            txtSalaryStructureID.ReadOnly = true;
 
-                var options = (list1 ?? new List<DropDownData>())
-                    .Select(comp => new
+            if (Mode == "view")
+            {
+                // In view mode, everything is non-editable
+                txtEffectiveFromDate.ReadOnly = true;
+                txtEffectiveToDate.ReadOnly = true;
+                ddlStatus.Enabled = false;
+                ddlEmployeeCategory.Enabled = false;
+                txtCTCAmount.ReadOnly = true;
+                txtGrossSalary.ReadOnly = true;
+                txtMonthlySalary.ReadOnly = true;
+                txtAnnualSalary.ReadOnly = true;
+                btnSave.Visible = false;
+
+                // Disable all repeater controls
+                DisableRepeaterControls(rptEarnings);
+                DisableRepeaterControls(rptDeductions);
+            }
+            else if (Mode == "edit")
+            {
+                // In edit mode, button says "Update"
+                btnSave.Text = "Update";
+                btnSave.Visible = true;
+            }
+        }
+
+        private void DisableRepeaterControls(Repeater repeater)
+        {
+            foreach (RepeaterItem item in repeater.Items)
+            {
+                CheckBox chk = item.FindControl("chkComponent") as CheckBox;
+                TextBox txt = item.FindControl("txtComponentAmount") as TextBox;
+                if (chk != null) chk.Enabled = false;
+                if (txt != null) txt.ReadOnly = true;
+            }
+        }
+
+        private void LoadRemunerationData(int remunerationId)
+        {
+            renumarationDO renum = obj.GetRemunerationDetailsById(remunerationId);
+            if (renum != null)
+            {
+                txtSalaryStructureID.Text = renum.SalaryStructureID;
+
+                // Select employee
+                if (ddlEmployee.Items.FindByValue(renum.UserId.ToString()) != null)
+                {
+                    ddlEmployee.SelectedValue = renum.UserId.ToString();
+                }
+
+                // Select status
+                if (!string.IsNullOrEmpty(renum.Status) && ddlStatus.Items.FindByValue(renum.Status) != null)
+                {
+                    ddlStatus.SelectedValue = renum.Status;
+                }
+
+                // Dates
+                                if (renum.EffectiveFromDate.HasValue)
+                                {
+                                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("dd-MM-yyyy");
+                                }
+                                if (renum.EffectiveToDate.HasValue)
+                                {
+                                    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
+                                }
+
+                // Employee category
+                if (!string.IsNullOrEmpty(renum.EmployeeCategory) && ddlEmployeeCategory.Items.FindByValue(renum.EmployeeCategory) != null)
+                {
+                    ddlEmployeeCategory.SelectedValue = renum.EmployeeCategory;
+                }
+
+                // Amounts
+                                if (renum.CTCAmount.HasValue)
+                                {
+                                    txtCTCAmount.Text = renum.CTCAmount.Value.ToString("F2");
+                                }
+
+                // Load repeater data (earnings)
+                LoadRepeaterData(rptEarnings, renum, "earning");
+
+                // Load repeater data (deductions)
+                LoadRepeaterData(rptDeductions, renum, "deduction");
+
+                // Calculate the salary values based on loaded components
+                CalculateGrossSalary(null, null);
+            }
+        }
+
+        private void LoadRepeaterData(Repeater repeater, renumarationDO renum, string type)
+        {
+            foreach (RepeaterItem item in repeater.Items)
+            {
+                HiddenField hfName = item.FindControl("hfComponentName") as HiddenField;
+                CheckBox chk = item.FindControl("chkComponent") as CheckBox;
+                TextBox txt = item.FindControl("txtComponentAmount") as TextBox;
+
+                if (hfName != null && chk != null && txt != null)
+                {
+                    string compName = hfName.Value.ToLower().Trim();
+                    decimal? amount = null;
+
+                    // Earnings
+                    if (type == "earning")
                     {
-                        Id = comp.Id.ToString(),
-                        Text = comp.Text,
-                        ComponentType = (comp.ComponentType ?? string.Empty).Trim().ToUpper()
-                    })
-                    .ToList();
-
-                hfComponentOptions.Value = new JavaScriptSerializer().Serialize(options);
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("Remunerationform", "BindComponents", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
-                hfComponentOptions.Value = "[]";
-            }
-        }
-
-        public void BindEmployeeCode()
-        {
-            try
-            {
-                UserDetailsBL userBL = new UserDetailsBL();
-                List<UserDetailsDO> users = userBL.ViewAllUsers()
-                    .Where(u => u.UserId > 0 && !string.IsNullOrWhiteSpace(u.EmployeeCode))
-                    .GroupBy(u => (u.EmployeeCode ?? string.Empty).Trim().ToUpper() + "|" + (u.user_fullname ?? string.Empty).Trim().ToUpper())
-                    .Select(g => g.First())
-                    .OrderBy(u => u.EmployeeCode)
-                    .ToList();
-
-                ddl_empcode.Items.Clear();
-                ddl_empcode.Items.Insert(0, new ListItem("-- Please Select --", ""));
-
-                if (users != null && users.Count > 0)
-                {
-                    foreach (var user in users)
+                        if (compName.Contains("basic salary"))
+                            amount = renum.BasicSalary;
+                        else if (compName.Contains("hra"))
+                            amount = renum.HRA;
+                        else if (compName.Contains("conveyance"))
+                            amount = renum.ConveyanceAllowance;
+                        else if (compName.Contains("medical"))
+                            amount = renum.MedicalAllowance;
+                        else if (compName.Contains("special"))
+                            amount = renum.SpecialAllowance;
+                        else if (compName.Contains("education"))
+                            amount = renum.EducationAllowance;
+                        else if (compName.Contains("travel"))
+                            amount = renum.TravelAllowance;
+                        else if (compName.Contains("uniform"))
+                            amount = renum.UniformAllowance;
+                        else if (compName.Contains("telephone"))
+                            amount = renum.TelephoneAllowance;
+                        else if (compName.Contains("food"))
+                            amount = renum.FoodAllowance;
+                        else if (compName.Contains("shift"))
+                            amount = renum.ShiftAllowance;
+                        else if (compName.Contains("incentive"))
+                            amount = renum.Incentive;
+                        else if (compName.Contains("bonus"))
+                            amount = renum.Bonus;
+                        else if (compName.Contains("other"))
+                            amount = renum.OtherAllowance;
+                    }
+                    // Deductions
+                    else
                     {
-                        ddl_empcode.Items.Add(new ListItem((user.EmployeeCode ?? string.Empty).Trim(), user.UserId.ToString()));
+                        if (compName.Contains("pf"))
+                            amount = renum.PF;
+                        else if (compName.Contains("esi"))
+                            amount = renum.ESI;
+                        else if (compName.Contains("professional tax"))
+                            amount = renum.ProfessionalTax;
+                        else if (compName.Contains("tds"))
+                            amount = renum.TDS;
+                        else if (compName.Contains("labour welfare"))
+                            amount = renum.LabourWelfareFund;
+                        else if (compName.Contains("loan"))
+                            amount = renum.LoanDeduction;
+                        else if (compName.Contains("advance"))
+                            amount = renum.AdvanceRecovery;
+                        else if (compName.Contains("other"))
+                            amount = renum.OtherDeductions;
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("Remunerationform", "BindEmployeeCode", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
-            }
-        }
-        public void BindMonths()
-        {
-            ddlMonth.Items.Clear();
-            ddlMonth.Items.Add(new ListItem("-Select Month-", ""));
 
-            for (int i = 1; i <= 12; i++)
-            {
-                ddlMonth.Items.Add(new ListItem(
-                    CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i),
-                    i.ToString()
-                ));
-            }
-        }
-
-        public void BindYears()
-        {
-            ddlYear.Items.Clear();
-            ddlYear.Items.Add(new ListItem("-Select Year-", ""));
-
-            int currentYear = DateTime.Now.Year;
-
-            for (int year = currentYear - 5; year <= currentYear + 5; year++)
-            {
-                ddlYear.Items.Add(new ListItem(year.ToString(), year.ToString()));
-            }
-        }
-        public void BindUsername()
-        {
-            try
-            {
-                UserDetailsBL userBL = new UserDetailsBL();
-                List<UserDetailsDO> users = userBL.ViewAllUsers()
-                    .Where(u => u.UserId > 0 && !string.IsNullOrWhiteSpace(u.user_fullname))
-                    .GroupBy(u => (u.user_fullname ?? string.Empty).Trim().ToUpper() + "|" + (u.EmployeeCode ?? string.Empty).Trim().ToUpper())
-                    .Select(g => g.First())
-                    .OrderBy(u => u.user_fullname)
-                    .ToList();
-                ddl_username.Items.Clear();
-                ddl_username.Items.Insert(0, new ListItem("-- Please Select --", ""));
-
-                if (users != null && users.Count > 0)
-                {
-                    foreach (var user in users)
+                    if (amount.HasValue && amount.Value > 0)
                     {
-                        ddl_username.Items.Add(new ListItem((user.user_fullname ?? string.Empty).Trim(), user.UserId.ToString()));
-                    }
-                }
-                else
-                {
-                    ddl_username.Items[0].Text = "-- No Users --";
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog(
-                    "Remunerationform",
-                    "BindUsername",
-                    "Exception=" + ex.Message + " | StackTrace=" + ex.StackTrace,
-                    UserId
-                );
-
-                ddl_username.Items.Clear();
-                ddl_username.Items.Insert(0, new ListItem("-- Error --", ""));
-            }
-        }
-        protected void ddl_employeename_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(ddl_username.SelectedValue))
-            {
-                int userId = Convert.ToInt32(ddl_username.SelectedValue);
-                BindEmployeeCodeAndDesignation(userId);
-                BindEmployeeSalary(userId);
-            }
-            else
-            {
-                ddl_username.Text = "";
-                ddldesign.Items.Clear();
-                ddldesign.Items.Insert(0, new ListItem("-- Select --", ""));
-            }
-        }
-
-        protected void ddl_employeeCode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(ddl_empcode.SelectedValue))
-            {
-                int userId = Convert.ToInt32(ddl_empcode.SelectedValue);
-                ListItem selectedUser = ddl_username.Items.FindByValue(ddl_empcode.SelectedValue);
-                if (selectedUser != null)
-                {
-                    ddl_username.SelectedValue = ddl_empcode.SelectedValue;
-                }
-                BindEmployeeCodeAndDesignation(userId);
-                BindEmployeeSalary(userId);
-            }
-        }
-        private void BindEmployeeSalary(int userId)
-        {
-            SalarySlipBL bl = new SalarySlipBL();
-            SalarySlipDO activeSlip = bl.GetLatestSavedSlipByUserId(userId);
-            if (activeSlip != null)
-            {
-                decimal basic = activeSlip.BasicSalary;
-                decimal hra = activeSlip.HouseRentAllowance;
-                decimal special = activeSlip.SpecialAllowance;
-                decimal professionalTax = activeSlip.ProfessionalTax;
-
-                txtBasicSalary.Text = basic.ToString("0.00");
-                txtHRA.Text = hra.ToString("0.00");
-                txtSpecial.Text = special.ToString("0.00");
-                txtProfessionalTax.Text = professionalTax.ToString("0.00");
-                txtTotalEarnings.Text = activeSlip.TotalEarnings.ToString("0.00");
-                txtTotalDeductions.Text = activeSlip.TotalDeductions.ToString("0.00");
-                txtNetPay.Text = activeSlip.NetPay.ToString("0.00");
-
-                ViewState["FullBasic"] = basic;
-                ViewState["FullHRA"] = hra;
-                ViewState["FullSpecial"] = special;
-                ViewState["FullPT"] = professionalTax;
-
-                int activeMonth = 0;
-                int activeYear = activeSlip.Year;
-                int.TryParse(Convert.ToString(activeSlip.Month), out activeMonth);
-                BindActiveComponents(userId, activeMonth, activeYear);
-                return;
-            }
-
-            // Hard stop: do not fallback to old master rows. This prevents stale 64000 values.
-            ClearSalaryFields();
-            ScriptManager.RegisterStartupScript(
-                this,
-                this.GetType(),
-                "ActiveSlipMissing",
-                "showsalarySavedMessage('error', 'Active salary slip not found for selected user. Please save remuneration again.');",
-                true);
-        }
-
-        private void BindActiveComponents(int userId, int month, int year)
-        {
-            if (month <= 0 || year <= 0)
-            {
-                hfDynamicComponents.Value = string.Empty;
-                return;
-            }
-
-            SalarySlipBL bl = new SalarySlipBL();
-            var components = bl.GetRemunerationComponents(userId, month, year);
-            if (components == null || components.Count == 0)
-            {
-                hfDynamicComponents.Value = string.Empty;
-                return;
-            }
-
-            hfDynamicComponents.Value = new JavaScriptSerializer().Serialize(components);
-            string js = @"
-                (function(){
-                    var earningBody = document.getElementById('earningsBody');
-                    var deductionBody = document.getElementById('deductionsBody');
-                    if (earningBody) {
-                        Array.from(earningBody.querySelectorAll('tr.dynamic-component')).forEach(function(r){ r.remove(); });
-                    }
-                    if (deductionBody) {
-                        Array.from(deductionBody.querySelectorAll('tr.dynamic-component')).forEach(function(r){ r.remove(); });
-                    }
-                    var data = " + hfDynamicComponents.Value + @";
-                    data.forEach(function(c){
-                        if (typeof createDynamicRow === 'function') {
-                            createDynamicRow(c.ComponentName, parseFloat(c.Amount || 0), !!c.IsDeduction);
-                        }
-                    });
-                    if (typeof calculateSalary === 'function') {
-                        calculateSalary();
-                    }
-                })();";
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "LoadActiveComponents", js, true);
-        }
-        private void ClearSalaryFields()
-        {
-            txtBasicSalary.Text = "0.00";
-            txtHRA.Text = "0.00";
-            txtSpecial.Text = "0.00";
-            txtProfessionalTax.Text = "0.00";
-
-            txtTotalEarnings.Text = "0.00";
-            txtTotalDeductions.Text = "0.00";
-            txtNetPay.Text = "0.00";
-        }
-
-        
-
-        protected void btnshowApprisal_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(ddl_username.SelectedValue))
-            {
-                ScriptManager.RegisterStartupScript(
-                    this,
-                    this.GetType(),
-                    "UserValidation",
-                    "showsalarySavedMessage('error', 'Please select a Employee Name');",
-                    true
-                );
-                return;
-            }
-            int userId = Convert.ToInt32(ddl_username.SelectedValue);
-            SalarySlipBL bl = new SalarySlipBL();
-
-            DateTime? lastDate = bl.GetLastAppraisalDate(userId);
-
-            if (lastDate.HasValue)
-            {
-                txtLastAppraisalDate.Text = lastDate.Value.ToString("dd-MM-yyyy");
-            }
-
-            pnlAppraisal.Visible = true;
-            btnshowApprisal.Visible = false;
-        }
-
-        private void BindSavedComponentsForEdit()
-        {
-            try
-            {
-                string mode = Convert.ToString(Request.QueryString["mode"]);
-                if (!string.Equals(mode, "edit", StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-
-                int userId;
-                int month;
-                int year;
-                if (!int.TryParse(Convert.ToString(Request.QueryString["user_id"]), out userId)
-                    || !int.TryParse(Convert.ToString(Request.QueryString["month"]), out month)
-                    || !int.TryParse(Convert.ToString(Request.QueryString["year"]), out year))
-                {
-                    return;
-                }
-
-                SalarySlipBL bl = new SalarySlipBL();
-                var components = bl.GetRemunerationComponents(userId, month, year);
-                if (components == null || components.Count == 0)
-                {
-                    return;
-                }
-
-                hfDynamicComponents.Value = new JavaScriptSerializer().Serialize(components);
-
-                string js = @"
-                    (function(){
-                        var data = " + hfDynamicComponents.Value + @";
-                        data.forEach(function(c){
-                            if (typeof createDynamicRow === 'function') {
-                                createDynamicRow(c.ComponentName, parseFloat(c.Amount || 0), !!c.IsDeduction);
-                            }
-                        });
-                        if (typeof calculateSalary === 'function') {
-                            calculateSalary();
-                        }
-                    })();";
-
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "LoadSavedComponents", js, true);
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("Remunerationform", "BindSavedComponentsForEdit", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
-            }
-        }
-    
-
-        private void BindEmployeeCodeAndDesignation(int userId)
-        {
-            UserDetailsBL userBL = new UserDetailsBL();
-            var userData = userBL.ViewAllUsers().Where(x => x.UserId == userId).ToList();
-            if (userData == null || userData.Count == 0)
-            {
-                userData = userBL.GetUserDetails(userId);
-            }
-            if (userData != null && userData.Count > 0)
-            {
-                var emp = userData.FirstOrDefault();
-                ddl_empcode.Items.Clear();
-                ddl_empcode.Items.Add(new ListItem(emp.EmployeeCode, userId.ToString()));
-                ddl_empcode.SelectedValue = userId.ToString();
-
-                ddldesign.Items.Clear();
-                string designation = string.IsNullOrWhiteSpace(emp.designation_name) ? "-- Not Found --" : emp.designation_name;
-                ddldesign.Items.Add(new ListItem(designation, designation));
-                ddldesign.SelectedValue = designation;
-
-                HttpContext.Current.Session["EmployeeCode"] = emp.EmployeeCode;
-                HttpContext.Current.Session["CompanyId"] = emp.company_id;
-            }
-            else
-            {
-                ddl_empcode.Items.Clear();
-                ddl_empcode.Items.Insert(0, new ListItem("-- Not Found --", ""));
-                ddldesign.Items.Clear();
-                ddldesign.Items.Insert(0, new ListItem("-- Not Found --", ""));
-            }
-        }
-
-     
-        protected void btnShowAdditional_Click(object sender, EventArgs e)
-        {
-            pnlAdditionalComponents.Visible = true;
-        }
-
-        protected void btnCloseAdditional_Click(object sender, EventArgs e)
-        {
-            pnlAdditionalComponents.Visible = false;
-        }
-
-        protected void btnCloseAppraisal_Click(object sender, EventArgs e)
-        {
-            pnlAppraisal.Visible = false;
-            btnshowApprisal.Visible = true;
-        }
-        protected void btnAddSalaryComponent_Click(object sender, EventArgs e)
-        {
-            pnlAdditionalComponents.Visible = true; 
-
-            List<SalaryComponent> list =
-                ViewState["Components"] as List<SalaryComponent>
-                ?? new List<SalaryComponent>();
-
-            if (string.IsNullOrEmpty(ddl_component.SelectedValue))
-                return;
-
-            string componentName = ddl_component.SelectedItem.Text;
-
-            if (list.Any(x => x.ComponentName == componentName))
-                return;
-
-            bool isDeduction =
-                componentName == "Provident Fund"
-                || componentName == "Other Deduction";
-
-            list.Add(new SalaryComponent
-            {
-                ComponentName = componentName,
-                Amount = 0,
-                IsDeduction = isDeduction
-            });
-
-            ViewState["Components"] = list;
-
-            BindComponentRepeater();
-            ScriptManager.RegisterStartupScript(
-       this,
-       this.GetType(),
-       "recalcSalary",
-       "calculateSalary();",
-       true
-   );
-        }
-
-        private void BindComponentRepeater()
-        {
-            var list = ViewState["Components"] as List<SalaryComponent>
-                       ?? new List<SalaryComponent>();
-
-            rptComponents.DataSource = list;
-            rptComponents.DataBind();
-
-        }
-
-        protected void RemoveComponent(object sender, CommandEventArgs e)
-        {
-            pnlAdditionalComponents.Visible = true; 
-
-            var list = ViewState["Components"] as List<SalaryComponent>;
-            if (list == null) return;
-
-            string componentName = e.CommandArgument.ToString();
-
-            list.RemoveAll(x => x.ComponentName == componentName);
-
-            ViewState["Components"] = list;
-
-            BindComponentRepeater();
-            ddl_component.ClearSelection();
-            ddl_component.SelectedIndex = 0;
-            ScriptManager.RegisterStartupScript(
-       this,
-       this.GetType(),
-       "recalcSalary",
-       "calculateSalary();",
-       true
-   );
-        }
-        protected void btn_saveremuneration_click(object sender, EventArgs e)
-        {
-            try
-            {
-                SalarySlipDO slip = new SalarySlipDO();
-
-                if (string.IsNullOrWhiteSpace(ddl_username.SelectedValue))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UserValidation",
-                        "showsalarySavedMessage('error', 'Please select employee.');", true);
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(ddlMonth.SelectedValue))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "MonthValidation",
-                        "showsalarySavedMessage('error', 'Please select month.');", true);
-                    return;
-                }
-
-                int yearValue;
-                if (!int.TryParse(ddlYear.SelectedValue, out yearValue))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "YearValidation",
-                        "showsalarySavedMessage('error', 'Please select year.');", true);
-                    return;
-                }
-
-                slip.Month = ddlMonth.SelectedValue;
-                slip.Year = yearValue;
-                int userIdValue;
-                if (!int.TryParse(ddl_username.SelectedValue, out userIdValue))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UserIdValidation",
-                        "showsalarySavedMessage('error', 'Invalid employee selection.');", true);
-                    return;
-                }
-                slip.UserId = userIdValue;
-
-                // Always derive name/code/company/designation from latest user master data
-                // to avoid invalid session fallbacks for newly created users.
-                UserDetailsBL userBL = new UserDetailsBL();
-                var userData = userBL.GetUserDetails(userIdValue);
-                var selectedUser = (userData != null && userData.Count > 0) ? userData[0] : null;
-                if (selectedUser == null)
-                {
-                    selectedUser = userBL.ViewAllUsers().FirstOrDefault(x => x.UserId == userIdValue);
-                }
-
-                if (selectedUser == null)
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UserMasterValidation",
-                        "showsalarySavedMessage('error', 'Employee master data not found. Please reselect employee.');", true);
-                    return;
-                }
-
-                slip.Username = string.IsNullOrWhiteSpace(selectedUser.user_fullname) ? ddl_username.SelectedItem.Text : selectedUser.user_fullname;
-                slip.DesignationName = string.IsNullOrWhiteSpace(selectedUser.designation_name) ? ddldesign.SelectedItem.Text : selectedUser.designation_name;
-
-                int employeeCodeValue;
-                if (!int.TryParse(selectedUser.EmployeeCode, out employeeCodeValue) || employeeCodeValue <= 0)
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EmpCodeValidation",
-                        "showsalarySavedMessage('error', 'Employee Code is missing for this user. Please update user details first.');", true);
-                    return;
-                }
-                slip.employeecode = employeeCodeValue;
-
-                if (selectedUser.company_id <= 0)
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "CompanyValidation",
-                        "showsalarySavedMessage('error', 'Company is missing for this user. Please update user details first.');", true);
-                    return;
-                }
-                slip.company_id = selectedUser.company_id;
-
-                decimal basicSalary;
-                if (!decimal.TryParse(txtBasicSalary.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out basicSalary) &&
-                    !decimal.TryParse(txtBasicSalary.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out basicSalary))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "BasicValidation",
-                        "showsalarySavedMessage('error', 'Invalid Basic Salary format.');", true);
-                    return;
-                }
-
-                decimal hra;
-                if (!decimal.TryParse(txtHRA.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out hra) &&
-                    !decimal.TryParse(txtHRA.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out hra))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HraValidation",
-                        "showsalarySavedMessage('error', 'Invalid HRA format.');", true);
-                    return;
-                }
-
-                decimal special;
-                if (!decimal.TryParse(txtSpecial.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out special) &&
-                    !decimal.TryParse(txtSpecial.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out special))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "SpecialValidation",
-                        "showsalarySavedMessage('error', 'Invalid Special Allowance format.');", true);
-                    return;
-                }
-
-                decimal professionalTax;
-                if (!decimal.TryParse(txtProfessionalTax.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out professionalTax) &&
-                    !decimal.TryParse(txtProfessionalTax.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out professionalTax))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "TaxValidation",
-                        "showsalarySavedMessage('error', 'Invalid Professional Tax format.');", true);
-                    return;
-                }
-
-                slip.BasicSalary = basicSalary;
-                slip.HouseRentAllowance = hra;
-                slip.SpecialAllowance = special;
-                slip.ProfessionalTax = professionalTax;
-                DateTime parsedDate;
-                if (string.IsNullOrWhiteSpace(txtLastAppraisalDate.Text))
-                {
-                    slip.LastAppraisalDate = null;
-                }
-                else if (DateTime.TryParseExact(txtLastAppraisalDate.Text, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
-                {
-                    slip.LastAppraisalDate = parsedDate;
-                }
-                else
-                {
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "DateValidation1",
-                        "showsalarySavedMessage('error', 'Please enter Last Appraisal Date in dd-MM-yyyy format.');",
-                        true
-                    );
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(txtCurrentAppraisalDate.Text))
-                {
-                    slip.CurrentAppraisalDate = null;
-                }
-                else if (DateTime.TryParseExact(txtCurrentAppraisalDate.Text, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
-                {
-                    slip.CurrentAppraisalDate = parsedDate;
-                }
-                else
-                {
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "DateValidation2",
-                        "showsalarySavedMessage('error', 'Please enter Current Appraisal Date in dd-MM-yyyy format.');",
-                        true
-                    );
-                    return;
-                }
-
-
-                decimal appraisalPercentage;
-                if (!decimal.TryParse(string.IsNullOrWhiteSpace(txtAppraisalPercent.Text) ? "0" : txtAppraisalPercent.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out appraisalPercentage) &&
-                    !decimal.TryParse(string.IsNullOrWhiteSpace(txtAppraisalPercent.Text) ? "0" : txtAppraisalPercent.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out appraisalPercentage))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "AppraisalValidation",
-                        "showsalarySavedMessage('error', 'Invalid appraisal percentage format.');", true);
-                    return;
-                }
-                slip.AppraisalPercentage = appraisalPercentage;
-
-                decimal incrementAmount;
-                if (!decimal.TryParse(string.IsNullOrWhiteSpace(hfIncrementAmount.Value) ? "0" : hfIncrementAmount.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out incrementAmount) &&
-                    !decimal.TryParse(string.IsNullOrWhiteSpace(hfIncrementAmount.Value) ? "0" : hfIncrementAmount.Value, NumberStyles.Any, CultureInfo.CurrentCulture, out incrementAmount))
-                {
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "IncrementValidation",
-                        "showsalarySavedMessage('error', 'Invalid increment amount format.');", true);
-                    return;
-                }
-                slip.IncrementAmount = incrementAmount;
-
-                List<SalaryComponent> components = GetComponentsFromRepeater();
-
-
-                decimal bonus = 0;
-                decimal incentive = 0;
-                decimal others = 0;
-                decimal lta = 0;
-                decimal dynamicEarnings = 0;
-                decimal dynamicDeductions = 0;
-
-                foreach (var c in components)
-                {
-                    if (c == null || string.IsNullOrWhiteSpace(c.ComponentName))
-                    {
-                        continue;
-                    }
-
-                    if (c.IsDeduction)
-                    {
-                        dynamicDeductions += c.Amount;
+                        chk.Checked = true;
+                        txt.Enabled = true;
+                        txt.Text = amount.Value.ToString("F2");
                     }
                     else
                     {
-                        dynamicEarnings += c.Amount;
-                    }
-
-                    // Keep legacy fields populated for existing SP/table columns.
-                    switch ((c.ComponentName ?? string.Empty).Trim().ToUpperInvariant())
-                    {
-                        case "BONUS":
-                            bonus += c.Amount;
-                            break;
-                        case "INCENTIVE":
-                            incentive += c.Amount;
-                            break;
-                        case "LEAVE TRAVEL ALLOWANCE":
-                            lta += c.Amount;
-                            break;
-                        case "OTHER DEDUCTION":
-                            others += c.Amount;
-                            break;
+                        chk.Checked = false;
+                        txt.Enabled = false;
+                        txt.Text = "0.00";
                     }
                 }
+            }
+        }
 
-                slip.TotalEarnings = slip.BasicSalary + slip.HouseRentAllowance + slip.SpecialAllowance + dynamicEarnings;
-                slip.TotalDeductions = slip.ProfessionalTax + dynamicDeductions;
-                slip.NetPay = slip.TotalEarnings - slip.TotalDeductions;
+        private void BindEmployees()
+        {
+            try
+            {
+                UserDetailsBL userBL = new UserDetailsBL();
+                List<UserDetailsDO> employees = userBL.ViewAllUsers();
 
-
-                SalarySlipBL bl = new SalarySlipBL();
-                var result = bl.SaveRenumerationSalaryDetails( slip, lta, bonus, incentive, others );
-
-
-                if (result != null && result.Count > 0)
+                if (employees != null && employees.Count > 0)
                 {
-                    string status = Convert.ToString(result[0].Status ?? string.Empty).Trim();
-                    string remark = Convert.ToString(result[0].Remarks ?? string.Empty).Trim();
-
-                    bool isSaveSuccessful = IsSaveSuccessful(status, remark);
-
-                    if (isSaveSuccessful)
-                    {
-                        int insertedBy = 0;
-                        int.TryParse(Convert.ToString(Session["userId"]), out insertedBy);
-
-                        int monthValue = 0;
-                        int.TryParse(slip.Month, out monthValue);
-
-                        if (monthValue > 0 && slip.Year > 0)
-                        {
-                            bl.SaveRemunerationComponents(slip.UserId, monthValue, slip.Year, components, insertedBy);
-                        }
-
-                        ResetRemunerationFormFields();
-                    }
-
-                    string safeStatus = HttpUtility.JavaScriptStringEncode(status);
-                    string safeRemark = HttpUtility.JavaScriptStringEncode(remark);
-                    string script = $"showsalarySavedMessage('{safeStatus}', '{safeRemark}');";
-                    if (isSaveSuccessful)
-                    {
-                        string reloadUrl = ResolveUrl("~/View/Modules/Remunerationform.aspx");
-                        script += $" setTimeout(function(){{ window.location.href = '{reloadUrl}'; }}, 1500);";
-                    }
-
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "UserSavedScript",
-                        script,
-                        true
-                    );
+                    ddlEmployee.DataSource = employees.OrderBy(x => x.user_fullname);
+                    ddlEmployee.DataTextField = "user_fullname";
+                    ddlEmployee.DataValueField = "UserId";
+                    ddlEmployee.DataBind();
                 }
 
+                ddlEmployee.Items.Insert(0, new ListItem("-- Select Employee --", ""));
             }
             catch (Exception ex)
             {
-                ClientScript.RegisterStartupScript(this.GetType(), "ErrorMsg",
-                      "alert('Unexpected error: " + ex.Message + "');", true);
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("Remunerationform", "BindEmployees", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, Convert.ToString(Session["userId"]));
             }
         }
 
-        private List<SalaryComponent> GetComponentsFromRepeater()
+        private void BindStatusDropdown()
         {
-            var list = new List<SalaryComponent>();
+            EmployeeOnboardingBL onboardingBL = new EmployeeOnboardingBL();
+            List<DropDownData> statusList = onboardingBL.BindLookupData("salary status");
+            ddlStatus.DataSource = statusList;
+            ddlStatus.DataTextField = "Text";
+            ddlStatus.DataValueField = "Id";
+            ddlStatus.DataBind();
+            ddlStatus.Items.Insert(0, new ListItem("-- Select Status --", ""));
+        }
 
-            // 1) Read dynamic components sent from client-side modal rows.
-            if (!string.IsNullOrWhiteSpace(hfDynamicComponents.Value))
+        private void BindEmployeeCategoryDropdown()
+        {
+            EmployeeOnboardingBL onboardingBL = new EmployeeOnboardingBL();
+            List<DropDownData> categoryList = onboardingBL.BindLookupData("Emptype");
+            ddlEmployeeCategory.DataSource = categoryList;
+            ddlEmployeeCategory.DataTextField = "Text";
+            ddlEmployeeCategory.DataValueField = "Id";
+            ddlEmployeeCategory.DataBind();
+            ddlEmployeeCategory.Items.Insert(0, new ListItem("-- Select Employee Category --", ""));
+        }
+
+        private void GenerateSalaryStructureID()
+        {
+            string year = DateTime.Now.Year.ToString();
+            string random = new Random().Next(1000, 9999).ToString();
+            txtSalaryStructureID.Text = "SS-" + year + "-" + random;
+        }
+
+        private void BindComponents()
+        {
+            allComponents = obj.GetRemunerationComponents();
+
+            // Bind Earnings components
+            var earnings = allComponents.Where(c => !string.IsNullOrEmpty(c.ComponentType) && c.ComponentType.ToUpper() == "EARNING").ToList();
+            rptEarnings.DataSource = earnings;
+            rptEarnings.DataBind();
+
+            // Bind Deductions components
+            var deductions = allComponents.Where(c => !string.IsNullOrEmpty(c.ComponentType) && c.ComponentType.ToUpper() == "DEDUCTION").ToList();
+            rptDeductions.DataSource = deductions;
+            rptDeductions.DataBind();
+        }
+
+        protected void chkComponent_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            RepeaterItem item = (RepeaterItem)chk.NamingContainer;
+            TextBox txtAmount = (TextBox)item.FindControl("txtComponentAmount");
+
+            if (chk.Checked)
             {
-                try
+                txtAmount.Enabled = true;
+            }
+            else
+            {
+                txtAmount.Enabled = false;
+                txtAmount.Text = "0";
+                CalculateGrossSalary(sender, e);
+            }
+            UpdatePanel1.Update();
+        }
+
+        protected void txtMonthlySalary_TextChanged(object sender, EventArgs e)
+        {
+            if (decimal.TryParse(txtMonthlySalary.Text, out decimal monthly))
+            {
+                txtAnnualSalary.Text = (monthly * 12).ToString("F2");
+            }
+            UpdatePanel1.Update();
+        }
+
+        protected void txtCTCAmount_TextChanged(object sender, EventArgs e)
+        {
+            // Can implement any CTC related logic here
+            UpdatePanel1.Update();
+        }
+
+        protected void CalculateGrossSalary(object sender, EventArgs e)
+        {
+            decimal totalEarnings = 0;
+
+            // Calculate from earnings repeater
+            foreach (RepeaterItem item in rptEarnings.Items)
+            {
+                CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+
+                if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
                 {
-                    JavaScriptSerializer js = new JavaScriptSerializer();
-                    var dynamicList = js.Deserialize<List<SalaryComponent>>(hfDynamicComponents.Value);
-                    if (dynamicList != null)
+                    totalEarnings += amount;
+                }
+            }
+
+            txtGrossSalary.Text = totalEarnings.ToString("F2");
+
+            // Calculate total deductions
+            decimal totalDeductions = 0;
+            foreach (RepeaterItem item in rptDeductions.Items)
+            {
+                CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+
+                if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
+                {
+                    totalDeductions += amount;
+                }
+            }
+
+            // Calculate net monthly salary and annual salary
+            decimal netMonthly = totalEarnings - totalDeductions;
+            txtMonthlySalary.Text = netMonthly.ToString("F2");
+            txtAnnualSalary.Text = (totalEarnings * 12).ToString("F2");
+
+            UpdatePanel1.Update();
+        }
+
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Validate Employee selection
+                if (string.IsNullOrEmpty(ddlEmployee.SelectedValue))
+                {
+                    ShowAlert("Please select an employee!");
+                    return;
+                }
+
+                // Validate Effective from date is not empty
+                if (string.IsNullOrEmpty(txtEffectiveFromDate.Text))
+                {
+                    ShowAlert("Effective from date is required!");
+                    return;
+                }
+                
+                // Parse dates
+                DateTime effectiveFromDate;
+                if (!DateTime.TryParseExact(txtEffectiveFromDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out effectiveFromDate))
+                {
+                    ShowAlert("Invalid date format! Please use dd-mm-yyyy.");
+                    return;
+                }
+
+                DateTime? effectiveToDate = null;
+                if (!string.IsNullOrEmpty(txtEffectiveToDate.Text) && DateTime.TryParseExact(txtEffectiveToDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedToDate))
+                {
+                    effectiveToDate = parsedToDate;
+                }
+
+                // Parse dropdown values
+                int? status = null;
+                if (int.TryParse(ddlStatus.SelectedValue, out int statusVal) && statusVal > 0)
+                {
+                    status = statusVal;
+                }
+
+                int? employeeCategory = null;
+                if (int.TryParse(ddlEmployeeCategory.SelectedValue, out int categoryVal) && categoryVal > 0)
+                {
+                    employeeCategory = categoryVal;
+                }
+
+                // Get Basic Salary
+                decimal basicSalary = 0;
+                decimal hra = 0;
+                decimal conveyanceAllowance = 0;
+                decimal medicalAllowance = 0;
+                decimal specialAllowance = 0;
+                decimal educationAllowance = 0;
+                decimal travelAllowance = 0;
+                decimal uniformAllowance = 0;
+                decimal telephoneAllowance = 0;
+                decimal foodAllowance = 0;
+                decimal shiftAllowance = 0;
+                decimal incentive = 0;
+                decimal bonus = 0;
+                decimal otherAllowance = 0;
+
+                foreach (RepeaterItem item in rptEarnings.Items)
+                {
+                    HiddenField hfName = (HiddenField)item.FindControl("hfComponentName");
+                    CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                    TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+
+                    if (hfName != null && chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
                     {
-                        list.AddRange(dynamicList);
+                        string compName = hfName.Value.ToLower().Trim();
+                        if (compName.Contains("basic salary"))
+                            basicSalary = amount;
+                        else if (compName.Contains("hra"))
+                            hra = amount;
+                        else if (compName.Contains("conveyance"))
+                            conveyanceAllowance = amount;
+                        else if (compName.Contains("medical"))
+                            medicalAllowance = amount;
+                        else if (compName.Contains("special"))
+                            specialAllowance = amount;
+                        else if (compName.Contains("education"))
+                            educationAllowance = amount;
+                        else if (compName.Contains("travel"))
+                            travelAllowance = amount;
+                        else if (compName.Contains("uniform"))
+                            uniformAllowance = amount;
+                        else if (compName.Contains("telephone"))
+                            telephoneAllowance = amount;
+                        else if (compName.Contains("food"))
+                            foodAllowance = amount;
+                        else if (compName.Contains("shift"))
+                            shiftAllowance = amount;
+                        else if (compName.Contains("incentive"))
+                            incentive = amount;
+                        else if (compName.Contains("bonus"))
+                            bonus = amount;
+                        else if (compName.Contains("other"))
+                            otherAllowance = amount;
                     }
                 }
-                catch
+
+                decimal pf = 0;
+                decimal esi = 0;
+                decimal professionalTax = 0;
+                decimal tds = 0;
+                decimal labourWelfareFund = 0;
+                decimal loanDeduction = 0;
+                decimal advanceRecovery = 0;
+                decimal otherDeductions = 0;
+
+                foreach (RepeaterItem item in rptDeductions.Items)
                 {
-                    // fallback to legacy repeater parsing below
+                    HiddenField hfName = (HiddenField)item.FindControl("hfComponentName");
+                    CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                    TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+
+                    if (hfName != null && chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
+                    {
+                        string compName = hfName.Value.ToLower().Trim();
+                        if (compName.Contains("pf"))
+                            pf = amount;
+                        else if (compName.Contains("esi"))
+                            esi = amount;
+                        else if (compName.Contains("professional tax"))
+                            professionalTax = amount;
+                        else if (compName.Contains("tds"))
+                            tds = amount;
+                        else if (compName.Contains("labour welfare"))
+                            labourWelfareFund = amount;
+                        else if (compName.Contains("loan"))
+                            loanDeduction = amount;
+                        else if (compName.Contains("advance"))
+                            advanceRecovery = amount;
+                        else if (compName.Contains("other"))
+                            otherDeductions = amount;
+                    }
+                }
+
+                // Validate CTC > 0
+                if (string.IsNullOrEmpty(txtCTCAmount.Text) || !decimal.TryParse(txtCTCAmount.Text, out decimal ctc) || ctc <= 0)
+                {
+                    ShowAlert("CTC amount must be greater than zero!");
+                    return;
+                }
+
+                // Validate Gross Salary
+                if (string.IsNullOrEmpty(txtGrossSalary.Text) || !decimal.TryParse(txtGrossSalary.Text, out decimal gross) || gross <= 0)
+                {
+                    ShowAlert("Gross salary must be greater than zero!");
+                    return;
+                }
+
+                // Validate Monthly & Annual Salary
+                if (string.IsNullOrEmpty(txtMonthlySalary.Text) || !decimal.TryParse(txtMonthlySalary.Text, out decimal monthlySalary) || monthlySalary <= 0)
+                {
+                    ShowAlert("Monthly salary must be greater than zero!");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(txtAnnualSalary.Text) || !decimal.TryParse(txtAnnualSalary.Text, out decimal annualSalary) || annualSalary <= 0)
+                {
+                    ShowAlert("Annual salary must be greater than zero!");
+                    return;
+                }
+
+                // Validate Basic Salary <= Gross Salary
+                if (basicSalary > gross)
+                {
+                    ShowAlert("Basic salary cannot exceed gross salary!");
+                    return;
+                }
+                
+                // Validate Gross Salary = Total Earnings (already calculated, just recheck)
+                decimal totalEarnings = 0;
+                foreach (RepeaterItem item in rptEarnings.Items)
+                {
+                    CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                    TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+                    
+                    if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
+                    {
+                        totalEarnings += amount;
+                    }
+                }
+                
+                if (Math.Abs(totalEarnings - gross) > 0.01m)
+                {
+                    ShowAlert("Gross salary must equal total earnings!");
+                    return;
+                }
+
+                // Get user id from session
+                int userId = 0;
+                if (Session["userId"] != null && int.TryParse(Session["userId"].ToString(), out int sessionUserId))
+                {
+                    userId = sessionUserId;
+                }
+
+                if (RemunerationId.HasValue && Mode == "edit")
+                {
+                    // Update mode
+                    var result = obj.UpdateRemunerationDetails(
+                        RemunerationId.Value,
+                        txtSalaryStructureID.Text,
+                        Convert.ToInt32(ddlEmployee.SelectedValue),
+                        status,
+                        effectiveFromDate,
+                        effectiveToDate,
+                        employeeCategory,
+                        ctc,
+                        gross,
+                        monthlySalary,
+                        annualSalary,
+                        basicSalary,
+                        hra,
+                        conveyanceAllowance,
+                        medicalAllowance,
+                        specialAllowance,
+                        educationAllowance,
+                        travelAllowance,
+                        uniformAllowance,
+                        telephoneAllowance,
+                        foodAllowance,
+                        shiftAllowance,
+                        incentive,
+                        bonus,
+                        otherAllowance,
+                        pf,
+                        esi,
+                        professionalTax,
+                        tds,
+                        labourWelfareFund,
+                        loanDeduction,
+                        advanceRecovery,
+                        otherDeductions,
+                        userId);
+
+                    if (result.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowSuccessAlert(result.Message);
+                    }
+                    else
+                    {
+                        ShowAlert(result.Message);
+                    }
+                }
+                else
+                {
+                    // Add mode
+                    var result = obj.SaveRemunerationDetails(
+                        txtSalaryStructureID.Text,
+                        Convert.ToInt32(ddlEmployee.SelectedValue),
+                        status,
+                        effectiveFromDate,
+                        effectiveToDate,
+                        employeeCategory,
+                        ctc,
+                        gross,
+                        monthlySalary,
+                        annualSalary,
+                        basicSalary,
+                        hra,
+                        conveyanceAllowance,
+                        medicalAllowance,
+                        specialAllowance,
+                        educationAllowance,
+                        travelAllowance,
+                        uniformAllowance,
+                        telephoneAllowance,
+                        foodAllowance,
+                        shiftAllowance,
+                        incentive,
+                        bonus,
+                        otherAllowance,
+                        pf,
+                        esi,
+                        professionalTax,
+                        tds,
+                        labourWelfareFund,
+                        loanDeduction,
+                        advanceRecovery,
+                        otherDeductions,
+                        userId);
+
+                    if (result.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowSuccessAlert(result.Message);
+                        // Reload page to clear all fields and reset form
+                        ScriptManager.RegisterStartupScript(this, GetType(), "reloadPage", "setTimeout(function() { window.location.href = window.location.href; }, 1500);", true);
+                    }
+                    else
+                    {
+                        ShowAlert(result.Message);
+                    }
                 }
             }
-
-            // 2) Merge legacy repeater components (if any).
-            var viewStateList = ViewState["Components"] as List<SalaryComponent> ?? new List<SalaryComponent>();
-            foreach (var item in viewStateList)
+            catch (Exception ex)
             {
-                if (!list.Any(x => string.Equals(x.ComponentName, item.ComponentName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    list.Add(item);
-                }
+                ShowAlert("Error: " + ex.Message);
             }
-
-            foreach (RepeaterItem item in rptComponents.Items)
-            {
-                //  Find amount textbox
-                TextBox txtAmount = item.FindControl("txtAmount") as TextBox;
-                if (txtAmount == null) continue;
-
-                decimal amount = 0;
-                decimal.TryParse(txtAmount.Text, out amount);
-
-                //  Get component name from ViewState list using index
-                int index = item.ItemIndex;
-
-                if (index >= 0 && index < list.Count)
-                {
-                    list[index].Amount = amount;
-                }
-            }
-
-            ViewState["Components"] = list;
-            return list;
         }
 
-        private void ResetRemunerationFormFields()
+        private void ShowAlert(string message)
         {
-            if (ddl_username.Items.Count > 0)
-            {
-                ddl_username.ClearSelection();
-                ddl_username.SelectedIndex = 0;
-            }
-
-            BindEmployeeCode();
-            if (ddl_empcode.Items.Count > 0)
-            {
-                ddl_empcode.ClearSelection();
-                ddl_empcode.SelectedIndex = 0;
-            }
-
-            ddldesign.Items.Clear();
-            ddldesign.Items.Insert(0, new ListItem("-- Select --", ""));
-
-            if (ddlMonth.Items.Count > 0)
-            {
-                ddlMonth.ClearSelection();
-                ddlMonth.SelectedIndex = 0;
-            }
-
-            if (ddlYear.Items.Count > 0)
-            {
-                ddlYear.ClearSelection();
-                ddlYear.SelectedIndex = 0;
-            }
-
-            txtBasicSalary.Text = "0.00";
-            txtHRA.Text = "0.00";
-            txtSpecial.Text = "0.00";
-            txtProfessionalTax.Text = "0.00";
-
-            txtTotalEarnings.Text = "0.00";
-            txtTotalDeductions.Text = "0.00";
-            txtNetPay.Text = "0.00";
-            txtTotalEarningsSummary.Text = "0.00";
-            txtTotalDeductionsSummary.Text = "0.00";
-            txtNetPaySummary.Text = "0.00";
-
-            txtLastAppraisalDate.Text = string.Empty;
-            txtCurrentAppraisalDate.Text = string.Empty;
-            txtAppraisalPercent.Text = string.Empty;
-            txtIncrementAmount.Text = string.Empty;
-            txtRevisedSalary.Text = string.Empty;
-            hfIncrementAmount.Value = string.Empty;
-            hfDynamicComponents.Value = string.Empty;
-
-            pnlAppraisal.Visible = false;
-            btnshowApprisal.Visible = true;
-
-            ViewState["Components"] = null;
-            rptComponents.DataSource = null;
-            rptComponents.DataBind();
-
-            if (ddl_component.Items.Count > 0)
-            {
-                ddl_component.ClearSelection();
-                ddl_component.SelectedIndex = 0;
-            }
-
-            Session["EmployeeCode"] = null;
-            Session["CompanyId"] = null;
-
-            upAdditionalComponents.Update();
+            string script = $"Swal.fire({{icon: 'error', title: 'Error', text: '{message.Replace("'", "\\'")}'}});";
+            ScriptManager.RegisterStartupScript(this, GetType(), "alert", script, true);
         }
 
-        protected void btnReset_Click(object sender, EventArgs e)
+        protected void btnBack_Click(object sender, EventArgs e)
         {
-            ResetRemunerationFormFields();
-
-            ScriptManager.RegisterStartupScript(
-                this,
-                this.GetType(),
-                "resetMsg",
-                "showsalarySavedMessage('info','Form reset successfully');",
-                true
-            );
+            Response.Redirect("~/View/Modules/Remunerationdetails.aspx");
         }
 
+        private void ShowSuccessAlert(string message)
+        {
+            string script = $"Swal.fire({{icon: 'success', title: 'Success', text: '{message.Replace("'", "\\'")}'}});";
+            ScriptManager.RegisterStartupScript(this, GetType(), "success", script, true);
+        }
     }
 }

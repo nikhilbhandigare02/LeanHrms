@@ -15,7 +15,7 @@ namespace ProcessModel
 
             try
             {
-                int userId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
+                int loggedInUserId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
                 
                 List<MySqlParameter> parameters = new List<MySqlParameter>
                 {
@@ -28,8 +28,8 @@ namespace ProcessModel
                     DataClass.GetParameter("p_increament_amount", appraisal.increament_amount),
                     DataClass.GetParameter("p_increament_percentage", appraisal.increament_percentage),
                     DataClass.GetParameter("p_increament_count", appraisal.increament_amount),
-                    DataClass.GetParameter("p_user_id", userId),
-                    DataClass.GetParameter("p_created_by", userId)
+                    DataClass.GetParameter("p_user_id", appraisal.user_id), // Use the selected employee's ID from dropdown
+                    DataClass.GetParameter("p_created_by", loggedInUserId) // Use the logged-in user's ID as creator
 
                 };
 
@@ -62,35 +62,140 @@ namespace ProcessModel
 
         public List<AppraisalDetailsDO> GetAppraisalDetailsList()
         {
-            MySqlDataReader dr =
+            List<AppraisalDetailsDO> list = new List<AppraisalDetailsDO>();
+
+            using (MySqlDataReader dr =
                 DataClass.GetDataReaderFromSp(
                     "",
-                    "Sp_Get_Appraisal_Details");
+                    "Sp_Get_Appraisal_Details"))
+            {
+                while (dr.Read())
+                {
+                    AppraisalDetailsDO item = new AppraisalDetailsDO();
 
-            getDrtolist mapper = new getDrtolist();
+                    // Map all properties manually
+                    for (int i = 0; i < dr.FieldCount; i++)
+                    {
+                        string colName = dr.GetName(i).ToLower();
+                        object val = dr[i];
 
-            return mapper.getdatafromreder<AppraisalDetailsDO>(dr);
+                        if (val == DBNull.Value)
+                            continue;
+
+                        switch (colName)
+                        {
+                            case "appraisal_id":
+                                item.appraisal_id = Convert.ToInt32(val);
+                                break;
+                            case "user_id":
+                                item.user_id = Convert.ToInt32(val);
+                                break;
+                            case "employee_name":
+                                item.employee_name = Convert.ToString(val);
+                                break;
+                            case "appraisal_effective_date":
+                                item.appraisal_effective_date = Convert.ToDateTime(val);
+                                break;
+                            case "salary_revision_date":
+                                item.salary_revision_date = Convert.ToDateTime(val);
+                                break;
+                            case "appraisal_ctc":
+                                item.appraisal_ctc = Convert.ToDecimal(val);
+                                break;
+                            case "gross_salary":
+                                item.gross_salary = Convert.ToDecimal(val);
+                                break;
+                            case "net_salary":
+                                item.net_salary = Convert.ToDecimal(val);
+                                break;
+                            case "increament_amount":
+                                item.increament_amount = Convert.ToDecimal(val);
+                                break;
+                            case "increament_percentage":
+                                item.increament_percentage = Convert.ToDecimal(val);
+                                break;
+                            case "oldctc":
+                                item.oldCTC = Convert.ToDecimal(val);
+                                break;
+                        }
+                    }
+
+                    list.Add(item);
+                }
+            }
+
+            return list;
         }
 
         public AppraisalDetailsDO GetAppraisalDetailsById(int appraisalId)
         {
             List<MySqlParameter> param = new List<MySqlParameter>();
+            AppraisalDetailsDO result = null;
 
             param.Add(DataClass.GetParameter(
                 "p_appraisal_id",
                 appraisalId));
 
-            MySqlDataReader dr =
+            using (MySqlDataReader dr =
                 DataClass.GetDataReaderFromSpWithParam(
                     param,
                     "",
-                    "sp_get_appraisal_details_by_id");
+                    "sp_get_appraisal_details_by_id"))
+            {
+                if (dr.HasRows && dr.Read())
+                {
+                    result = new AppraisalDetailsDO();
 
-            getDrtolist mapper = new getDrtolist();
+                    // Map all properties manually
+                    for (int i = 0; i < dr.FieldCount; i++)
+                    {
+                        string colName = dr.GetName(i).ToLower();
+                        object val = dr[i];
 
-            return mapper
-                .getdatafromreder<AppraisalDetailsDO>(dr)
-                .FirstOrDefault();
+                        if (val == DBNull.Value)
+                            continue;
+
+                        switch (colName)
+                        {
+                            case "appraisal_id":
+                                result.appraisal_id = Convert.ToInt32(val);
+                                break;
+                            case "user_id":
+                                result.user_id = Convert.ToInt32(val);
+                                break;
+                            case "employee_name":
+                                result.employee_name = Convert.ToString(val);
+                                break;
+                            case "appraisal_effective_date":
+                                result.appraisal_effective_date = Convert.ToDateTime(val);
+                                break;
+                            case "salary_revision_date":
+                                result.salary_revision_date = Convert.ToDateTime(val);
+                                break;
+                            case "appraisal_ctc":
+                                result.appraisal_ctc = Convert.ToDecimal(val);
+                                break;
+                            case "gross_salary":
+                                result.gross_salary = Convert.ToDecimal(val);
+                                break;
+                            case "net_salary":
+                                result.net_salary = Convert.ToDecimal(val);
+                                break;
+                            case "increament_amount":
+                                result.increament_amount = Convert.ToDecimal(val);
+                                break;
+                            case "increament_percentage":
+                                result.increament_percentage = Convert.ToDecimal(val);
+                                break;
+                            case "oldctc":
+                                result.oldCTC = Convert.ToDecimal(val);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         public ResponseDO DeleteAppraisalDetails(int appraisalID)
@@ -139,7 +244,7 @@ namespace ProcessModel
 
             try
             {
-                int userId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
+                int loggedInUserId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
                 
                 List<MySqlParameter> parameters = new List<MySqlParameter>
                 {
@@ -152,7 +257,8 @@ namespace ProcessModel
                     DataClass.GetParameter("p_net_salary", appraisal.net_salary),
                     DataClass.GetParameter("p_increament_amount", appraisal.increament_amount),
                     DataClass.GetParameter("p_increament_percentage", appraisal.increament_percentage),
-                    DataClass.GetParameter("p_user_id", userId)
+                    DataClass.GetParameter("p_user_id", appraisal.user_id), // Use the stored employee ID
+                    DataClass.GetParameter("p_updated_by", loggedInUserId) // Use the stored employee ID
                 };
 
                 MySqlDataReader dr =

@@ -2,6 +2,9 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <!-- Flatpickr CSS and JS for date pickers -->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         :root {
             --hrms-primary: #2563eb;
@@ -213,5 +216,25 @@
     <asp:HiddenField ID="hdnIsEdit" runat="server" Value="0" />
     <asp:HiddenField ID="hdnIsView" runat="server" Value="0" />
     <asp:HiddenField ID="hdnUserId" runat="server" Value="0" />
+
+    <script>
+        // Initialize Flatpickr date pickers
+        function initializeDatePickers() {
+            flatpickr('#<%= txtEffectiveDate.ClientID %>', {
+                dateFormat: 'd-m-Y',
+                allowInput: true
+            });
+
+            flatpickr('#<%= txtSalaryRevisionDate.ClientID %>', {
+                dateFormat: 'd-m-Y',
+                allowInput: true
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeDatePickers();
+        });
+    </script>
 </asp:Content>
 

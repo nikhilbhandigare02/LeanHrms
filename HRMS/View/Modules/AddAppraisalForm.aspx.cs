@@ -77,6 +77,9 @@ namespace HRMS.View.Modules
                     hdnIsView.Value = "0";
                     lblPageTitle.Text = "Add New Appraisal";
                     btnSave.Text = "Save Appraisal";
+                    // Explicitly ensure dropdown is visible and textbox is hidden in add mode
+                    ddlEmployee.Visible = true;
+                    txtEmployeeName.Visible = false;
                 }
             }
         }
@@ -163,9 +166,8 @@ namespace HRMS.View.Modules
                     // Store user_id in hidden field for save operation
                     hdnUserId.Value = appraisal.user_id.ToString();
                     
-                    // Calculate and set Old CTC: New CTC - Increment Amount
-                    decimal oldCtc = appraisal.appraisal_ctc - appraisal.increament_amount;
-                    txtCTCOld.Text = oldCtc.ToString();
+                    // Set Old CTC from stored procedure result
+                txtCTCOld.Text = appraisal.oldCTC.ToString();
                 }
             }
             catch (Exception ex)

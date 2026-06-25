@@ -528,6 +528,9 @@ namespace HRMS.View.Modules
 
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
+            // Clear session variables to ensure add mode
+            Session["Appraisal_ID"] = null;
+            Session["Appraisal_Mode"] = null;
             Response.Redirect("AddAppraisalForm.aspx");
         }
 

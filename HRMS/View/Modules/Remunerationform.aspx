@@ -170,7 +170,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">CTC Amount <span class="required">*</span></label>
-                                <asp:TextBox ID="txtCTCAmount" runat="server" CssClass="form-control" AutoPostBack="true" OnTextChanged="txtCTCAmount_TextChanged"></asp:TextBox>
+                                <asp:TextBox ID="txtCTCAmount" runat="server" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtCTCAmount_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -213,7 +213,7 @@
                                         <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
                                         <asp:CheckBox ID="chkComponent" runat="server" AutoPostBack="true" OnCheckedChanged="chkComponent_CheckedChanged" />
                                         <label><%# Eval("Text") %></label>
-                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary"></asp:TextBox>
+                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
                                     </div>
                                 </ItemTemplate>
                                 <FooterTemplate>
@@ -237,7 +237,7 @@
                                         <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
                                         <asp:CheckBox ID="chkComponent" runat="server" AutoPostBack="true" OnCheckedChanged="chkComponent_CheckedChanged" />
                                         <label><%# Eval("Text") %></label>
-                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary"></asp:TextBox>
+                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
                                     </div>
                                 </ItemTemplate>
                                 <FooterTemplate>
@@ -267,6 +267,78 @@
                 dateFormat: "d-m-Y",
                 allowInput: true
             });
+        }
+
+        // Allow only numeric keys (digits, backspace, delete, tab, enter, decimal point)
+        function isNumberKey(evt, allowDecimal) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                if (allowDecimal && charCode == 46) {
+                    var input = evt.target || evt.srcElement;
+                    if (input.value.indexOf('.') !== -1) {
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            }
+            
+            // Check decimal places limit when typing
+            if (allowDecimal) {
+                var input = evt.target || evt.srcElement;
+                var value = input.value;
+                var decimalIndex = value.indexOf('.');
+                
+                if (decimalIndex !== -1) {
+                    var cursorPosition = input.selectionStart;
+                    var decimalPlaces = value.length - decimalIndex - 1;
+                    
+                    // If cursor is after decimal and already 2 decimal places, disallow
+                    if (cursorPosition > decimalIndex && decimalPlaces >= 2) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        // Validate pasted content
+        function validateNumberPaste(evt, allowDecimal, decimalLimit) {
+            if (!decimalLimit) decimalLimit = 2;
+            var clipboardData, pastedData;
+            evt.stopPropagation();
+            evt.preventDefault();
+            clipboardData = evt.clipboardData || window.clipboardData;
+            pastedData = clipboardData.getData('Text');
+            
+            if (allowDecimal) {
+                // Allow numbers with up to specified decimal places
+                var regex = new RegExp('^\\d*\\.?\\d{0,' + decimalLimit + '}$');
+                if (!regex.test(pastedData)) {
+                    return false;
+                }
+            } else {
+                if (!/^\d*$/.test(pastedData)) {
+                    return false;
+                }
+            }
+            
+            var input = evt.target || evt.srcElement;
+            input.value = pastedData;
+            return false;
+        }
+
+        // Limit decimal places on input
+        function limitDecimalPlaces(input, limit) {
+            var value = input.value;
+            var decimalIndex = value.indexOf('.');
+            
+            if (decimalIndex !== -1) {
+                var integerPart = value.substring(0, decimalIndex);
+                var decimalPart = value.substring(decimalIndex + 1, decimalIndex + 1 + limit);
+                input.value = integerPart + '.' + decimalPart;
+            }
         }
         
         // Initialize on page load

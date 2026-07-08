@@ -518,12 +518,36 @@ namespace HRMS.View.Modules
 
         private void BindAppraisalGrid()
         {
+            BindAppraisalGrid(null);
+        }
+
+        private void BindAppraisalGrid(string searchText)
+        {
             AppraisalBL bl = new AppraisalBL();
 
             List<AppraisalDetailsDO> lst = bl.GetAppraisalDetailsList();
 
+            // Filter by search text if provided
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                lst = lst.Where(x => 
+                    x.employee_name != null && 
+                    x.employee_name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+
             gvAppraisal.DataSource = lst;
             gvAppraisal.DataBind();
+        }
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            BindAppraisalGrid(txtSearch.Text.Trim());
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            txtSearch.Text = "";
+            BindAppraisalGrid(null);
         }
 
         protected void btnAddNew_Click(object sender, EventArgs e)
@@ -575,7 +599,7 @@ namespace HRMS.View.Modules
                         "msg",
                         $"Swal.fire('Success','{HttpUtility.JavaScriptStringEncode(result.message)}','success')",
                         true);
-                    BindAppraisalGrid();
+                    BindAppraisalGrid(txtSearch.Text.Trim());
                 }
                 else
                 {

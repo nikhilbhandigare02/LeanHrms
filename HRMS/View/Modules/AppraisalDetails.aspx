@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master"
+<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master"
     AutoEventWireup="true"
     CodeBehind="AppraisalDetails.aspx.cs"
     Inherits="HRMS.View.Modules.AppraisalDetails" %>
@@ -108,6 +108,49 @@
         .required {
             color: red;
         }
+
+        .search-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            margin: 0 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        @media (max-width: 992px) {
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .search-wrapper {
+                margin: 0;
+            }
+
+            .search-input {
+                max-width: 100%;
+            }
+        }
     </style>
 
 
@@ -129,6 +172,12 @@
                 <div class="page-subtitle">
                     Manage employee appraisal records
                 </div>
+            </div>
+
+            <div class="search-wrapper">
+                <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" placeholder="Search by employee name..." style="border-radius: 8px 0 0 8px; border-right: none;"></asp:TextBox>
+                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary" style="border-radius: 0 0 0 0; min-width: 100px;" OnClick="btnSearch_Click" />
+                <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-secondary" style="border-radius: 0 8px 8px 0; min-width: 100px;" OnClick="btnClear_Click" />
             </div>
 
             <asp:Button ID="btnAddNew"

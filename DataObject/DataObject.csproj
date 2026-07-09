@@ -53,6 +53,7 @@
     <Compile Include="LoginDO.cs" />
     <Compile Include="MenuDO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReimbursementDetailsDO.cs" />
     <Compile Include="renumarationDO.cs" />
     <Compile Include="ResignationDO.cs" />
     <Compile Include="rightsDO.cs" />

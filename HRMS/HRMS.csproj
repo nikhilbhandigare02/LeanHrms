@@ -1730,7 +1730,9 @@
     <Content Include="View\Modules\AddAppraisalForm.aspx" />
     <Content Include="View\Modules\AddBioxiasalaryform.aspx" />
     <Content Include="View\Modules\AddEmployee.aspx" />
+    <Content Include="View\Modules\AddReimbursementForm.aspx" />
     <Content Include="View\Modules\AppraisalDetails.aspx" />
+    <Content Include="View\Modules\ReimbursementDetails.aspx" />
     <Content Include="View\Modules\EmployeeRegistration.aspx" />
     <Content Include="View\Modules\EmployeeList.aspx" />
     <Content Include="View\Modules\EmployeeLeaveList.aspx" />
@@ -1846,12 +1848,26 @@
       <DependentUpon>AddEmployee.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="View\Modules\AddReimbursementForm.aspx.cs">
+      <DependentUpon>AddReimbursementForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddReimbursementForm.aspx.designer.cs">
+      <DependentUpon>AddReimbursementForm.aspx</DependentUpon>
+    </Compile>
     <Compile Include="View\Modules\AppraisalDetails.aspx.cs">
       <DependentUpon>AppraisalDetails.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="View\Modules\AppraisalDetails.aspx.designer.cs">
       <DependentUpon>AppraisalDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\ReimbursementDetails.aspx.cs">
+      <DependentUpon>ReimbursementDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\ReimbursementDetails.aspx.designer.cs">
+      <DependentUpon>ReimbursementDetails.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\EmployeeRegistration.aspx.cs">
       <DependentUpon>EmployeeRegistration.aspx</DependentUpon>

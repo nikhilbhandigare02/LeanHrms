@@ -109,31 +109,36 @@
             color: red;
         }
 
-        .search-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            margin: 0 20px;
+        .appraisal-search {
+            position: relative;
         }
 
-        .search-input {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px 15px;
-            border: 1px solid #e5e7eb;
+        .appraisal-search input {
+            background: #FFFFFF;
+            border: 1px solid #DDE6F3;
             border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            color: #0B1B45;
+            font-size: 13px;
+            font-weight: 600;
+            height: 48px;
+            min-width: 390px;
+            padding: 0 16px 0 44px;
         }
 
-        .search-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .appraisal-search .bx {
+            color: #1D4ED8;
+            font-size: 20px;
+            left: 16px;
+            position: absolute;
+            top: 14px;
         }
 
-        .search-input::placeholder {
-            color: #9ca3af;
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         @media (max-width: 992px) {
@@ -174,10 +179,9 @@
                 </div>
             </div>
 
-            <div class="search-wrapper">
-                <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" placeholder="Search by employee name..." style="border-radius: 8px 0 0 8px; border-right: none;"></asp:TextBox>
-                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary" style="border-radius: 0 0 0 0; min-width: 100px;" OnClick="btnSearch_Click" />
-                <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-secondary" style="border-radius: 0 8px 8px 0; min-width: 100px;" OnClick="btnClear_Click" />
+            <div class="appraisal-search">
+                <input type="text" id="searchInput" placeholder="Search by employee name...">
+                <span class="bx bx-search-alt"></span>
             </div>
 
             <asp:Button ID="btnAddNew"
@@ -305,7 +309,39 @@
 
     </script>
 
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script type="text/javascript">
+        function initializeSearch() {
+            $(document).on('input', '#searchInput', function () {
+                var searchTerm = $(this).val().toLowerCase();
+                filterGrid(searchTerm);
+            });
+        }
+
+        function filterGrid(searchTerm) {
+            $('#<%= gvAppraisal.ClientID %> tr:has(td)').hide();
+
+            if (searchTerm === '') {
+                $('#<%= gvAppraisal.ClientID %> tr:has(td)').show();
+            } else {
+                $('#<%= gvAppraisal.ClientID %> tr:has(td)').filter(function () {
+                    var found = false;
+                    $(this).find('td').each(function () {
+                        var cellText = $(this).text().toLowerCase();
+                        if (cellText.includes(searchTerm)) {
+                            found = true;
+                            return false;
+                        }
+                    });
+                    return found;
+                }).show();
+            }
+        }
+
+        $(document).ready(function () {
+            initializeSearch();
+        });
+
         function confirmDelete(btn) {
             Swal.fire({
                 title: 'Are you sure?',

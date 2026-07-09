@@ -160,7 +160,7 @@
             <div class="form-grid">
                 <div class="field-block">
                     <label for="ddlEmployee">Employee Name</label>
-                    <asp:DropDownList ID="ddlEmployee" runat="server" CssClass="form-control"></asp:DropDownList>
+                    <asp:DropDownList ID="ddlEmployee" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlEmployee_SelectedIndexChanged"></asp:DropDownList>
                     <asp:TextBox ID="txtEmployeeName" runat="server" CssClass="form-control" ReadOnly="true" Visible="false"></asp:TextBox>
                 </div>
 

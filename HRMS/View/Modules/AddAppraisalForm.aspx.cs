@@ -108,6 +108,31 @@ namespace HRMS.View.Modules
             }
         }
 
+        protected void ddlEmployee_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(ddlEmployee.SelectedValue))
+                {
+                    int userId = Convert.ToInt32(ddlEmployee.SelectedValue);
+                    
+                    AppraisalBL appraisalBL = new AppraisalBL();
+                    decimal oldCTC = appraisalBL.GetOldCTCByUserId(userId);
+                    
+                    txtCTCOld.Text = oldCTC > 0 ? oldCTC.ToString() : "";
+                }
+                else
+                {
+                    txtCTCOld.Text = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddAppraisalForm", "ddlEmployee_SelectedIndexChanged", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
         private void LoadAppraisalDetails(int appraisalId)
         {
             try

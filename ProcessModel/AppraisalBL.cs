@@ -64,64 +64,74 @@ namespace ProcessModel
         {
             List<AppraisalDetailsDO> list = new List<AppraisalDetailsDO>();
 
-            using (MySqlDataReader dr =
-                DataClass.GetDataReaderFromSp(
-                    "",
-                    "Sp_Get_Appraisal_Details"))
+            try
             {
-                while (dr.Read())
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSp(
+                        "",
+                        "Sp_Get_Appraisal_Details"))
                 {
-                    AppraisalDetailsDO item = new AppraisalDetailsDO();
-
-                    // Map all properties manually
-                    for (int i = 0; i < dr.FieldCount; i++)
+                    if (dr != null)
                     {
-                        string colName = dr.GetName(i).ToLower();
-                        object val = dr[i];
-
-                        if (val == DBNull.Value)
-                            continue;
-
-                        switch (colName)
+                        while (dr.Read())
                         {
-                            case "appraisal_id":
-                                item.appraisal_id = Convert.ToInt32(val);
-                                break;
-                            case "user_id":
-                                item.user_id = Convert.ToInt32(val);
-                                break;
-                            case "employee_name":
-                                item.employee_name = Convert.ToString(val);
-                                break;
-                            case "appraisal_effective_date":
-                                item.appraisal_effective_date = Convert.ToDateTime(val);
-                                break;
-                            case "salary_revision_date":
-                                item.salary_revision_date = Convert.ToDateTime(val);
-                                break;
-                            case "appraisal_ctc":
-                                item.appraisal_ctc = Convert.ToDecimal(val);
-                                break;
-                            case "gross_salary":
-                                item.gross_salary = Convert.ToDecimal(val);
-                                break;
-                            case "net_salary":
-                                item.net_salary = Convert.ToDecimal(val);
-                                break;
-                            case "increament_amount":
-                                item.increament_amount = Convert.ToDecimal(val);
-                                break;
-                            case "increament_percentage":
-                                item.increament_percentage = Convert.ToDecimal(val);
-                                break;
-                            case "oldctc":
-                                item.oldCTC = Convert.ToDecimal(val);
-                                break;
+                            AppraisalDetailsDO item = new AppraisalDetailsDO();
+
+                            // Map all properties manually
+                            for (int i = 0; i < dr.FieldCount; i++)
+                            {
+                                string colName = dr.GetName(i).ToLower();
+                                object val = dr[i];
+
+                                if (val == DBNull.Value)
+                                    continue;
+
+                                switch (colName)
+                                {
+                                    case "appraisal_id":
+                                        item.appraisal_id = Convert.ToInt32(val);
+                                        break;
+                                    case "user_id":
+                                        item.user_id = Convert.ToInt32(val);
+                                        break;
+                                    case "employee_name":
+                                        item.employee_name = Convert.ToString(val);
+                                        break;
+                                    case "appraisal_effective_date":
+                                        item.appraisal_effective_date = Convert.ToDateTime(val);
+                                        break;
+                                    case "salary_revision_date":
+                                        item.salary_revision_date = Convert.ToDateTime(val);
+                                        break;
+                                    case "appraisal_ctc":
+                                        item.appraisal_ctc = Convert.ToDecimal(val);
+                                        break;
+                                    case "gross_salary":
+                                        item.gross_salary = Convert.ToDecimal(val);
+                                        break;
+                                    case "net_salary":
+                                        item.net_salary = Convert.ToDecimal(val);
+                                        break;
+                                    case "increament_amount":
+                                        item.increament_amount = Convert.ToDecimal(val);
+                                        break;
+                                    case "increament_percentage":
+                                        item.increament_percentage = Convert.ToDecimal(val);
+                                        break;
+                                    case "oldctc":
+                                        item.oldCTC = Convert.ToDecimal(val);
+                                        break;
+                                }
+                            }
+
+                            list.Add(item);
                         }
                     }
-
-                    list.Add(item);
                 }
+            }
+            catch (Exception)
+            {
+                // Log the error if needed, but return empty list
             }
 
             return list;
@@ -136,63 +146,70 @@ namespace ProcessModel
                 "p_appraisal_id",
                 appraisalId));
 
-            using (MySqlDataReader dr =
-                DataClass.GetDataReaderFromSpWithParam(
-                    param,
-                    "",
-                    "sp_get_appraisal_details_by_id"))
+            try
             {
-                if (dr.HasRows && dr.Read())
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSpWithParam(
+                        param,
+                        "",
+                        "sp_get_appraisal_details_by_id"))
                 {
-                    result = new AppraisalDetailsDO();
-
-                    // Map all properties manually
-                    for (int i = 0; i < dr.FieldCount; i++)
+                    if (dr != null && dr.HasRows && dr.Read())
                     {
-                        string colName = dr.GetName(i).ToLower();
-                        object val = dr[i];
+                        result = new AppraisalDetailsDO();
 
-                        if (val == DBNull.Value)
-                            continue;
-
-                        switch (colName)
+                        // Map all properties manually
+                        for (int i = 0; i < dr.FieldCount; i++)
                         {
-                            case "appraisal_id":
-                                result.appraisal_id = Convert.ToInt32(val);
-                                break;
-                            case "user_id":
-                                result.user_id = Convert.ToInt32(val);
-                                break;
-                            case "employee_name":
-                                result.employee_name = Convert.ToString(val);
-                                break;
-                            case "appraisal_effective_date":
-                                result.appraisal_effective_date = Convert.ToDateTime(val);
-                                break;
-                            case "salary_revision_date":
-                                result.salary_revision_date = Convert.ToDateTime(val);
-                                break;
-                            case "appraisal_ctc":
-                                result.appraisal_ctc = Convert.ToDecimal(val);
-                                break;
-                            case "gross_salary":
-                                result.gross_salary = Convert.ToDecimal(val);
-                                break;
-                            case "net_salary":
-                                result.net_salary = Convert.ToDecimal(val);
-                                break;
-                            case "increament_amount":
-                                result.increament_amount = Convert.ToDecimal(val);
-                                break;
-                            case "increament_percentage":
-                                result.increament_percentage = Convert.ToDecimal(val);
-                                break;
-                            case "oldctc":
-                                result.oldCTC = Convert.ToDecimal(val);
-                                break;
+                            string colName = dr.GetName(i).ToLower();
+                            object val = dr[i];
+
+                            if (val == DBNull.Value)
+                                continue;
+
+                            switch (colName)
+                            {
+                                case "appraisal_id":
+                                    result.appraisal_id = Convert.ToInt32(val);
+                                    break;
+                                case "user_id":
+                                    result.user_id = Convert.ToInt32(val);
+                                    break;
+                                case "employee_name":
+                                    result.employee_name = Convert.ToString(val);
+                                    break;
+                                case "appraisal_effective_date":
+                                    result.appraisal_effective_date = Convert.ToDateTime(val);
+                                    break;
+                                case "salary_revision_date":
+                                    result.salary_revision_date = Convert.ToDateTime(val);
+                                    break;
+                                case "appraisal_ctc":
+                                    result.appraisal_ctc = Convert.ToDecimal(val);
+                                    break;
+                                case "gross_salary":
+                                    result.gross_salary = Convert.ToDecimal(val);
+                                    break;
+                                case "net_salary":
+                                    result.net_salary = Convert.ToDecimal(val);
+                                    break;
+                                case "increament_amount":
+                                    result.increament_amount = Convert.ToDecimal(val);
+                                    break;
+                                case "increament_percentage":
+                                    result.increament_percentage = Convert.ToDecimal(val);
+                                    break;
+                                case "oldctc":
+                                    result.oldCTC = Convert.ToDecimal(val);
+                                    break;
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                // Log if needed
             }
 
             return result;
@@ -286,6 +303,40 @@ namespace ProcessModel
             }
 
             return response;
+        }
+
+        public decimal GetOldCTCByUserId(int userId)
+        {
+            decimal oldCTC = 0;
+
+            try
+            {
+                List<MySqlParameter> parameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("p_user_id", userId)
+                };
+
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSpWithParam(
+                        parameters,
+                        "",
+                        "SP_GetOldCTCByUserId"))
+                {
+                    if (dr != null && dr.HasRows && dr.Read())
+                    {
+                        if (!dr.IsDBNull(0))
+                        {
+                            oldCTC = Convert.ToDecimal(dr["oldCTC"]);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Return 0 on error
+            }
+
+            return oldCTC;
         }
     }
 }

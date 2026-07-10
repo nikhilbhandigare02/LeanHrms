@@ -1027,7 +1027,7 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(ValueOf(txtbranch))) return "Branch Office is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return "Location is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddldesign))) return "Designation is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddl_reportingmanager))) return "Reporting Manager is required.";
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddl_reportingmanager))) return "Reporting Manager is required..";
             if (string.IsNullOrWhiteSpace(ValueOf(txtFunctionalManager))) return "Functional Manager is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtHod))) return "HOD is required.";
 

@@ -1814,7 +1814,7 @@
                         <div class="field-block">
                             <label class="required-label">Reporting Manager</label>
                             <asp:DropDownList ID="ddl_reportingmanager" runat="server" CssClass="form-control custom-dropdown" />
-                            <asp:RequiredFieldValidator runat="server" ControlToValidate="ddl_reportingmanager" InitialValue="" ErrorMessage="Reporting Manager is required" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
+                            <asp:RequiredFieldValidator runat="server" ControlToValidate="ddl_reportingmanager" InitialValue="" ErrorMessage="Reporting Manager is required." ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
                         </div>
                         <div class="field-block"><label class="required-label">Location</label><asp:TextBox ID="txtLocation" runat="server" CssClass="form-control" placeholder="Enter work location" /></div>
                         <div class="field-block"><label class="required-label">Functional Manager</label><asp:TextBox ID="txtFunctionalManager" runat="server" CssClass="form-control" placeholder="Functional manager" /></div>

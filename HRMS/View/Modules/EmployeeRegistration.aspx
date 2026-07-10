@@ -1097,7 +1097,8 @@
                 <div class="step-item" data-step-link="3"><span class="step-number">3</span><span class="step-title">Organization Details</span></div>
                 <div class="step-item" data-step-link="4"><span class="step-number">4</span><span class="step-title">Attendance &amp; Shift Information</span></div>
                 <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Assets Assignment</span></div>
-                <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Review &amp; Submit</span></div>
+                  <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Assets Return</span></div>
+                <div class="step-item" data-step-link="7"><span class="step-number">7</span><span class="step-title">Review &amp; Submit</span></div>
             </aside>
 
             <main class="onboarding-card">
@@ -1110,7 +1111,7 @@
                         <span class="step-pill">Step 1 of 6</span>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" /><span id="employeeCodeDuplicateMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" readonly="readonly" disabled="disabled" /><span id="employeeCodeDuplicateMessage" class="validation-message" aria-readonly="true" ></span></div>
                         <div class="form-group"><label class="is-required">Username</label><input id="txtUsername" runat="server" class="form-control-modern" placeholder="Enter username" /><span id="usernameDuplicateMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">First Name</label><input id="txtFirstName" runat="server" class="form-control-modern" placeholder="Enter first name" /><span id="firstNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label>Middle Name</label><input id="txtMiddleName" runat="server" class="form-control-modern" placeholder="Enter middle name" /><span id="middleNameValidationMessage" class="validation-message"></span></div>
@@ -1141,11 +1142,22 @@
                         <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label>Notice Period</label><input id="txtNoticePeriod" runat="server" class="form-control-modern" placeholder="Enter notice period days" /></div>
-                        <div class="form-group"><label>Exit Date</label><input id="txtExitDate" runat="server" class="form-control-modern" type="date" disabled /></div>
-                        <div class="form-group"><label>Separation Reason</label><asp:DropDownList ID="ddlSeparationReason" runat="server" CssClass="form-select-modern" Enabled="false"></asp:DropDownList></div>
-                    </div>
+                        <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+
+       <%--                 <div class="form-group"><label>Notice Period </label>--%>
+                            <input id="txtNoticePeriod" runat="server" class="form-control-modern" placeholder="Enter notice period days" visible="false" />
+
+                 <%--   </div>--%>
+                      <%--  <div class="form-group"><label>Exit Date</label>--%>
+                            <input id="txtExitDate" runat="server" class="form-control-modern" type="date" disabled  visible="false" />
+                 <%--   </div>--%>
+                       <%-- <div class="form-group"><label>Separation Reason</label>--%>
+                            <asp:DropDownList ID="ddlSeparationReason" runat="server" CssClass="form-select-modern" Enabled="false" Visible="false"></asp:DropDownList>
+
+                   <%-- </div>--%>
+               </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="2">Save</button></div>
+         
                 </section>
 
                 <section class="wizard-step collapsed pending" data-step="3">
@@ -1156,15 +1168,16 @@
                         <span class="step-pill">Step 3 of 6</span>
                     </div>
                     <div class="premium-grid">
-                        <div class="premium-field"><label class="is-required">Company</label><asp:DropDownList ID="ddlCompany" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <%--<div class="premium-field"><label class="is-required">Company</label><asp:DropDownList ID="ddlCompany" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
                         <div class="premium-field"><label class="is-required">Department</label><asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
                         <div class="premium-field"><label class="is-required">Branch Office</label><input id="txtBranchOffice" runat="server" class="form-control-modern" placeholder="Enter branch office" /></div>
                         <div class="premium-field"><label class="is-required">Location</label><input id="txtLocation" runat="server" class="form-control-modern" placeholder="Enter location" /></div>
                         <div class="premium-field"><label class="is-required">Designation</label><asp:DropDownList ID="ddlDesignation" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
                         <div class="premium-field"><label class="is-required">Reporting Manager</label><asp:DropDownList ID="ddlReportingManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label class="is-required">Functional Manager</label><asp:DropDownList ID="ddlFunctionalManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                       <%-- <div class="premium-field"><label class="is-required">Functional Manager</label><asp:DropDownList ID="ddlFunctionalManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
                         <div class="premium-field"><label class="is-required">HOD</label><asp:DropDownList ID="ddlHod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label>Employee Level</label><asp:DropDownList ID="ddlEmployeeLevel" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                       
+                       <%-- <div class="premium-field"><label>Employee Level</label><asp:DropDownList ID="ddlEmployeeLevel" runat="server" CssClass="form-select-modern"></asp:DropDownList--%><%--</div>--%>
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="3">Save</button></div>
                 </section>
@@ -1214,16 +1227,22 @@
                     </div>
                     <div class="table-responsive">
                         <table class="asset-table">
-                            <thead><tr><th class="is-required">Asset Type</th><th class="is-required">Asset Number</th><th class="is-required">Asset Name</th><th class="is-required">Assigned Date</th><th>Return Date</th><th class="is-required">Asset Condition</th><th class="is-required">Asset Status</th><th>Action</th></tr></thead>
+                            <thead><tr><th class="is-required">Asset Type</th><th class="is-required">Asset Number</th>
+                                <th class="is-required">Asset Name</th>
+                                <th class="is-required">Assigned Date</th>
+                               <%-- <th>Return Date</th>--%>
+                                <th class="is-required">Asset assigned Condition</th>
+                              <%--  <th class="is-required">Asset Status</th>--%>
+                                <th>Action</th></tr></thead>
                             <tbody id="assetRows">
                                 <tr class="asset-row">
                                     <td><input id="txtAssetType" runat="server" class="form-control-modern" placeholder="Enter asset type" /></td>
                                     <td><input id="txtAssetNumber" runat="server" class="form-control-modern" /></td>
                                     <td><input id="txtAssetName" runat="server" class="form-control-modern" /></td>
                                     <td><input id="txtAssignedDate" runat="server" class="form-control-modern" type="date" /></td>
-                                    <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>
+                                   <%-- <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>--%>
                                     <td><asp:DropDownList ID="ddlAssetCondition" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                   <%-- <td><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>--%>
                                     <td></td>
                                 </tr>
                             </tbody>
@@ -1232,12 +1251,49 @@
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="5">Save</button></div>
                 </section>
 
-                <section class="wizard-step collapsed pending-neutral" data-step="6">
+                  <section class="wizard-step collapsed pending" data-step="6">
+      <div class="card-heading">
+          <div><span class="accordion-number">6</span><h2>Assets Return</h2><p>Return company assets and track return status from day one.</p></div>
+          <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
+          <i class="fas fa-chevron-down registration-chevron"></i>
+          <span class="step-pill">Step 6 of 7</span>
+      </div>
+      <div class="asset-toolbar">
+          <button type="button" id="returnAssetButton" class="btn-modern btn-primary-modern">Return Asset</button>
+      </div>
+      <div class="table-responsive">
+          <table class="asset-table">
+              <thead><tr><th class="is-required">Asset Type</th>
+                  <th class="is-required">Asset Number</th>
+                  <th class="is-required">Asset Name</th>
+                  <th class="is-required">Return Date</th>
+                 <%-- <th>Return Date</th>--%>
+                  <th class="is-required">Asset Return Condition</th>
+                  <th class="is-required">Asset Status</th>
+                  <th>Action</th></tr></thead>
+              <tbody id="assetReturnRows">
+                  <tr class="asset-row">
+                      <td><input id="txtAssetTypeR" runat="server" class="form-control-modern" placeholder="Enter asset type" /></td>
+                      <td><input id="txtAssetNumberR" runat="server" class="form-control-modern" /></td>
+                      <td><input id="txtAssetNameR" runat="server" class="form-control-modern" /></td>
+                      <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>
+                     <%-- <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>--%>
+                      <td><asp:DropDownList ID="ddlAssetReturnConditionR" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                      <td><asp:DropDownList ID="ddlAssetReturnStatusR" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                      <td></td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="6">Save</button></div>
+  </section>
+
+                <section class="wizard-step collapsed pending-neutral" data-step="7">
                     <div class="card-heading">
-                        <div><span class="accordion-number">6</span><h2>Review &amp; Submit</h2><p>Review completed sections before creating the employee record.</p></div>
+                        <div><span class="accordion-number">7</span><h2>Review &amp; Submit</h2><p>Review completed sections before creating the employee record.</p></div>
                         <span class="registration-section-status neutral"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 6 of 6</span>
+                        <span class="step-pill">Step 6 of 7</span>
                     </div>
                     <div class="review-grid">
                         <div class="review-card"><div class="review-name"><span class="review-check">&#10003;</span>Basic Employee Information</div><button type="button" class="btn-modern btn-secondary-modern" data-edit-step="1">Edit</button></div>
@@ -1296,13 +1352,14 @@
                 { id: '<%= txtJoiningDate.ClientID %>', name: 'Joining Date' },
                 { id: '<%= ddlProbationPeriod.ClientID %>', name: 'Probation Period' },
                 { id: '<%= ddlEmployeeStatus.ClientID %>', name: 'Employee Status' },
-                { id: '<%= ddlCompany.ClientID %>', name: 'Company' },
+                { id: '<%= ddlEmployeeSubStatus.ClientID %>', name: 'Employee Sub Status' },
+                <%--{ id: '<%= ddlCompany.ClientID %>', name: 'Company' },--%>
                 { id: '<%= ddlDepartment.ClientID %>', name: 'Department' },
                 { id: '<%= txtBranchOffice.ClientID %>', name: 'Branch Office' },
                 { id: '<%= txtLocation.ClientID %>', name: 'Location' },
                 { id: '<%= ddlDesignation.ClientID %>', name: 'Designation' },
                 { id: '<%= ddlReportingManager.ClientID %>', name: 'Reporting Manager' },
-                { id: '<%= ddlFunctionalManager.ClientID %>', name: 'Functional Manager' },
+             <%--   { id: '<%= ddlFunctionalManager.ClientID %>', name: 'Functional Manager' },--%>
                 { id: '<%= ddlHod.ClientID %>', name: 'HOD' },
                 { id: '<%= ddlAttendanceType.ClientID %>', name: 'Attendance Type' },
                 { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off' },
@@ -1316,7 +1373,9 @@
                 { id: '<%= txtAssetName.ClientID %>', name: 'Asset Name' },
                 { id: '<%= txtAssignedDate.ClientID %>', name: 'Assigned Date' },
                 { id: '<%= ddlAssetCondition.ClientID %>', name: 'Asset Condition' },
-                { id: '<%= ddlAssetStatus.ClientID %>', name: 'Asset Status' }
+               <%-- { id: '<%= ddlAssetStatus.ClientID %>', name: 'Asset Status' }--%>
+                { id: '<%= ddlAssetReturnStatusR.ClientID %>', name: 'Asset Status' },
+                 { id: '<%= ddlAssetReturnConditionR.ClientID %>', name: 'Asset Condition' }
             ];
         }
 
@@ -1635,6 +1694,7 @@
             var backButton = document.getElementById('backButton');
             var createAnotherButton = document.getElementById('createAnotherButton');
             var assignAssetButton = document.getElementById('assignAssetButton');
+            var returnAssetButton = document.getElementById('returnAssetButton');
             var assetRows = document.getElementById('assetRows');
             var overtimeEligible = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             var overtimeRate = document.getElementById('<%= txtOvertimeRate.ClientID %>');
@@ -2085,7 +2145,8 @@
 
             function createAssetRow() {
                 var conditionSelect = document.getElementById('<%= ddlAssetCondition.ClientID %>');
-                var statusSelect = document.getElementById('<%= ddlAssetStatus.ClientID %>');
+                <%--var statusSelect = document.getElementById('<%= ddlAssetStatus.ClientID %>');--%>
+
                 var row = document.createElement('tr');
                 row.className = 'asset-row';
                 row.innerHTML =
@@ -2093,7 +2154,26 @@
                     '<td><input class="form-control-modern" /></td>' +
                     '<td><input class="form-control-modern" /></td>' +
                     '<td><input class="form-control-modern" type="date" /></td>' +
+                    //'<td><input class="form-control-modern" type="date" /></td>' +
+                    '<td><select class="form-select-modern">' + (conditionSelect ? conditionSelect.innerHTML : '') + '</select></td>' +
+                    //'<td><select class="form-select-modern">' + (statusSelect ? statusSelect.innerHTML : '') + '</select></td>' +
+                    '<td><button type="button" class="asset-delete-btn" data-delete-asset title="Delete asset"><i class="fas fa-trash-alt"></i></button></td>';
+                return row;
+            }
+
+
+            function createAssetReturnRow() {
+                var conditionSelect = document.getElementById('<%= ddlAssetReturnConditionR.ClientID %>');
+                var statusSelect = document.getElementById('<%= ddlAssetReturnStatusR.ClientID %>');
+
+                var row = document.createElement('tr');
+                row.className = 'asset-row';
+                row.innerHTML =
+                    '<td><input class="form-control-modern" placeholder="Enter asset type" /></td>' +
+                    '<td><input class="form-control-modern" /></td>' +
+                    '<td><input class="form-control-modern" /></td>' +
                     '<td><input class="form-control-modern" type="date" /></td>' +
+                    //'<td><input class="form-control-modern" type="date" /></td>' +
                     '<td><select class="form-select-modern">' + (conditionSelect ? conditionSelect.innerHTML : '') + '</select></td>' +
                     '<td><select class="form-select-modern">' + (statusSelect ? statusSelect.innerHTML : '') + '</select></td>' +
                     '<td><button type="button" class="asset-delete-btn" data-delete-asset title="Delete asset"><i class="fas fa-trash-alt"></i></button></td>';
@@ -2104,6 +2184,16 @@
                 assignAssetButton.addEventListener('click', function () {
                     var row = createAssetRow();
                     assetRows.appendChild(row);
+                    initMobileSelects(row);
+                    bindAssetDelete(row.querySelector('[data-delete-asset]'));
+                    applyNoFutureDates(row);
+                });
+            }
+
+            if (returnAssetButton && assetReturnRows) {
+                returnAssetButton.addEventListener('click', function () {
+                    var row = createAssetReturnRow();
+                    assetReturnRows.appendChild(row);
                     initMobileSelects(row);
                     bindAssetDelete(row.querySelector('[data-delete-asset]'));
                     applyNoFutureDates(row);

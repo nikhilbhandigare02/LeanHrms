@@ -11,10 +11,12 @@ namespace HRMS.View.Modules
     public partial class EmployeeLeaveList : System.Web.UI.Page
     {
         protected string UserId = null;
+        protected string UserRole = null;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
+            UserRole = Convert.ToString(Session["userrole"]);
             if (!IsPostBack)
             {
                 if (Session["userId"] == null)
@@ -47,11 +49,22 @@ namespace HRMS.View.Modules
         {
             if (approvalStatusObj == null || approvalStatusObj == DBNull.Value)
             {
-                return true; // Show button if status is unknown
+                return false;
             }
             string approvalStatus = approvalStatusObj.ToString();
-            return !(approvalStatus.Equals("Accept", StringComparison.OrdinalIgnoreCase) ||
-                     approvalStatus.Equals("Reject", StringComparison.OrdinalIgnoreCase));
+            
+            // For HR: show edit button only when status is "Sent To HR Authority"
+            if (UserRole.Equals("HR", StringComparison.OrdinalIgnoreCase))
+            {
+                return approvalStatus.Equals("Sent To HR Authority", StringComparison.OrdinalIgnoreCase);
+            }
+            // For Admin: show edit button only when status is "Send to Director Authority"
+            else if (UserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return approvalStatus.Equals("Send to Director Authority", StringComparison.OrdinalIgnoreCase);
+            }
+            // For other roles: don't show edit button
+            return false;
         }
 
         protected void gridview_RowCommand(object sender, GridViewCommandEventArgs e)

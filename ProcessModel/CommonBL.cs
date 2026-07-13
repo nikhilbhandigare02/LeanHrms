@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -583,6 +584,77 @@ namespace ProcessModel
                 errorlog.fnStoreErrorLog("CommonBL", "dropdownEmployeeCode_ForRenumeration", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
             return dropDownData;
+        }
+
+        public List<DropDownData> BindLookupData(string lookupType)
+        {
+            List<DropDownData> items = new List<DropDownData>();
+            if (string.IsNullOrWhiteSpace(Sqlconnection) || string.IsNullOrWhiteSpace(lookupType))
+            {
+                return items;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_bindLookupData", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_lookupType", lookupType);
+
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            items.Add(new DropDownData
+                            {
+                                Id = ReadInt(dr, "id"),
+                                Value = ReadString(dr, "value"),
+                                Text = ReadString(dr, "name")
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "BindLookupData", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+            }
+
+            return items;
+        }
+
+        private int ReadInt(IDataRecord dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (string.Equals(dr.GetName(i), columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    object v = dr[i];
+                    if (v == DBNull.Value) return 0;
+                    int result = 0;
+                    int.TryParse(Convert.ToString(v), out result);
+                    return result;
+                }
+            }
+            return 0;
+        }
+
+        private string ReadString(IDataRecord dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (string.Equals(dr.GetName(i), columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    object v = dr[i];
+                    if (v == DBNull.Value) return string.Empty;
+                    return Convert.ToString(v);
+                }
+            }
+            return string.Empty;
         }
     }
 }

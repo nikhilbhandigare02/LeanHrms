@@ -15,6 +15,9 @@ namespace ProcessModel
         private static string Sqlconnection = ConfigurationManager.ConnectionStrings["Sqlconnection"] != null
             ? ConfigurationManager.ConnectionStrings["Sqlconnection"].ConnectionString
             : string.Empty;
+        private static string MySqlconnection = ConfigurationManager.ConnectionStrings["MySqlconnection"] != null
+            ? ConfigurationManager.ConnectionStrings["MySqlconnection"].ConnectionString
+            : string.Empty;
 
         public List<EmployeeLeaveListDO> GetAllLeaveRequestsForHr()
         {
@@ -262,6 +265,210 @@ namespace ProcessModel
                 });
             }
             return listdata;
+        }
+
+        public EmployeeLeaveDetailDO GetLeaveDetailsByLeaveId(int leaveId)
+        {
+            EmployeeLeaveDetailDO detail = null;
+            if (leaveId <= 0 || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return detail;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("SP_GetemployeeLeaveRequestBy_Id", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_leaveId", leaveId);
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            detail = MapLeaveDetail(dr);
+                        }
+                    }
+                }
+            }
+            catch (Exception exMySql)
+            {
+                try
+                {
+                    using (SqlConnection con = new SqlConnection(Sqlconnection))
+                    using (SqlCommand cmd = new SqlCommand("SP_GetemployeeLeaveRequestBy_Id", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@p_leaveId", leaveId);
+                        con.Open();
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                detail = MapLeaveDetail(dr);
+                            }
+                        }
+                    }
+                }
+                catch (Exception exSql)
+                {
+                    CommonBL errorlog = new CommonBL();
+                    errorlog.fnStoreErrorLog(
+                        "EmployeeLeaveBL",
+                        "GetLeaveDetailsByLeaveId",
+                        "MySqlError=" + exMySql.Message + " | SqlError=" + exSql.Message,
+                        UserId
+                    );
+                }
+            }
+
+            return detail;
+        }
+
+        public class UpdateLeaveStatusResult
+        {
+            public bool Success { get; set; }
+            public string Remarks { get; set; }
+        }
+
+        public UpdateLeaveStatusResult UpdateLeaveStatus(
+            int leaveId,
+            int userId,
+            string startDate,
+            string endDate,
+            string rejectionRemark,
+            string approvalStatus,
+            int leaveCount)
+        {
+            UpdateLeaveStatusResult result = new UpdateLeaveStatusResult
+            {
+                Success = false,
+                Remarks = "Failed to update leave status"
+            };
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("SP_ApproveOrRejectLeaveRequest", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@p_leaveId", leaveId);
+                    cmd.Parameters.AddWithValue("@p_userId", userId);
+                    cmd.Parameters.AddWithValue("@p_start_date", startDate);
+                    cmd.Parameters.AddWithValue("@p_end_date", endDate);
+                    cmd.Parameters.AddWithValue("@p_rejection_remark", rejectionRemark ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_approval_status", GetApprovalStatusId(approvalStatus));
+                    cmd.Parameters.AddWithValue("@p_leave_count", leaveCount);
+
+                    con.Open();
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            string status = dr["Status"]?.ToString();
+                            string remarks = dr["Remarks"]?.ToString();
+
+                            result.Success = status.Equals(
+                                "Success",
+                                StringComparison.OrdinalIgnoreCase
+                            );
+                            result.Remarks = remarks ?? "Operation completed";
+
+                            // Optional: you can use response data
+                            if (result.Success)
+                            {
+                                int empId = Convert.ToInt32(dr["emp_id"]);
+                                string employeeName = dr["emp_name"].ToString();
+                                string email = dr["mail"].ToString();
+                                int approvalStatusId = Convert.ToInt32(dr["approval_status"]);
+
+                                // Send mail logic here
+                            }
+                            else
+                            {
+                                // Log failure reason
+                                CommonBL errorlog = new CommonBL();
+
+                                errorlog.fnStoreErrorLog(
+                                    "EmployeeLeaveBL",
+                                    "UpdateLeaveStatus",
+                                    "Leave Update Failed : " + remarks,
+                                    userId.ToString()
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+
+                errorlog.fnStoreErrorLog(
+                    "EmployeeLeaveBL",
+                    "UpdateLeaveStatus",
+                    "MySqlError=" + ex.Message,
+                    userId.ToString()
+                );
+                result.Remarks = "An error occurred: " + ex.Message;
+            }
+
+            return result;
+        }
+        private int GetApprovalStatusId(string statusValue)
+        {
+            if (string.IsNullOrWhiteSpace(statusValue))
+                return 0;
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("SELECT lookupid FROM lookupM WHERE lookupType = 'LeaveStatus' AND lookupvalue = @p_lookupValue AND isactive = 1 LIMIT 1", con))
+                {
+                    cmd.Parameters.AddWithValue("@p_lookupValue", statusValue);
+                    con.Open();
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        return Convert.ToInt32(result);
+                    }
+                }
+            }
+            catch (Exception exMySql)
+            {
+                try
+                {
+                    using (SqlConnection con = new SqlConnection(Sqlconnection))
+                    using (SqlCommand cmd = new SqlCommand("SELECT lookupid FROM lookupM WHERE lookupType = 'LeaveStatus' AND lookupvalue = @p_lookupValue AND isactive = 1 LIMIT 1", con))
+                    {
+                        cmd.Parameters.AddWithValue("@p_lookupValue", statusValue);
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+                catch (Exception exSql)
+                {
+                    CommonBL errorlog = new CommonBL();
+                    errorlog.fnStoreErrorLog(
+                        "EmployeeLeaveBL",
+                        "GetApprovalStatusId",
+                        "MySqlError=" + exMySql.Message + " | SqlError=" + exSql.Message,
+                        UserId
+                    );
+                }
+            }
+
+            return 0;
         }
 
         private string NormalizeMySqlConnectionString(string raw)

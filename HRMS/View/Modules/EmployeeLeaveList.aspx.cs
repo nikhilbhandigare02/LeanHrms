@@ -43,6 +43,17 @@ namespace HRMS.View.Modules
             }
         }
 
+        protected bool ShouldShowEditButton(object approvalStatusObj)
+        {
+            if (approvalStatusObj == null || approvalStatusObj == DBNull.Value)
+            {
+                return true; // Show button if status is unknown
+            }
+            string approvalStatus = approvalStatusObj.ToString();
+            return !(approvalStatus.Equals("Accept", StringComparison.OrdinalIgnoreCase) ||
+                     approvalStatus.Equals("Reject", StringComparison.OrdinalIgnoreCase));
+        }
+
         protected void gridview_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
@@ -52,6 +63,11 @@ namespace HRMS.View.Modules
                     string[] args = Convert.ToString(e.CommandArgument).Split('|');
                     string leaveId = args.Length > 0 ? args[0] : "0";
                     Response.Redirect("EmployeeLeaveView.aspx?leaveId=" + HttpUtility.UrlEncode(leaveId) + "&mode=view", false);
+                }
+                else if (e.CommandName == "editLeave")
+                {
+                    string leaveId = Convert.ToString(e.CommandArgument);
+                    Response.Redirect("EmployeeLeaveStatusUpdate.aspx?leaveId=" + HttpUtility.UrlEncode(leaveId), false);
                 }
             }
             catch (Exception ex)

@@ -41,7 +41,7 @@
                                         <asp:BoundField DataField="emp_name" HeaderText="Employee Name" ItemStyle-Width="220px" />
                                         <asp:BoundField DataField="approval_status" HeaderText="Approval Status" ItemStyle-Width="150px" />
                                         <asp:BoundField DataField="request_date" HeaderText="Request Date" ItemStyle-Width="140px" />
-                                        <asp:TemplateField HeaderText="Action" ItemStyle-Width="100px">
+                                        <asp:TemplateField HeaderText="Action" ItemStyle-Width="150px">
                                             <ItemTemplate>
                                                 <asp:LinkButton
                                                     ID="lnkView"
@@ -50,6 +50,15 @@
                                                     CommandArgument='<%# Eval("leave_id") + "|" + Eval("emp_id") %>'
                                                     title="View Leave">
                                                     <i class="fa fa-eye"></i>
+                                                </asp:LinkButton>
+                                                <asp:LinkButton
+                                                    ID="lnkEdit"
+                                                    runat="server"
+                                                    CommandName="editLeave"
+                                                    CommandArgument='<%# Eval("leave_id") %>'
+                                                    title="Edit Leave Status"
+                                                    Visible='<%# ShouldShowEditButton(Eval("approval_status")) %>'>
+                                                    <i class="fa fa-edit"></i>
                                                 </asp:LinkButton>
                                             </ItemTemplate>
                                         </asp:TemplateField>

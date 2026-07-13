@@ -1736,6 +1736,7 @@
     <Content Include="View\Modules\EmployeeRegistration.aspx" />
     <Content Include="View\Modules\EmployeeList.aspx" />
     <Content Include="View\Modules\EmployeeLeaveList.aspx" />
+    <Content Include="View\Modules\EmployeeLeaveStatusUpdate.aspx" />
     <Content Include="View\Modules\AddImsetsalaryForm.aspx" />
     <Content Include="View\Modules\Addrole.aspx" />
     <Content Include="View\Modules\AddSalarySlipData.aspx" />
@@ -1892,6 +1893,13 @@
     </Compile>
     <Compile Include="View\Modules\EmployeeLeaveList.aspx.designer.cs">
       <DependentUpon>EmployeeLeaveList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\EmployeeLeaveStatusUpdate.aspx.cs">
+      <DependentUpon>EmployeeLeaveStatusUpdate.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\EmployeeLeaveStatusUpdate.aspx.designer.cs">
+      <DependentUpon>EmployeeLeaveStatusUpdate.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\AddImsetsalaryForm.aspx.cs">
       <DependentUpon>AddImsetsalaryForm.aspx</DependentUpon>

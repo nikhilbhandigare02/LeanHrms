@@ -106,10 +106,9 @@
     <Compile Include="HolidayListBL.cs" />
     <Compile Include="LoginBAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-<<<<<<< HEAD
+
     <Compile Include="ReimbursementBL.cs" />
-=======
->>>>>>> d512996 (Implemented leave approval and status update changes)
+
     <Compile Include="renumarationBL.cs" />
     <Compile Include="RoleDetailsBL.cs" />
     <Compile Include="SalarySlipBL.cs" />

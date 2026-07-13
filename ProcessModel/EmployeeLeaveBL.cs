@@ -327,11 +327,7 @@ namespace ProcessModel
             return detail;
         }
 
-        public class UpdateLeaveStatusResult
-        {
-            public bool Success { get; set; }
-            public string Remarks { get; set; }
-        }
+        
 
         public UpdateLeaveStatusResult UpdateLeaveStatus(
             int leaveId,

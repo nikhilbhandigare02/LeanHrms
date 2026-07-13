@@ -10,7 +10,11 @@ namespace DataObject
         public string approval_status { get; set; }
         public string request_date { get; set; }
     }
-
+    public class UpdateLeaveStatusResult
+    {
+        public bool Success { get; set; }
+        public string Remarks { get; set; }
+    }
     public class EmployeeLeaveDetailDO
     {
         public int leave_id { get; set; }

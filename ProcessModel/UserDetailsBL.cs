@@ -1901,6 +1901,59 @@ namespace ProcessModel
             return assets;
         }
 
+        public List<EmployeeAssetDetailsDO> GetEmployeeAssetReturns(int userId)
+        {
+            List<EmployeeAssetDetailsDO> assetReturns = new List<EmployeeAssetDetailsDO>();
+            if (userId <= 0 || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return assetReturns;
+            }
+
+            try
+            {
+                string normalizedConnection = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalizedConnection))
+                using (MySqlCommand cmd = new MySqlCommand("SP_GetEmployeeAssetReturns", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            assetReturns.Add(new EmployeeAssetDetailsDO
+                            {
+                                AssetAssignmentId = ReadIntValue(dr, "AssetId", "asset_assignment_id"),
+                                UserId = ReadIntValue(dr, "UserId", "user_id"),
+                                AssetType = ReadStringValue(dr, "AssetType", "asset_type"),
+                                AssetNumber = ReadStringValue(dr, "AssetNumber", "asset_number"),
+                                AssetName = ReadStringValue(dr, "AssetName", "asset_name"),
+                                ReturnDate = ReadDateValue(dr, "ReturnDate", "return_date"),
+                                AssetConditionId = ReadIntValue(dr, "AssetConditionId", "asset_condition_id"),
+                                AssetCondition = ReadStringValue(dr, "AssetCondition", "asset_condition"),
+                                AssetStatusId = ReadIntValue(dr, "AssetStatusId", "asset_status_id"),
+                                AssetStatus = ReadStringValue(dr, "AssetStatus", "asset_status"),
+                                InsertedBy = ReadIntValue(dr, "InsertedBy", "inserted_by"),
+                                InsertedDate = ReadDateValue(dr, "InsertedDate", "inserted_date"),
+                                UpdatedBy = ReadIntValue(dr, "UpdatedBy", "updated_by"),
+                                UpdatedDate = ReadDateValue(dr, "UpdatedDate", "updated_date"),
+                                IsActive = IsActiveValue(ReadStringValue(dr, "IsActive", "is_active"))
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("UserDetailsBL", "GetEmployeeAssetReturns", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+
+            return assetReturns;
+        }
+
         public List<EmployeeEducationDetailsDO> GetEmployeeEducation(int userId)
         {
             List<EmployeeEducationDetailsDO> educationList = new List<EmployeeEducationDetailsDO>();

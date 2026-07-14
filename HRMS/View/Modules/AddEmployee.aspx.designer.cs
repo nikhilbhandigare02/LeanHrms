@@ -258,6 +258,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Image imgEmployeePhotoPreview;
 
         /// <summary>
+        /// contactSectionStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl contactSectionStatus;
+
+        /// <summary>
         /// txt_contact control.
         /// </summary>
         /// <remarks>
@@ -537,258 +546,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtEmergencyContactRelationship;
 
         /// <summary>
-        /// lblViewMobileNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewMobileNumber;
-
-        /// <summary>
-        /// lblViewOfficialEmail control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewOfficialEmail;
-
-        /// <summary>
-        /// lblViewAlternateMobile control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewAlternateMobile;
-
-        /// <summary>
-        /// lblViewPersonalEmail control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPersonalEmail;
-
-        /// <summary>
-        /// lblViewPermanentHouseNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentHouseNumber;
-
-        /// <summary>
-        /// lblViewPermanentBuildingName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentBuildingName;
-
-        /// <summary>
-        /// lblViewPermanentStreet control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentStreet;
-
-        /// <summary>
-        /// lblViewPermanentArea control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentArea;
-
-        /// <summary>
-        /// lblViewPermanentLandmark control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentLandmark;
-
-        /// <summary>
-        /// lblViewPermanentCity control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentCity;
-
-        /// <summary>
-        /// lblViewPermanentDistrict control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentDistrict;
-
-        /// <summary>
-        /// lblViewPermanentState control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentState;
-
-        /// <summary>
-        /// lblViewPermanentCountry control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentCountry;
-
-        /// <summary>
-        /// lblViewPermanentPinCode control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewPermanentPinCode;
-
-        /// <summary>
-        /// lblViewSameAsPermanent control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewSameAsPermanent;
-
-        /// <summary>
-        /// lblViewCurrentHouseNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentHouseNumber;
-
-        /// <summary>
-        /// lblViewCurrentBuildingName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentBuildingName;
-
-        /// <summary>
-        /// lblViewCurrentStreet control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentStreet;
-
-        /// <summary>
-        /// lblViewCurrentArea control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentArea;
-
-        /// <summary>
-        /// lblViewCurrentLandmark control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentLandmark;
-
-        /// <summary>
-        /// lblViewCurrentCity control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentCity;
-
-        /// <summary>
-        /// lblViewCurrentDistrict control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentDistrict;
-
-        /// <summary>
-        /// lblViewCurrentState control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentState;
-
-        /// <summary>
-        /// lblViewCurrentCountry control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentCountry;
-
-        /// <summary>
-        /// lblViewCurrentPinCode control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewCurrentPinCode;
-
-        /// <summary>
-        /// lblViewEmergencyContactName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewEmergencyContactName;
-
-        /// <summary>
-        /// lblViewEmergencyContactNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewEmergencyContactNumber;
-
-        /// <summary>
-        /// lblViewEmergencyContactRelationship control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblViewEmergencyContactRelationship;
-
-        /// <summary>
         /// ddlexporintern control.
         /// </summary>
         /// <remarks>
@@ -1005,6 +762,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList txtEmployeeLevel;
 
         /// <summary>
+        /// attendanceSectionStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl attendanceSectionStatus;
+
+        /// <summary>
         /// txtAttendanceType control.
         /// </summary>
         /// <remarks>
@@ -1086,6 +852,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList txtWorkLocation;
 
         /// <summary>
+        /// bankSectionStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl bankSectionStatus;
+
+        /// <summary>
         /// txtBankName control.
         /// </summary>
         /// <remarks>
@@ -1156,6 +931,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSalaryAccountFlag;
+
+        /// <summary>
+        /// educationSectionStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl educationSectionStatus;
 
         /// <summary>
         /// educationPreviewBody control.
@@ -1428,6 +1212,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Label lblCertificationNoFile;
 
         /// <summary>
+        /// workExperienceSectionStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl workExperienceSectionStatus;
+
+        /// <summary>
         /// workExperiencePreviewBody control.
         /// </summary>
         /// <remarks>
@@ -1552,6 +1345,96 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSaveAsset;
+
+        /// <summary>
+        /// gvEmployeeAssetReturns control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvEmployeeAssetReturns;
+
+        /// <summary>
+        /// assetReturnEditorCard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl assetReturnEditorCard;
+
+        /// <summary>
+        /// hdnAssetReturnId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnAssetReturnId;
+
+        /// <summary>
+        /// txtAssetTypeReturn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAssetTypeReturn;
+
+        /// <summary>
+        /// txtAssetNumberReturn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAssetNumberReturn;
+
+        /// <summary>
+        /// txtAssetNameReturn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAssetNameReturn;
+
+        /// <summary>
+        /// txtReturnDateReturn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtReturnDateReturn;
+
+        /// <summary>
+        /// ddlAssetReturnCondition control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlAssetReturnCondition;
+
+        /// <summary>
+        /// ddlAssetReturnStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlAssetReturnStatus;
+
+        /// <summary>
+        /// btnSaveAssetReturn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveAssetReturn;
 
         /// <summary>
         /// lblpass control.

@@ -60,15 +60,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtEffectiveFromDate;
 
         /// <summary>
-        /// txtEffectiveToDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtEffectiveToDate;
-
-        /// <summary>
         /// ddlEmployeeCategory control.
         /// </summary>
         /// <remarks>

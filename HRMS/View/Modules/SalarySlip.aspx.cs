@@ -2,398 +2,350 @@ using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using iText.IO.Font.Constants;
+using iText.IO.Image;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Draw;
+using iText.Layout;
+using iText.Layout.Borders;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using ITable = iText.Layout.Element.Table;
+using IImage = iText.Layout.Element.Image;
+using ListItem = System.Web.UI.WebControls.ListItem;
 
 namespace HRMS.View.Modules
 {
     public partial class SalarySlip : System.Web.UI.Page
     {
         protected string UserId = null;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
-            int userId = 0;
+
             if (!IsPostBack)
             {
-               
                 if (Session["userId"] == null)
                 {
                     Response.Redirect("~/view/authentication/login.aspx", false);
                     return;
                 }
 
-                if (Request.QueryString["user_id"] != null)
-                {
-                    userId = Convert.ToInt32(Request.QueryString["user_id"]);
-                }
-                else
-                {
-                    userId = 0;
-                }
-
-                Bindcompany();
+                BindYears();
+                BindMonths(ddlFromMonth);
+                BindMonths(ddlToMonth);
+                BindEmployees();
             }
         }
-        public void Bindcompany()
+
+        private void BindYears()
         {
-            List<DropDownData> list1 = new List<DropDownData>();
-            CommonBL commonbl = new CommonBL();
+            ddlYear.Items.Clear();
+            ddlYear.Items.Add(new ListItem("Select Year", ""));
+            int currentYear = DateTime.Now.Year;
+            for (int y = currentYear; y >= currentYear - 6; y--)
+            {
+                ddlYear.Items.Add(new ListItem(y.ToString(), y.ToString()));
+            }
+        }
+
+        private void BindMonths(DropDownList ddl)
+        {
+            ddl.Items.Clear();
+            ddl.Items.Add(new ListItem("Select Month", ""));
+            for (int m = 1; m <= 12; m++)
+            {
+                ddl.Items.Add(new ListItem(MonthName(m), m.ToString()));
+            }
+        }
+
+        // All active employees across companies (per requested scope).
+        private void BindEmployees()
+        {
             try
             {
-                list1 = commonbl.dropdowCompany();
-                if (list1 != null)
-                {
-                    ddlcompany.DataSource = list1;
-                    ddlcompany.DataTextField = "Text";
-                    ddlcompany.DataValueField = "Id";
-                }
-                else
-                {
-                    ddlcompany.DataSource = null;
-                }
-                ddlcompany.DataBind();
-                ddlcompany.Items.Insert(0, new ListItem("-- Please Select --", ""));
+                UserDetailsBL userBL = new UserDetailsBL();
+                var activeUsers = (userBL.ViewAllUsers() ?? new List<UserDetailsDO>())
+                    .Where(u => u != null && u.Isactive && u.UserId > 0)
+                    .OrderBy(u => (u.user_fullname ?? string.Empty).Trim())
+                    .ToList();
 
-
+                ddlEmployee.Items.Clear();
+                ddlEmployee.Items.Add(new ListItem("Select Employee", ""));
+                foreach (var u in activeUsers)
+                {
+                    string name = string.IsNullOrWhiteSpace(u.user_fullname) ? u.Username : u.user_fullname;
+                    ddlEmployee.Items.Add(new ListItem(name, u.UserId.ToString()));
+                }
             }
             catch (Exception ex)
             {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("SalarySlip", "Bindcompany", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
+                new CommonBL().fnStoreErrorLog("SalarySlip", "BindEmployees", ex.Message + " Strace=" + ex.StackTrace, UserId);
             }
         }
 
-        protected void btnsearch_click(object sender, EventArgs e)
+        protected void btnSearch_Click(object sender, EventArgs e)
         {
             try
             {
-                int companyId = 0;
-                if (!int.TryParse(Convert.ToString(ddlcompany.SelectedValue), out companyId) || companyId <= 0)
+                string year = Convert.ToString(ddlYear.SelectedValue);
+                string fromMonth = Convert.ToString(ddlFromMonth.SelectedValue);
+                string toMonth = Convert.ToString(ddlToMonth.SelectedValue);
+                string employeeValue = Convert.ToString(ddlEmployee.SelectedValue);
+
+                if (string.IsNullOrWhiteSpace(year) || string.IsNullOrWhiteSpace(fromMonth) ||
+                    string.IsNullOrWhiteSpace(toMonth) || string.IsNullOrWhiteSpace(employeeValue))
                 {
-                    ClientScript.RegisterStartupScript(
-                        this.GetType(),
-                        "Error",
-                        "showUserSavedMessage('Error', 'Please select Company.');",
-                        true
-                    );
+                    ShowResults(false);
+                    ClientScript.RegisterStartupScript(GetType(), "Validation",
+                        "showUserSavedMessage('Error', 'Please select Year, From Month, To Month, and Employee.');", true);
                     return;
                 }
 
-                Session["SelectedCompanyId"] = companyId;  // save for later (paging, sorting)
-                Session["CurrentPageIndex"] = 0; // reset page on new search
+                int yearInt = Convert.ToInt32(year);
+                int fromInt = Convert.ToInt32(fromMonth);
+                int toInt = Convert.ToInt32(toMonth);
+                int selectedUserId = Convert.ToInt32(employeeValue);
 
-                // Always bind using selected companyId
-                BindGridViewFromAPI(companyId);
+                if (fromInt > toInt)
+                {
+                    ShowResults(false);
+                    ClientScript.RegisterStartupScript(GetType(), "RangeError",
+                        "showUserSavedMessage('Error', 'From Month cannot be after To Month.');", true);
+                    return;
+                }
 
-                gridview.Visible = gridview.Rows.Count > 0;
-                paginationContainer.Visible = gridview.Rows.Count > 0;
+                List<SalarySlipDO> slips = new SalarySlipBL().GetSalarySlipList(selectedUserId, yearInt, fromInt, toInt);
+
+                if (slips == null || slips.Count == 0)
+                {
+                    ShowResults(false);
+                    ClientScript.RegisterStartupScript(GetType(), "NoSlip",
+                        "showUserSavedMessage('Error', 'No salary slip found for the selected period.');", true);
+                    return;
+                }
+
+                gvSlips.DataSource = slips;
+                gvSlips.DataBind();
+
+                // Keep selection for the per-row PDF download.
+                ViewState["ss_userId"] = selectedUserId;
+                ViewState["ss_year"] = yearInt;
+
+                ShowResults(true);
             }
             catch (Exception ex)
             {
-                gridview.Visible = false;
-                paginationContainer.Visible = false;
-                ClientScript.RegisterStartupScript(
-                    this.GetType(),
-                    "Error",
-                    $"showUserSavedMessage('Error', 'Please search Company');",
-                    true
-                );
+                ShowResults(false);
+                new CommonBL().fnStoreErrorLog("SalarySlip", "btnSearch_Click", ex.Message + " Strace=" + ex.StackTrace, UserId);
+                ClientScript.RegisterStartupScript(GetType(), "Error",
+                    "showUserSavedMessage('Error', 'Unable to load salary slips. Please try again.');", true);
             }
         }
 
+        private void ShowResults(bool show)
+        {
+            pnlResults.Visible = show;
+            pnlNoData.Visible = !show;
+        }
 
-
-
-        protected void btnclear_click(object sender, EventArgs e)
+        protected void gvSlips_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
             {
-                ddlcompany.SelectedIndex = 0; // reset company dropdown
-                gridview.DataSource = null;
-                gridview.DataBind();
-                gridview.Visible = false;     // hide grid on clear
-                ddlPageSelector.Visible = false; // hide pagination dropdown
+                if (e.CommandName != "DownloadSlip")
+                {
+                    return;
+                }
+
+                int month;
+                if (!int.TryParse(Convert.ToString(e.CommandArgument), out month) || ViewState["ss_userId"] == null)
+                {
+                    return;
+                }
+
+                int userId = Convert.ToInt32(ViewState["ss_userId"]);
+                int year = Convert.ToInt32(ViewState["ss_year"]);
+
+                SalarySlipDO slip = new SalarySlipBL().GetSalarySlipList(userId, year, month, month).FirstOrDefault();
+                if (slip == null)
+                {
+                    ClientScript.RegisterStartupScript(GetType(), "NoSlipRow",
+                        "showUserSavedMessage('Error', 'Salary slip not found.');", true);
+                    return;
+                }
+
+                byte[] pdfBytes = GenerateSlipPdf(slip, userId);
+                string safeName = (slip.Username ?? "Employee").Replace(" ", "_");
+                string fileName = "SalarySlip_" + safeName + "_" + MonthName(month) + "_" + year + ".pdf";
+
+                Response.Clear();
+                Response.ContentType = "application/pdf";
+                Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+                Response.BinaryWrite(pdfBytes);
+                Response.End();
+            }
+            catch (System.Threading.ThreadAbortException)
+            {
+                // Raised by Response.End(); expected, safe to ignore.
             }
             catch (Exception ex)
             {
-                ClientScript.RegisterStartupScript(this.GetType(), "Error",
-                    $"showsalarySavedMessage('Error', 'Clear failed: {ex.Message}');", true);
+                new CommonBL().fnStoreErrorLog("SalarySlip", "gvSlips_RowCommand", ex.Message + " Strace=" + ex.StackTrace, UserId);
+                ClientScript.RegisterStartupScript(GetType(), "Error",
+                    "showUserSavedMessage('Error', 'Unable to download salary slip.');", true);
             }
         }
 
-        protected void BindGridViewFromAPI(int companyId)
+        private byte[] GenerateSlipPdf(SalarySlipDO slip, int userId)
         {
+            // Department isn't stored on the salary row, so pull it from the employee record.
+            string department = string.Empty;
             try
             {
-                UserDetailsBL userDetailsBL = new UserDetailsBL();
-                var users = userDetailsBL.ViewAllUsers()
-                    .Where(u => u.company_id == companyId || u.CompanyId == companyId)
-                    .ToList();
+                var emp = (new UserDetailsBL().ViewAllUsers() ?? new List<UserDetailsDO>())
+                    .FirstOrDefault(u => u != null && u.UserId == userId);
+                if (emp != null) department = emp.department;
+            }
+            catch { /* department is optional on the slip */ }
 
-                ApplySorting(ref users); // existing sorting logic
+            using (MemoryStream ms = new MemoryStream())
+            {
+                PdfDocument pdf = new PdfDocument(new PdfWriter(ms, new WriterProperties()));
+                Document document = new Document(pdf);
+                document.SetMargins(42, 42, 42, 42);
 
-                int totalRecords = users.Count;
-                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
-                int pageSize = 10;
-                int totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 0;
-                if (totalPages == 0)
+                PdfFont boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+                PdfFont normalFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                DeviceRgb brand = new DeviceRgb(37, 99, 235);
+
+                // Header: logo + company info
+                ITable headerTable = new ITable(UnitValue.CreatePercentArray(new float[] { 45, 55 })).UseAllAvailableWidth();
+                string logoPath = Server.MapPath("~/assets/images/alphonsol_logo.png");
+                if (File.Exists(logoPath))
                 {
-                    pageIndex = 0;
-                }
-                else if (pageIndex < 0 || pageIndex >= totalPages)
-                {
-                    pageIndex = 0;
-                    Session["CurrentPageIndex"] = 0;
-                }
-                hfPageIndexViewUser.Value = pageIndex.ToString();
-
-                int startRowIndex = pageIndex * pageSize;
-                int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
-
-                if (totalRecords > 0)
-                {
-                    List<UserDetailsDO> displayedData = users.GetRange(startRowIndex, endRowIndex - startRowIndex);
-
-                    gridview.DataSource = displayedData;
-                    gridview.DataBind();
-                    gridview.Visible = true;
-
-                    if (totalRecords > pageSize)
-                    {
-                        ddlPageSelector.Visible = true;
-                        UpdatePageInfoLabel(pageIndex, totalRecords);
-                    }
-                    else
-                    {
-                        ddlPageSelector.Visible = false;
-                    }
+                    IImage logo = new IImage(ImageDataFactory.Create(logoPath)).SetWidth(110);
+                    headerTable.AddCell(new Cell().Add(logo).SetBorder(Border.NO_BORDER).SetVerticalAlignment(VerticalAlignment.MIDDLE));
                 }
                 else
                 {
-                    gridview.DataSource = null;
-                    gridview.DataBind();
-                    gridview.Visible = false;
-                    ddlPageSelector.Visible = false;
-                    UpdatePageInfoLabel(0, 0);
+                    headerTable.AddCell(new Cell().SetBorder(Border.NO_BORDER));
                 }
-            }
-            catch (Exception ex)
-            {
-                gridview.Visible = false;
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "BindGridViewFromAPI",
-                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+
+                Div contactInfo = new Div().SetTextAlignment(TextAlignment.RIGHT);
+                contactInfo.Add(new Paragraph("High-street Corporate Center, FB-03, Kapurbawdi Junction, Thane(W)-400601")
+                    .SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                contactInfo.Add(new Paragraph("Email Address - support@alphonsol.com").SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                contactInfo.Add(new Paragraph("Website - www.alphonsol.com").SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                headerTable.AddCell(new Cell().Add(contactInfo).SetBorder(Border.NO_BORDER).SetVerticalAlignment(VerticalAlignment.MIDDLE));
+                document.Add(headerTable);
+
+                LineSeparator line = new LineSeparator(new SolidLine());
+                line.SetStrokeColor(brand);
+                document.Add(line);
+
+                int monthNum;
+                int.TryParse(slip.Month, out monthNum);
+                document.Add(new Paragraph("Salary Slip").SetFont(boldFont).SetFontSize(15).SetMarginTop(10).SetMarginBottom(2));
+                document.Add(new Paragraph("Pay Period: " + MonthName(monthNum) + " " + slip.Year)
+                    .SetFont(normalFont).SetFontSize(10).SetMarginBottom(12));
+
+                // Employee info
+                ITable infoTable = new ITable(UnitValue.CreatePercentArray(new float[] { 25, 25, 25, 25 })).UseAllAvailableWidth();
+                AddInfoCell(infoTable, boldFont, normalFont, "Employee Name", slip.Username);
+                AddInfoCell(infoTable, boldFont, normalFont, "Employee Code", slip.employeecode > 0 ? slip.employeecode.ToString() : "-");
+                AddInfoCell(infoTable, boldFont, normalFont, "Designation", slip.DesignationName);
+                AddInfoCell(infoTable, boldFont, normalFont, "Department", department);
+                document.Add(infoTable.SetMarginBottom(14));
+
+                // Earnings / Deductions
+                ITable breakup = new ITable(UnitValue.CreatePercentArray(new float[] { 50, 50 })).UseAllAvailableWidth();
+
+                ITable earn = new ITable(UnitValue.CreatePercentArray(new float[] { 60, 40 })).UseAllAvailableWidth();
+                AddSectionHeader(earn, boldFont, brand, "Earnings");
+                AddMoneyRow(earn, normalFont, "Basic Salary", slip.BasicSalary);
+                AddMoneyRow(earn, normalFont, "House Rent Allowance", slip.HouseRentAllowance);
+                AddMoneyRow(earn, normalFont, "Special Allowance", slip.SpecialAllowance);
+                AddMoneyRow(earn, normalFont, "Leave Travel Allowance", slip.LeaveTravelAllowance);
+                AddMoneyRow(earn, boldFont, "Total Earnings", slip.TotalEarnings);
+                breakup.AddCell(new Cell().Add(earn).SetBorder(Border.NO_BORDER).SetPaddingRight(10));
+
+                ITable ded = new ITable(UnitValue.CreatePercentArray(new float[] { 60, 40 })).UseAllAvailableWidth();
+                AddSectionHeader(ded, boldFont, brand, "Deductions");
+                AddMoneyRow(ded, normalFont, "Professional Tax", slip.ProfessionalTax);
+                AddMoneyRow(ded, boldFont, "Total Deductions", slip.TotalDeductions);
+                breakup.AddCell(new Cell().Add(ded).SetBorder(Border.NO_BORDER).SetPaddingLeft(10));
+                document.Add(breakup.SetMarginBottom(14));
+
+                // Net pay
+                ITable netTable = new ITable(UnitValue.CreatePercentArray(new float[] { 60, 40 })).UseAllAvailableWidth();
+                netTable.AddCell(new Cell().Add(new Paragraph("Net Salary Payable").SetFont(boldFont).SetFontSize(12))
+                    .SetBackgroundColor(brand).SetFontColor(ColorConstants.WHITE).SetPadding(8).SetBorder(Border.NO_BORDER));
+                netTable.AddCell(new Cell().Add(new Paragraph("Rs. " + slip.NetPay.ToString("N2")).SetFont(boldFont).SetFontSize(12).SetTextAlignment(TextAlignment.RIGHT))
+                    .SetBackgroundColor(brand).SetFontColor(ColorConstants.WHITE).SetPadding(8).SetBorder(Border.NO_BORDER));
+                document.Add(netTable);
+
+                document.Add(new Paragraph("\nThis is a system generated salary slip and does not require a signature.")
+                    .SetFont(normalFont).SetFontSize(8).SetFontColor(ColorConstants.GRAY));
+
+                document.Close();
+                return ms.ToArray();
             }
         }
 
-
-        public int TotalRecordCount()
+        private void AddSectionHeader(ITable table, PdfFont boldFont, DeviceRgb brand, string title)
         {
-
-            UserDetailsDO userDO = new UserDetailsDO();
-            UserDetailsBL userbl = new UserDetailsBL();
-            List<UserDetailsDO> users = userbl.ViewAllUsers();
-
-            return users.Count;
+            table.AddCell(new Cell(1, 2).Add(new Paragraph(title).SetFont(boldFont).SetFontSize(12))
+                .SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(brand, 1.5f)).SetPaddingBottom(4));
         }
-        protected void UpdatePageInfoLabel(int pageIndex, int pagecount)
+
+        private void AddMoneyRow(ITable table, PdfFont font, string label, decimal value)
         {
-            try
-            {
-                int currentPage = pageIndex + 1;
-                int totalPages = (int)Math.Ceiling((double)pagecount / 10);
-                ddlPageSelector.Items.Clear();
-                for (int i = 1; i <= totalPages; i++)
-                {
-                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"{i}/{totalPages}", (i - 1).ToString()));
-                }
-                if (ddlPageSelector.Items.Count > 0)
-                {
-                    ddlPageSelector.SelectedValue = pageIndex.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "UpdatePageInfoLabel", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-            }
+            table.AddCell(new Cell().Add(new Paragraph(label).SetFont(font).SetFontSize(9)).SetBorder(Border.NO_BORDER).SetPadding(3));
+            table.AddCell(new Cell().Add(new Paragraph("Rs. " + value.ToString("N2")).SetFont(font).SetFontSize(9).SetTextAlignment(TextAlignment.RIGHT))
+                .SetBorder(Border.NO_BORDER).SetPadding(3));
         }
-        protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
+
+        private void AddInfoCell(ITable table, PdfFont boldFont, PdfFont normalFont, string label, string value)
         {
-            try
-            {
-                int selectedPageIndex = Convert.ToInt32(ddlPageSelector.SelectedValue);
-                Session["CurrentPageIndex"] = selectedPageIndex;
-
-                if (Session["AdvSearchResViewUser"] != null)
-                {
-                    List<UserDetailsDO> searchResults = (List<UserDetailsDO>)Session["AdvSearchResViewUser"];
-                    searchResults = searchResults.OrderByDescending(t => t.Inserteddate).ToList();
-                    ApplySorting(ref searchResults);
-
-                    int totalRecords = searchResults.Count;
-                    int pageIndex = selectedPageIndex;
-                    hfPageIndexViewUser.Value = pageIndex.ToString();
-
-                    int pageSize = gridview.PageSize;
-                    int startRowIndex = pageIndex * pageSize;
-                    int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
-
-                    List<UserDetailsDO> displayedUsers = searchResults.GetRange(startRowIndex, endRowIndex - startRowIndex);
-                    gridview.DataSource = displayedUsers;
-                    gridview.DataBind();
-
-                    UpdatePageInfoLabel(pageIndex, totalRecords);
-                }
-                else
-                {
-                    int companyId = Convert.ToInt32(Session["SelectedCompanyId"]);
-                    BindGridViewFromAPI(companyId);
-
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "ddlPageSelector_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-            }
+            Cell cell = new Cell().SetBorder(Border.NO_BORDER);
+            cell.Add(new Paragraph(label).SetFont(normalFont).SetFontSize(8).SetFontColor(ColorConstants.GRAY).SetMarginBottom(0));
+            cell.Add(new Paragraph(string.IsNullOrWhiteSpace(value) ? "-" : value).SetFont(boldFont).SetFontSize(10).SetMarginTop(0));
+            table.AddCell(cell);
         }
-        protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)
+
+        // --- Markup helpers (protected so the .aspx databinding expressions can call them) ---
+
+        protected string GetMonthLabel(object monthValue)
         {
-            gridview.PageIndex = e.NewPageIndex;
-            //BindGridView();
-            int companyId = Convert.ToInt32(Session["SelectedCompanyId"]);
-            BindGridViewFromAPI(companyId);
+            int m;
+            if (int.TryParse(Convert.ToString(monthValue), out m))
+            {
+                return MonthName(m);
+            }
+            return Convert.ToString(monthValue);
         }
-        protected void gridview_Sorting(object sender, GridViewSortEventArgs e)
+
+        protected string FormatMoney(object value)
         {
-            UserDetailsBL userDetailsBL = new UserDetailsBL();
-            try
-            {
-                int companyId = Session["SelectedCompanyId"] != null ? Convert.ToInt32(Session["SelectedCompanyId"]) : 0;
-                List<UserDetailsDO> createdet = userDetailsBL.ViewAllUsers()
-                    .Where(u => companyId == 0 || u.company_id == companyId || u.CompanyId == companyId)
-                    .ToList();
-
-                if (createdet != null)
-                {
-                    string sortExpression = e.SortExpression;
-                    string sortDirection = GetSortDirection(sortExpression);
-
-                    if (sortDirection == "ASC")
-                    {
-                        createdet = createdet.OrderBy(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-                    else
-                    {
-                        createdet = createdet.OrderByDescending(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-
-                    gridview.DataSource = createdet;
-                    gridview.DataBind();
-                }
-            }
-
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "gridview_Sorting", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-            }
+            decimal d;
+            decimal.TryParse(Convert.ToString(value), out d);
+            return "&#8377; " + d.ToString("N2");
         }
-        private string GetSortDirection(string column)
+
+        private string MonthName(int month)
         {
-
-
-            string sortDirection = "ASC";
-            if (ViewState["SortDirection"] != null)
-            {
-                if (ViewState["SortExpression"].ToString() == column)
-                {
-                    sortDirection = ViewState["SortDirection"].ToString() == "ASC" ? "DESC" : "ASC";
-                }
-            }
-            ViewState["SortExpression"] = column;
-            ViewState["SortDirection"] = sortDirection;
-            return sortDirection;
-
+            if (month < 1 || month > 12) return string.Empty;
+            return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
         }
-        private void ApplySorting(ref List<UserDetailsDO> users)
-        {
-            try
-            {
-                string sortExpression = ViewState["SortExpression"] as string;
-                string sortDirection = ViewState["SortDirection"] as string;
-
-                if (!string.IsNullOrEmpty(sortExpression) && !string.IsNullOrEmpty(sortDirection))
-                {
-                    if (sortDirection == "ASC")
-                    {
-                        users = users.OrderBy(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-                    else
-                    {
-                        users = users.OrderByDescending(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-                }
-            }
-
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "ApplySorting", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-            }
-        }
-
-        protected void gvUsers_RowCommand(object sender, GridViewCommandEventArgs e)
-        {
-            try
-            {
-                if (e.CommandName == "viewUser")
-                {
-                    string userId = e.CommandArgument.ToString();
-
-                    int? companyId = Session["SelectedCompanyId"] != null ? Convert.ToInt32(Session["SelectedCompanyId"]) : (int?)null;
-
-                    if (companyId == null)
-                    {
-                        ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage",
-                            "alert('Company information missing. Please log in again.');", true);
-                        return;
-                    }
-
-                    // ✅ Redirect based on company_id
-                    switch (companyId)
-                    {
-                        case 1:
-                            Response.Redirect("AddImsetsalaryForm.aspx?user_id=" + userId + "&mode=edit", false);
-                            break;
-
-                        case 2:
-                            Response.Redirect("AddBioxiasalaryform.aspx?user_id=" + userId + "&mode=edit", false);
-                            break;
-
-                        case 3:
-                            Response.Redirect("AddSalarySlipData.aspx?user_id=" + userId + "&mode=edit", false);
-                            break;
-
-                        default:
-                            ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage",
-                                "alert('Invalid company. Cannot open form.');", true);
-                            break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "gvUsers_RowCommand",
-                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
-            }
-        }
-
     }
 }

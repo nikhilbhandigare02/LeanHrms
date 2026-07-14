@@ -349,6 +349,133 @@ namespace ProcessModel
 
             return listdata;
         }
+        // Fetches saved salary slips for an employee within a month range (single year)
+        // via stored procedure sp_get_salary_slip_list. Falls back to a direct query on
+        // employee_salary_master if the SP is not deployed.
+        public List<SalarySlipDO> GetSalarySlipList(int userId, int year, int fromMonth, int toMonth)
+        {
+            List<SalarySlipDO> list = new List<SalarySlipDO>();
+            if (userId <= 0)
+            {
+                return list;
+            }
+
+            // Preferred: stored procedure.
+            try
+            {
+                List<MySqlParameter> spParams = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("@p_user_id", userId),
+                    DataClass.GetParameter("@p_year", year),
+                    DataClass.GetParameter("@p_from_month", fromMonth),
+                    DataClass.GetParameter("@p_to_month", toMonth)
+                };
+
+                using (MySqlDataReader dr = DataClass.GetDataReaderFromSpWithParam(spParams, DBName, "sp_get_salary_slip_list"))
+                {
+                    while (dr != null && dr.Read())
+                    {
+                        list.Add(MapSlipRow(dr));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipList(SP)",
+                    "Exception Message: " + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+
+            if (list.Count > 0)
+            {
+                return list;
+            }
+
+            // Fallback: direct query when the SP is not present.
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(MySqlconnection))
+                using (MySqlCommand cmd = new MySqlCommand(@"
+                    SELECT t.user_id, t.employeeCode, t.employeeName, t.month, t.year, t.designation,
+                           t.DaysPaid, t.BasicSalary, t.HouseRentAllowance, t.SpecialAllowance,
+                           t.LeaveTravelAllowance, t.ProfessionalTax, t.TotalEarnings, t.TotalDeductions, t.NetPay
+                    FROM employee_salary_master t
+                    INNER JOIN (
+                        SELECT user_id, month, year, MAX(emp_salary_master_id) AS latest_id
+                        FROM employee_salary_master
+                        WHERE user_id = @p_user_id AND year = @p_year
+                              AND month BETWEEN @p_from_month AND @p_to_month
+                        GROUP BY user_id, month, year
+                    ) latest ON latest.latest_id = t.emp_salary_master_id
+                    ORDER BY t.month;", con))
+                {
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    cmd.Parameters.AddWithValue("@p_year", year);
+                    cmd.Parameters.AddWithValue("@p_from_month", fromMonth);
+                    cmd.Parameters.AddWithValue("@p_to_month", toMonth);
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            list.Add(MapSlipRow(dr));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipList(fallback)",
+                    "Exception Message: " + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+
+            return list;
+        }
+
+        // Maps a salary-slip row (from the SP or the fallback query) into a SalarySlipDO.
+        private SalarySlipDO MapSlipRow(IDataRecord dr)
+        {
+            return new SalarySlipDO
+            {
+                UserId = SlipInt(dr, "user_id"),
+                employeecode = SlipInt(dr, "employeeCode"),
+                Username = SlipStr(dr, "employeeName"),
+                Month = SlipStr(dr, "month"),
+                Year = SlipInt(dr, "year"),
+                DesignationName = SlipStr(dr, "designation"),
+                DaysPaid = SlipInt(dr, "DaysPaid"),
+                BasicSalary = SlipDec(dr, "BasicSalary"),
+                HouseRentAllowance = SlipDec(dr, "HouseRentAllowance"),
+                SpecialAllowance = SlipDec(dr, "SpecialAllowance"),
+                LeaveTravelAllowance = SlipDec(dr, "LeaveTravelAllowance"),
+                ProfessionalTax = SlipDec(dr, "ProfessionalTax"),
+                TotalEarnings = SlipDec(dr, "TotalEarnings"),
+                TotalDeductions = SlipDec(dr, "TotalDeductions"),
+                NetPay = SlipDec(dr, "NetPay")
+            };
+        }
+
+        private int SlipInt(IDataRecord dr, string column)
+        {
+            if (!HasColumn(dr, column) || dr[column] == DBNull.Value) return 0;
+            int value;
+            return int.TryParse(Convert.ToString(dr[column]), out value) ? value : 0;
+        }
+
+        private decimal SlipDec(IDataRecord dr, string column)
+        {
+            if (!HasColumn(dr, column) || dr[column] == DBNull.Value) return 0m;
+            decimal value;
+            return decimal.TryParse(Convert.ToString(dr[column]), out value) ? value : 0m;
+        }
+
+        private string SlipStr(IDataRecord dr, string column)
+        {
+            if (!HasColumn(dr, column) || dr[column] == DBNull.Value) return string.Empty;
+            return Convert.ToString(dr[column]);
+        }
+
         public List<RemunerationDO> GetRemunerationDetails(int? year)
         {
             List<RemunerationDO> listdata = new List<RemunerationDO>();

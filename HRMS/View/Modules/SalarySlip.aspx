@@ -1,133 +1,197 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="SalarySlip.aspx.cs" Inherits="HRMS.View.Modules.SalarySlip" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="SalarySlip.aspx.cs" Inherits="HRMS.View.Modules.SalarySlip" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <style>
-        .custom-dropdown-container {
-            position: relative;
+        .salary-slip-page {
+            --ss-primary: #2563EB;
+            --ss-primary-dark: #1D4ED8;
+            --ss-heading: #1E293B;
+            --ss-muted: #64748B;
+            --ss-line: #E8EEF7;
+            --ss-panel: #F8FAFC;
         }
 
-        .custom-dropdown {
-            padding-right: 25px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"%3E%3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /%3E%3C/svg%3E') no-repeat right center;
-            background-size: 16px;
+        .salary-slip-page .ss-card {
+            background: #FFFFFF;
+            border: 1px solid var(--ss-line);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            padding: 28px 30px;
         }
+
+        .salary-slip-page .ss-title {
+            color: var(--ss-heading);
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 22px;
+        }
+
+        .salary-slip-page .ss-filter {
+            background: var(--ss-panel);
+            border: 1px solid var(--ss-line);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .salary-slip-page .ss-filter-label {
+            color: var(--ss-heading);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .salary-slip-page .ss-filter .form-select {
+            border: 1px solid #D9E2EF;
+            border-radius: 8px;
+            height: 42px;
+        }
+
+        .salary-slip-page .ss-search-btn {
+            background: var(--ss-primary);
+            border: none;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-weight: 600;
+            height: 42px;
+            min-width: 120px;
+            transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        }
+
+        .salary-slip-page .ss-search-btn:hover {
+            background: var(--ss-primary-dark);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
+            transform: translateY(-1px);
+        }
+
+        /* Grid */
+        .salary-slip-page .ss-grid-wrap { margin-top: 24px; overflow-x: auto; }
+
+        .salary-slip-page .ss-grid {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .salary-slip-page .ss-grid th {
+            background: #F1F5FB;
+            border-bottom: 1px solid var(--ss-line);
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 12px 14px;
+            text-align: left;
+        }
+
+        .salary-slip-page .ss-grid td {
+            border-bottom: 1px solid #EEF2F7;
+            color: #334155;
+            font-size: 14px;
+            padding: 11px 14px;
+        }
+
+        .salary-slip-page .ss-grid tr:hover td { background: #F8FBFF; }
+
+        .salary-slip-page .ss-grid .num { text-align: right; }
+
+        .salary-slip-page .ss-dl {
+            background: var(--ss-primary);
+            border-radius: 6px;
+            color: #FFFFFF !important;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            text-decoration: none;
+        }
+
+        .salary-slip-page .ss-dl:hover { background: var(--ss-primary-dark); }
+
+        /* Empty state */
+        .salary-slip-page .ss-empty { padding: 56px 20px; text-align: center; }
+        .salary-slip-page .ss-empty h4 { color: #475569; font-weight: 700; margin-bottom: 8px; }
+        .salary-slip-page .ss-empty p { color: var(--ss-muted); margin: 0; }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card shadow-lg rounded-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <asp:Label runat="server" ID="lbluser" CssClass="card-title mb-4"
-                            Style="font-size: 2.0em; font-weight: bold;">Select Company</asp:Label>
-                        <div class="d-flex justify-content-end align-items-center">
-                            <div class="app-search d-none d-lg-block" id="searchdata" runat="server">
-                                <div class="position-relative">
-                                    <input type="text" class="form-control" id="searchInput" placeholder="Search..." onkeydown="searchOnEnter(event)">
-                                    <span class="bx bx-search-alt"></span>
-                                </div>
-                            </div>
-                            <%--                            <button runat="server" id="btn_advanceserach" onserverclick="AdvSearchFunction" class="btn btn-outline-dark ms-2 light-border" title="Advance Search">
-        <i class="bx bx-search-alt"></i>&nbsp;Advance Search
-     
-    </button>--%>
-    &nbsp;
-     
-    <%--                            <button runat="server" id="btn_adduser" onserverclick="Button3_ServerClick" class="btn btn-primary ms-2" title="Add User">
-        <i class="fas fa-user-plus"></i>&nbsp;Add User
-     
-    </button>--%>
-                            <%--                            <asp:Button ID="btnBack1" runat="server" CssClass="btn btn-secondary" Text="Back" Visible="false" OnClick="btnBack1_click" />--%>
-                        </div>
-                    </div>
+    <div class="salary-slip-page">
+        <div class="row">
+            <div class="col-12">
+                <div class="ss-card">
+                    <div class="ss-title">Salary Slip Details</div>
 
-                    <!-- Search Row -->
-                    <div class="row mb-3 align-items-end">
-                        <!-- Dropdown -->
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="ddlcompany" class="fw-bold">Select Company</label>
-                                <asp:DropDownList ID="ddlcompany" runat="server" CssClass="form-control custom-dropdown" TabIndex="6">
-                                    <asp:ListItem Text="-- Select Company --" Value="" />
-                                </asp:DropDownList>
+                    <!-- Filter -->
+                    <div class="ss-filter">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2">
+                                <div class="ss-filter-label">Year</div>
+                                <asp:DropDownList ID="ddlYear" runat="server" CssClass="form-select"></asp:DropDownList>
                             </div>
-                        </div>
-
-                        <!-- Buttons: Search + Clear -->
-                        <div class="col-md-8 d-flex align-items-end">
-                            <div class="d-flex gap-2">
-                                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-success" OnClick="btnsearch_click" />
-                                <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-secondary" OnClick="btnclear_click" />
+                            <div class="col-md-2">
+                                <div class="ss-filter-label">From Month</div>
+                                <asp:DropDownList ID="ddlFromMonth" runat="server" CssClass="form-select"></asp:DropDownList>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="ss-filter-label">To Month</div>
+                                <asp:DropDownList ID="ddlToMonth" runat="server" CssClass="form-select"></asp:DropDownList>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ss-filter-label">Employee Name</div>
+                                <asp:DropDownList ID="ddlEmployee" runat="server" CssClass="form-select"></asp:DropDownList>
+                            </div>
+                            <div class="col-md-2">
+                                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="ss-search-btn w-100" OnClick="btnSearch_Click" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- GridView -->
-                    <div class="row">
-                        <div class="col-12">
-                            <asp:HiddenField ID="hfPageIndexViewUser" runat="server" />
-                            <asp:GridView runat="server" ID="gridview" class="table custom-gridview" AutoGenerateColumns="false" OnRowCommand="gvUsers_RowCommand"
-                                DataKeyNames="UserId" EnablePersistedSelection="true"
-                                OnPageIndexChanging="OnPageIndexChanging" PageSize="10"
-                                AllowSorting="true" OnSorting="gridview_Sorting"
-                                Style="margin: 0 auto;" EmptyDataText="No records found.">
+                    <!-- Results grid -->
+                    <asp:Panel ID="pnlResults" runat="server" Visible="false">
+                        <div class="ss-grid-wrap">
+                            <asp:GridView ID="gvSlips" runat="server" AutoGenerateColumns="false" CssClass="ss-grid"
+                                GridLines="None" Width="100%" OnRowCommand="gvSlips_RowCommand">
                                 <Columns>
-
-                                    <asp:BoundField DataField="EmployeeCode" HeaderText="Employee Code" ItemStyle-Width="130px" Visible="true" />
-                                    <asp:BoundField DataField="UserId" HeaderText="User Id" ItemStyle-Width="130px" Visible="false" />
-                                    <asp:BoundField DataField="Username" HeaderText="Username" ItemStyle-Width="130px" />
-                                    <asp:BoundField DataField="user_fullname" HeaderText="Employee Name" ItemStyle-Width="130px" />
-                                    <asp:BoundField DataField="user_mail_id" HeaderText="Email Id" ItemStyle-Width="130px" />
-                                    <asp:BoundField DataField="contact_detail" HeaderText="Contact Number" ItemStyle-Width="130px" />
-
-                                    <asp:TemplateField HeaderText="Action" ItemStyle-Width="80px">
+                                    <asp:TemplateField HeaderText="Month">
+                                        <ItemTemplate><%# GetMonthLabel(Eval("Month")) %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="Year" HeaderText="Year" />
+                                    <asp:TemplateField HeaderText="Total Earnings" ItemStyle-CssClass="num" HeaderStyle-CssClass="num">
+                                        <ItemTemplate><%# FormatMoney(Eval("TotalEarnings")) %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Total Deductions" ItemStyle-CssClass="num" HeaderStyle-CssClass="num">
+                                        <ItemTemplate><%# FormatMoney(Eval("TotalDeductions")) %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Net Pay" ItemStyle-CssClass="num" HeaderStyle-CssClass="num">
+                                        <ItemTemplate><%# FormatMoney(Eval("NetPay")) %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="lnkView" runat="server" CommandName="viewUser" CommandArgument='<%# Eval("UserId") %>' title="Salary Slip">
-                                            <i class="fa fa-edit"></i>
+                                            <asp:LinkButton ID="lnkDownload" runat="server" CssClass="ss-dl"
+                                                CommandName="DownloadSlip" CommandArgument='<%# Eval("Month") %>'>
+                                                <i class="fa fa-download"></i>&nbsp;Download
                                             </asp:LinkButton>
-                                            <%--<asp:LinkButton ID="lnkViews" runat="server" CommandName="viewUsers" CommandArgument='<%# Eval("UserId") %>' CssClass="me-1" ToolTip="View">
-<i class="fa fa-eye"></i>
-                                            </asp:LinkButton>--%>
-
-                                            <%--  <asp:LinkButton ID="lnkDelete" CommandName="deleteUser" runat="server" CommandArgument='<%# Eval("UserId") %>' title="Delete User">
-                                             <i class="fa fa-trash"></i>
-                                            </asp:LinkButton>--%>
                                         </ItemTemplate>
-
                                     </asp:TemplateField>
                                 </Columns>
                             </asp:GridView>
-
-                            <!-- Pagination -->
-                            <asp:Panel ID="paginationContainer" runat="server"
-                                CssClass="pagination-container"
-                                Style="text-align: right; font-size: 14px; color: black;"
-                                Visible="false">
-
-                                <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true"
-                                    OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged"
-                                    Style="background-color: white; color: black; border: 1px solid #ddd; padding: 5px 10px; margin: 2px;">
-                                </asp:DropDownList>
-                            </asp:Panel>
-
-
                         </div>
-                    </div>
+                    </asp:Panel>
 
+                    <!-- Empty state -->
+                    <asp:Panel ID="pnlNoData" runat="server" Visible="true">
+                        <div class="ss-empty">
+                            <h4>No Salary Slip Found</h4>
+                            <p>Please select Year, From Month, To Month, and Employee to view salary slip details.</p>
+                        </div>
+                    </asp:Panel>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
     <script>
         function showUserSavedMessage(status, remark) {
             Swal.fire({
-
                 icon: status === "Success" ? "success" : "error",
                 text: remark,
                 timer: 4000,
@@ -135,44 +199,4 @@
             });
         }
     </script>
-      <script>
-          function initializeSearch() {
-              $(document).on('input', '#searchInput', function () {
-                  var searchTerm = $(this).val().toLowerCase();
-                  filterGrid(searchTerm);
-              });
-              $(document).on('keydown', '#searchInput', searchOnEnter);
-          }
-
-          function filterGrid(searchTerm) {
-              $('#<%= gridview.ClientID %> tr:has(td)').hide();
-
-          if (searchTerm === '') {
-              $('#<%= gridview.ClientID %> tr:has(td)').show();
-          } else {
-              $('#<%= gridview.ClientID %> tr:has(td)').filter(function () {
-                      var found = false;
-                      $(this).find('td').each(function () {
-                          if ($(this).text().toLowerCase().includes(searchTerm)) {
-                              found = true;
-                              return false;
-                          }
-                      });
-                      return found;
-                  }).show();
-              }
-          }
-
-          function searchOnEnter(event) {
-              if (event.key === 'Enter') {
-                  event.preventDefault();
-                  var searchTerm = $('#searchInput').val().toLowerCase();
-                  filterGrid(searchTerm);
-              }
-          }
-
-          $(document).ready(function () {
-              initializeSearch();
-          });
-      </script>
 </asp:Content>

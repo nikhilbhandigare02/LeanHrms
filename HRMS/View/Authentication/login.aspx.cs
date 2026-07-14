@@ -12,6 +12,7 @@ namespace HRMS.View.Authentication
     public partial class login : System.Web.UI.Page
     {
         protected string UserId = null;
+        protected string LogoUrl;
         protected void Page_Load(object sender, EventArgs e)
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
@@ -25,6 +26,24 @@ namespace HRMS.View.Authentication
                 Session.Abandon();
                 Response.Redirect("~/view/authentication/login.aspx", false);
                 return;
+            }
+
+            SetLogoUrl();
+        }
+
+        // No user is logged in yet, so use the configured default company logo,
+        // falling back to the bundled image if none is configured.
+        private void SetLogoUrl()
+        {
+            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
+            try
+            {
+                string path = new CommonBL().GetDefaultCompanyLogoPath();
+                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+            }
+            catch
+            {
+                LogoUrl = fallback;
             }
         }
         protected void loginButton_Click(object sender, EventArgs e)

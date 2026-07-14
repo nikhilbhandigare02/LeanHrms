@@ -218,15 +218,14 @@ namespace Lean.View.Layout
                     if (Session["userId"] != null)
                     {
                         CommonBL commonBL = new CommonBL();
-                        var logoList = commonBL.GetCompanyLogoByUser(userId); 
+                        string logoPath = commonBL.ResolveCompanyLogoPath(userId); // e.g. "assets/images/NEW_IMSET_LOGO.png"
 
-                        if (logoList != null && logoList.Count > 0)
-                        {
-                            string logoPath = logoList[0].LogoPath; // "assets/images/NEW_IMSET_LOGO.png"
-                            imgLogoSmall.ImageUrl = ResolveUrl("~/" + logoPath);
-                            imgLogoLarge.ImageUrl = ResolveUrl("~/" + logoPath);
+                        string logoUrl = !string.IsNullOrWhiteSpace(logoPath)
+                            ? ResolveUrl("~/" + logoPath.TrimStart('~', '/'))
+                            : ResolveUrl("~/assets/images/alphonsol_logo.png");
 
-                        }
+                        imgLogoSmall.ImageUrl = logoUrl;
+                        imgLogoLarge.ImageUrl = logoUrl;
                     }
 
 

@@ -45,7 +45,7 @@
                                 <div class="col-12 text-center">
                                     <%--<img src="~/assets/images/alphonsol_logo.png" alt="Alphonsol Logo" class="mb-3" style="max-width: 100px;">--%>
                                     <div style="padding-top: 20px; padding-bottom: 0;">
-                                        <img src="../../assets/images/alphonsol_logo.png" alt="" height="30" />
+                                        <img src="<%= LogoUrl %>" alt="" height="30" />
                                     </div>
                                     <br />
                                     <%-- <div class="text-primary p-4">

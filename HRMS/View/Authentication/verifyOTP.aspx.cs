@@ -12,9 +12,12 @@ namespace HRMS.View.Authentication
     public partial class verifyOTP : System.Web.UI.Page
     {
         protected string UserId = null;
+        protected string LogoUrl;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            SetLogoUrl();
+
             if (!IsPostBack)
             {
                 try
@@ -61,6 +64,24 @@ namespace HRMS.View.Authentication
                     lblErrorMessager.CssClass = "text-danger";
                     lblErrorMessager.Visible = true;
                 }
+            }
+        }
+
+        // Uses the logged-in user's company logo (set during login), then the configured
+        // default, then the bundled image. Runs on every load so postbacks keep the logo.
+        private void SetLogoUrl()
+        {
+            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
+            try
+            {
+                int userId = 0;
+                int.TryParse(Convert.ToString(Session["userId"]), out userId);
+                string path = new CommonBL().ResolveCompanyLogoPath(userId);
+                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+            }
+            catch
+            {
+                LogoUrl = fallback;
             }
         }
 

@@ -17,10 +17,12 @@ namespace HRMS.View.Modules
     public partial class AddSalarySlipData : System.Web.UI.Page
     {
         protected string UserId = null;
+        protected string LogoUrl;
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
             int userId = 0;
+            SetLogoUrl();
             if (!IsPostBack)
             {
                 ddlMonth.Items.Add(new ListItem("-- Select Month --", "0"));
@@ -51,6 +53,24 @@ namespace HRMS.View.Modules
                 BindMonths();
                 BindEmployeeSalary();
                 BindExistingSavedSlip();
+            }
+        }
+
+        // Salary-slip header logo: the logged-in user's company logo, then the configured
+        // default, then the bundled image.
+        private void SetLogoUrl()
+        {
+            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
+            try
+            {
+                int loggedInUserId = 0;
+                int.TryParse(Convert.ToString(Session["userId"]), out loggedInUserId);
+                string path = new CommonBL().ResolveCompanyLogoPath(loggedInUserId);
+                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+            }
+            catch
+            {
+                LogoUrl = fallback;
             }
         }
 

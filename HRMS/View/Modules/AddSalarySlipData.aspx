@@ -54,7 +54,7 @@
 
                         <!-- Logo + Address (Centered) -->
                         <div class="text-center">
-                            <img src="../../assets/images/alphonsol_logo.png"
+                            <img src="<%= LogoUrl %>"
                                 alt="Alphonsol Logo"
                                 style="height: 40px; width: auto; margin-bottom: 6px;" />
 

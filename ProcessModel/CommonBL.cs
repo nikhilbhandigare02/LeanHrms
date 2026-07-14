@@ -271,6 +271,57 @@ namespace ProcessModel
             return listdata;
         }
 
+        // Returns the stored logo path (e.g. "assets/images/NEW_IMSET_LOGO.png") for a
+        // specific user's company, or null when the user has no configured logo.
+        public string GetCompanyLogoPathByUser(int userId)
+        {
+            if (userId <= 0)
+            {
+                return null;
+            }
+
+            List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
+            if (listdata != null && listdata.Count > 0 && !string.IsNullOrWhiteSpace(listdata[0].LogoPath))
+            {
+                return listdata[0].LogoPath;
+            }
+            return null;
+        }
+
+        // Logo shown where there is no logged-in user (login / OTP pages). Driven by the
+        // "DefaultLogoUserId" AppSetting so no DB schema change is required; returns null
+        // when the setting is missing/blank so callers can fall back to the bundled image.
+        public string GetDefaultCompanyLogoPath()
+        {
+            try
+            {
+                int defaultUserId = 0;
+                int.TryParse(ConfigurationManager.AppSettings["DefaultLogoUserId"], out defaultUserId);
+                if (defaultUserId > 0)
+                {
+                    return GetCompanyLogoPathByUser(defaultUserId);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommanBL", "GetDefaultCompanyLogoPath", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return null;
+        }
+
+        // Best available logo path: the user's company logo, else the configured default,
+        // else null (caller falls back to the bundled static image).
+        public string ResolveCompanyLogoPath(int userId)
+        {
+            string path = GetCompanyLogoPathByUser(userId);
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                path = GetDefaultCompanyLogoPath();
+            }
+            return path;
+        }
+
         public List<DropDownData> dropdowCompany()
         {
             List<DropDownData> dropDownData = new List<DropDownData>();

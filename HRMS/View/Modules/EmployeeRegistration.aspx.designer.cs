@@ -168,24 +168,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList ddlProbationPeriod;
 
         /// <summary>
-        /// txtConfirmationDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputGenericControl txtConfirmationDate;
-
-        /// <summary>
-        /// txtProbationEndDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputGenericControl txtProbationEndDate;
-
-        /// <summary>
         /// ddlEmployeeStatus control.
         /// </summary>
         /// <remarks>
@@ -409,60 +391,6 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlAssetCondition;
-
-        /// <summary>
-        /// txtAssetTypeR control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetTypeR;
-
-        /// <summary>
-        /// txtAssetNumberR control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetNumberR;
-
-        /// <summary>
-        /// txtAssetNameR control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetNameR;
-
-        /// <summary>
-        /// txtReturnDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputGenericControl txtReturnDate;
-
-        /// <summary>
-        /// ddlAssetReturnConditionR control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAssetReturnConditionR;
-
-        /// <summary>
-        /// ddlAssetReturnStatusR control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAssetReturnStatusR;
 
         /// <summary>
         /// submitButton control.

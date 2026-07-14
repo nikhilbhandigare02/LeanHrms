@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="Lean.View.Layout.Site1" %>
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="Lean.View.Layout.Site1" %>
 
 <!DOCTYPE html>
 
@@ -435,6 +435,10 @@
             var hrefPath = href.replace(/^https?:\/\/[^/]+/i, '').split('?')[0].toLowerCase();
             var hrefFile = getHrmsFileName(hrefPath);
             var hrefQuery = href.indexOf('?') >= 0 ? href.substring(href.indexOf('?')).toLowerCase() : '';
+
+            if (label.indexOf('accounts dashboard') >= 0 && currentFile === 'accountsdashboard') {
+                return true;
+            }
 
             if (label.indexOf('employee registration') >= 0 && currentFile === 'employeeregistration') {
                 return true;

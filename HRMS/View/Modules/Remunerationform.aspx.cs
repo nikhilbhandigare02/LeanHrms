@@ -67,7 +67,7 @@ namespace HRMS.View.Modules
             {
                 // In view mode, everything is non-editable
                 txtEffectiveFromDate.ReadOnly = true;
-                txtEffectiveToDate.ReadOnly = true;
+               // txtEffectiveToDate.ReadOnly = true;
                 ddlStatus.Enabled = false;
                 ddlEmployeeCategory.Enabled = false;
                 txtCTCAmount.ReadOnly = true;
@@ -123,10 +123,10 @@ namespace HRMS.View.Modules
                                 {
                                     txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("dd-MM-yyyy");
                                 }
-                                if (renum.EffectiveToDate.HasValue)
-                                {
-                                    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
-                                }
+                                //if (renum.EffectiveToDate.HasValue)
+                                //{
+                                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
+                                //}
 
                 // Employee category
                 if (!string.IsNullOrEmpty(renum.EmployeeCategory) && ddlEmployeeCategory.Items.FindByValue(renum.EmployeeCategory) != null)
@@ -401,10 +401,10 @@ namespace HRMS.View.Modules
                 }
 
                 DateTime? effectiveToDate = null;
-                if (!string.IsNullOrEmpty(txtEffectiveToDate.Text) && DateTime.TryParseExact(txtEffectiveToDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedToDate))
-                {
-                    effectiveToDate = parsedToDate;
-                }
+                //if (!string.IsNullOrEmpty(txtEffectiveToDate.Text) && DateTime.TryParseExact(txtEffectiveToDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedToDate))
+                //{
+                //    effectiveToDate = parsedToDate;
+                //}
 
                 // Parse dropdown values
                 int? status = null;

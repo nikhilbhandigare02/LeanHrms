@@ -1097,8 +1097,7 @@
                 <div class="step-item" data-step-link="3"><span class="step-number">3</span><span class="step-title">Organization Details</span></div>
                 <div class="step-item" data-step-link="4"><span class="step-number">4</span><span class="step-title">Attendance &amp; Shift Information</span></div>
                 <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Assets Assignment</span></div>
-                  <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Assets Return</span></div>
-                <div class="step-item" data-step-link="7"><span class="step-number">7</span><span class="step-title">Review &amp; Submit</span></div>
+                <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Review &amp; Submit</span></div>
             </aside>
 
             <main class="onboarding-card">
@@ -1139,8 +1138,8 @@
                         <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
                         <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /></div>
                         <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
-                        <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>
+<%--                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
+                        <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>--%>
                         <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
                         <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
 
@@ -1251,44 +1250,8 @@
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="5">Save</button></div>
                 </section>
 
-                  <section class="wizard-step collapsed pending" data-step="6">
-      <div class="card-heading">
-          <div><span class="accordion-number">6</span><h2>Assets Return</h2><p>Return company assets and track return status from day one.</p></div>
-          <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
-          <i class="fas fa-chevron-down registration-chevron"></i>
-          <span class="step-pill">Step 6 of 7</span>
-      </div>
-      <div class="asset-toolbar">
-          <button type="button" id="returnAssetButton" class="btn-modern btn-primary-modern">Return Asset</button>
-      </div>
-      <div class="table-responsive">
-          <table class="asset-table">
-              <thead><tr><th class="is-required">Asset Type</th>
-                  <th class="is-required">Asset Number</th>
-                  <th class="is-required">Asset Name</th>
-                  <th class="is-required">Return Date</th>
-                 <%-- <th>Return Date</th>--%>
-                  <th class="is-required">Asset Return Condition</th>
-                  <th class="is-required">Asset Status</th>
-                  <th>Action</th></tr></thead>
-              <tbody id="assetReturnRows">
-                  <tr class="asset-row">
-                      <td><input id="txtAssetTypeR" runat="server" class="form-control-modern" placeholder="Enter asset type" /></td>
-                      <td><input id="txtAssetNumberR" runat="server" class="form-control-modern" /></td>
-                      <td><input id="txtAssetNameR" runat="server" class="form-control-modern" /></td>
-                      <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>
-                     <%-- <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>--%>
-                      <td><asp:DropDownList ID="ddlAssetReturnConditionR" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                      <td><asp:DropDownList ID="ddlAssetReturnStatusR" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                      <td></td>
-                  </tr>
-              </tbody>
-          </table>
-      </div>
-      <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="6">Save</button></div>
-  </section>
 
-                <section class="wizard-step collapsed pending-neutral" data-step="7">
+         <%--       <section class="wizard-step collapsed pending-neutral" data-step="7">
                     <div class="card-heading">
                         <div><span class="accordion-number">7</span><h2>Review &amp; Submit</h2><p>Review completed sections before creating the employee record.</p></div>
                         <span class="registration-section-status neutral"><i class="far fa-clock"></i> Pending</span>
@@ -1302,7 +1265,7 @@
                         <div class="review-card"><div class="review-name"><span class="review-check">&#10003;</span>Attendance &amp; Shift Information</div><button type="button" class="btn-modern btn-secondary-modern" data-edit-step="4">Edit</button></div>
                         <div class="review-card"><div class="review-name"><span class="review-check">&#10003;</span>Assets Assignment</div><button type="button" class="btn-modern btn-secondary-modern" data-edit-step="5">Edit</button></div>
                     </div>
-                </section>
+                </section>--%>
 
                 <div class="wizard-actions">
                     <div class="action-left">
@@ -1372,10 +1335,8 @@
                 { id: '<%= txtAssetNumber.ClientID %>', name: 'Asset Number' },
                 { id: '<%= txtAssetName.ClientID %>', name: 'Asset Name' },
                 { id: '<%= txtAssignedDate.ClientID %>', name: 'Assigned Date' },
-                { id: '<%= ddlAssetCondition.ClientID %>', name: 'Asset Condition' },
+                { id: '<%= ddlAssetCondition.ClientID %>', name: 'Asset Condition' }
                <%-- { id: '<%= ddlAssetStatus.ClientID %>', name: 'Asset Status' }--%>
-                { id: '<%= ddlAssetReturnStatusR.ClientID %>', name: 'Asset Status' },
-                 { id: '<%= ddlAssetReturnConditionR.ClientID %>', name: 'Asset Condition' }
             ];
         }
 
@@ -1544,6 +1505,7 @@
             return true;
         }
 
+
         var employeeDuplicateState = {};
         var employeeDuplicateLastShown = {};
         var employeeFormatState = {};
@@ -1694,7 +1656,6 @@
             var backButton = document.getElementById('backButton');
             var createAnotherButton = document.getElementById('createAnotherButton');
             var assignAssetButton = document.getElementById('assignAssetButton');
-            var returnAssetButton = document.getElementById('returnAssetButton');
             var assetRows = document.getElementById('assetRows');
             var overtimeEligible = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             var overtimeRate = document.getElementById('<%= txtOvertimeRate.ClientID %>');
@@ -2162,38 +2123,10 @@
             }
 
 
-            function createAssetReturnRow() {
-                var conditionSelect = document.getElementById('<%= ddlAssetReturnConditionR.ClientID %>');
-                var statusSelect = document.getElementById('<%= ddlAssetReturnStatusR.ClientID %>');
-
-                var row = document.createElement('tr');
-                row.className = 'asset-row';
-                row.innerHTML =
-                    '<td><input class="form-control-modern" placeholder="Enter asset type" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" type="date" /></td>' +
-                    //'<td><input class="form-control-modern" type="date" /></td>' +
-                    '<td><select class="form-select-modern">' + (conditionSelect ? conditionSelect.innerHTML : '') + '</select></td>' +
-                    '<td><select class="form-select-modern">' + (statusSelect ? statusSelect.innerHTML : '') + '</select></td>' +
-                    '<td><button type="button" class="asset-delete-btn" data-delete-asset title="Delete asset"><i class="fas fa-trash-alt"></i></button></td>';
-                return row;
-            }
-
             if (assignAssetButton && assetRows) {
                 assignAssetButton.addEventListener('click', function () {
                     var row = createAssetRow();
                     assetRows.appendChild(row);
-                    initMobileSelects(row);
-                    bindAssetDelete(row.querySelector('[data-delete-asset]'));
-                    applyNoFutureDates(row);
-                });
-            }
-
-            if (returnAssetButton && assetReturnRows) {
-                returnAssetButton.addEventListener('click', function () {
-                    var row = createAssetReturnRow();
-                    assetReturnRows.appendChild(row);
                     initMobileSelects(row);
                     bindAssetDelete(row.querySelector('[data-delete-asset]'));
                     applyNoFutureDates(row);

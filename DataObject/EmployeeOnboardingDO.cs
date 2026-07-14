@@ -17,12 +17,14 @@ namespace DataObject
         public string Nationality { get; set; }
         public string EmploymentType { get; set; }
         public string EmployeeCategory { get; set; }
+       
         public DateTime? JoiningDate { get; set; }
         public DateTime? ConfirmationDate { get; set; }
         public DateTime? ProbationEndDate { get; set; }
         public DateTime? RetirementDate { get; set; }
         public int ProbationMonths { get; set; }
         public string EmployeeStatus { get; set; }
+        public string EmployeeSubStatus { get; set; }
         public int NoticePeriod { get; set; }
         public DateTime? ExitDate { get; set; }
         public string SeparationReason { get; set; }

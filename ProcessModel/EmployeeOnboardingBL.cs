@@ -146,6 +146,7 @@ namespace ProcessModel
                     cmd.Parameters.AddWithValue("@p_retirement_date", ToDbValue(employee.RetirementDate));
                     cmd.Parameters.AddWithValue("@p_probation_months", employee.ProbationMonths);
                     cmd.Parameters.AddWithValue("@p_employee_status", ToDbIntValue(employee.EmployeeStatus));
+                    cmd.Parameters.AddWithValue("@p_employee_sub_status", ToDbIntValue(employee.EmployeeSubStatus));
                     cmd.Parameters.AddWithValue("@p_notice_period", employee.NoticePeriod);
                     cmd.Parameters.AddWithValue("@p_exit_date", ToDbValue(employee.ExitDate));
                     cmd.Parameters.AddWithValue("@p_separation_reason", ToDbIntValue(employee.SeparationReason));
@@ -241,6 +242,7 @@ namespace ProcessModel
                     cmd.Parameters.AddWithValue("@p_asset_condition", ToDbIntValue(asset.AssetCondition));
                     cmd.Parameters.AddWithValue("@p_asset_status", ToDbIntValue(asset.AssetStatus));
                     cmd.Parameters.AddWithValue("@p_inserted_by", insertedBy);
+                    cmd.Parameters.AddWithValue("@P_AssignReturn", "Assign");
 
                     con.Open();
                     using (MySqlDataReader dr = cmd.ExecuteReader())
@@ -313,6 +315,165 @@ namespace ProcessModel
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("EmployeeOnboardingBL", "UpdateEmployeeAsset", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
                 response.Message = "Employee asset update failed due to an exception: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public EmployeeOnboardingResponseDO SaveEmployeeAssetReturn(int userId, EmployeeAssetDO asset, int insertedBy)
+        {
+            EmployeeOnboardingResponseDO response = new EmployeeOnboardingResponseDO
+            {
+                Status = "Failed",
+                Message = "Employee asset return save failed.",
+                UserId = userId
+            };
+
+            if (asset == null || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                response.Message = "Employee asset return data or secondary database connection is missing.";
+                return response;
+            }
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(NormalizeMySqlConnectionString(Sqlconnection)))
+                using (MySqlCommand cmd = new MySqlCommand("SP_SaveEmployeeAsset", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 0;
+
+                    cmd.Parameters.AddWithValue("@p_asset_assignment_id", 0);
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    cmd.Parameters.AddWithValue("@p_asset_type", asset.AssetType);
+                    cmd.Parameters.AddWithValue("@p_asset_number", asset.AssetNumber);
+                    cmd.Parameters.AddWithValue("@p_asset_name", asset.AssetName);
+                    cmd.Parameters.AddWithValue("@p_assigned_date", ToDbValue(asset.AssignedDate));
+                    cmd.Parameters.AddWithValue("@p_return_date", ToDbValue(asset.ReturnDate));
+                    cmd.Parameters.AddWithValue("@p_asset_condition", ToDbIntValue(asset.AssetCondition));
+                    cmd.Parameters.AddWithValue("@p_asset_status", ToDbIntValue(asset.AssetStatus));
+                    cmd.Parameters.AddWithValue("@p_inserted_by", insertedBy);
+                    cmd.Parameters.AddWithValue("@P_AssignReturn", "Return");
+
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            response.Status = ReadString(dr, "Status");
+                            response.Message = ReadString(dr, "Message");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("EmployeeOnboardingBL", "SaveEmployeeAssetReturn", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                response.Message = "Employee asset return save failed due to an exception: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public EmployeeOnboardingResponseDO UpdateEmployeeAssetReturn(int assetId, int userId, EmployeeAssetDO asset, int updatedBy)
+        {
+            EmployeeOnboardingResponseDO response = new EmployeeOnboardingResponseDO
+            {
+                Status = "Failed",
+                Message = "Employee asset return update failed.",
+                UserId = userId
+            };
+
+            if (assetId <= 0 || asset == null || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                response.Message = "Employee asset return id, data, or secondary database connection is missing.";
+                return response;
+            }
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(NormalizeMySqlConnectionString(Sqlconnection)))
+                using (MySqlCommand cmd = new MySqlCommand("SP_SaveEmployeeAsset", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 0;
+
+                    cmd.Parameters.AddWithValue("@p_asset_assignment_id", assetId);
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    cmd.Parameters.AddWithValue("@p_asset_type", asset.AssetType);
+                    cmd.Parameters.AddWithValue("@p_asset_number", asset.AssetNumber);
+                    cmd.Parameters.AddWithValue("@p_asset_name", asset.AssetName);
+                    cmd.Parameters.AddWithValue("@p_assigned_date", ToDbValue(asset.AssignedDate));
+                    cmd.Parameters.AddWithValue("@p_return_date", ToDbValue(asset.ReturnDate));
+                    cmd.Parameters.AddWithValue("@p_asset_condition", ToDbIntValue(asset.AssetCondition));
+                    cmd.Parameters.AddWithValue("@p_asset_status", ToDbIntValue(asset.AssetStatus));
+                    cmd.Parameters.AddWithValue("@p_inserted_by", updatedBy);
+
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            response.Status = ReadString(dr, "Status");
+                            response.Message = ReadString(dr, "Message");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("EmployeeOnboardingBL", "UpdateEmployeeAssetReturn", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                response.Message = "Employee asset return update failed due to an exception: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public EmployeeOnboardingResponseDO DeleteEmployeeAssetReturn(int assetId, int userId, int updatedBy)
+        {
+            EmployeeOnboardingResponseDO response = new EmployeeOnboardingResponseDO
+            {
+                Status = "Failed",
+                Message = "Employee asset return delete failed.",
+                UserId = userId
+            };
+
+            if (assetId <= 0 || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                response.Message = "Employee asset return id or secondary database connection is missing.";
+                return response;
+            }
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(NormalizeMySqlConnectionString(Sqlconnection)))
+                using (MySqlCommand cmd = new MySqlCommand("SP_DeleteEmployeeAsset", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 0;
+
+                    cmd.Parameters.AddWithValue("@p_asset_assignment_id", assetId);
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    cmd.Parameters.AddWithValue("@p_updated_by", updatedBy);
+
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            response.Status = ReadString(dr, "Status");
+                            response.Message = ReadString(dr, "Message");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("EmployeeOnboardingBL", "DeleteEmployeeAssetReturn", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                response.Message = "Employee asset return delete failed due to an exception: " + ex.Message;
             }
 
             return response;

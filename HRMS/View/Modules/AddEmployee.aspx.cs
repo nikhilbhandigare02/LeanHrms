@@ -71,6 +71,7 @@ namespace HRMS.View.Modules
                 BindAssetLookups();
                 BindUserData(userId);
                 BindEmployeeAssets(userId);
+                BindEmployeeAssetReturns(userId);
                 BindEmployeeEducation(userId);
                 BindEmployeeWorkExperience(userId);
                 UpdateSectionStatuses();
@@ -91,6 +92,22 @@ namespace HRMS.View.Modules
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeAssets", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        private void BindEmployeeAssetReturns(int userId)
+        {
+            try
+            {
+                UserDetailsBL userBAL = new UserDetailsBL();
+                List<EmployeeAssetDetailsDO> assetReturns = userBAL.GetEmployeeAssetReturns(userId) ?? new List<EmployeeAssetDetailsDO>();
+                gvEmployeeAssetReturns.DataSource = assetReturns;
+                gvEmployeeAssetReturns.DataBind();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeAssetReturns", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
             }
         }
 
@@ -453,6 +470,18 @@ namespace HRMS.View.Modules
                 ddlAssetStatus.DataValueField = "Id";
                 ddlAssetStatus.DataBind();
                 ddlAssetStatus.Items.Insert(0, new ListItem("-- Select --", ""));
+
+                ddlAssetReturnCondition.DataSource = onboardingBL.BindLookupData("Asset Return Condition");
+                ddlAssetReturnCondition.DataTextField = "Text";
+                ddlAssetReturnCondition.DataValueField = "Id";
+                ddlAssetReturnCondition.DataBind();
+                ddlAssetReturnCondition.Items.Insert(0, new ListItem("-- Select --", ""));
+
+                ddlAssetReturnStatus.DataSource = onboardingBL.BindLookupData("Asset Return Status");
+                ddlAssetReturnStatus.DataTextField = "Text";
+                ddlAssetReturnStatus.DataValueField = "Id";
+                ddlAssetReturnStatus.DataBind();
+                ddlAssetReturnStatus.Items.Insert(0, new ListItem("-- Select --", ""));
             }
             catch (Exception ex)
             {
@@ -656,6 +685,128 @@ namespace HRMS.View.Modules
                 BindEmployeeAssets(employeeUserId);
                 // Keep delete as a staged page change; final DB delete happens on the main employee update.
             }
+        }
+
+        protected void btnSaveAssetReturn_Click(object sender, EventArgs e)
+        {
+            int employeeUserId = GetEmployeeUserIdFromQuery();
+            if (employeeUserId <= 0)
+            {
+                ShowAssetMessage("Failed", "Employee UserId is required for asset return save.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtAssetTypeReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Type is required."); return; }
+            if (string.IsNullOrWhiteSpace(txtAssetNumberReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Number is required."); return; }
+            if (string.IsNullOrWhiteSpace(txtAssetNameReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Name is required."); return; }
+            if (!ParseAssetDate(txtReturnDateReturn.Text).HasValue) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Return Date is required."); return; }
+            if (string.IsNullOrWhiteSpace(ddlAssetReturnCondition.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Condition is required."); return; }
+            if (string.IsNullOrWhiteSpace(ddlAssetReturnStatus.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Status is required."); return; }
+
+            int assetReturnId;
+            int.TryParse(hdnAssetReturnId.Value, out assetReturnId);
+
+            int insertedBy = ParseIntValue(Convert.ToString(Session["userId"]));
+            EmployeeOnboardingBL onboardingBL = new EmployeeOnboardingBL();
+
+            EmployeeAssetDO assetReturn = new EmployeeAssetDO
+            {
+                AssetType = txtAssetTypeReturn.Text.Trim(),
+                AssetNumber = txtAssetNumberReturn.Text.Trim(),
+                AssetName = txtAssetNameReturn.Text.Trim(),
+                ReturnDate = ParseAssetDate(txtReturnDateReturn.Text),
+                AssetCondition = ddlAssetReturnCondition.SelectedValue,
+                AssetStatus = ddlAssetReturnStatus.SelectedValue
+            };
+
+            EmployeeOnboardingResponseDO response;
+            if (assetReturnId > 0)
+            {
+                response = onboardingBL.UpdateEmployeeAssetReturn(assetReturnId, employeeUserId, assetReturn, insertedBy);
+            }
+            else
+            {
+                response = onboardingBL.SaveEmployeeAssetReturn(employeeUserId, assetReturn, insertedBy);
+            }
+
+            if (!string.Equals(response.Status, "Success", StringComparison.OrdinalIgnoreCase))
+            {
+                ShowAssetReturnEditor();
+                ShowAssetMessage("Failed", string.IsNullOrWhiteSpace(response.Message) ? "Asset return save failed." : response.Message);
+                return;
+            }
+
+            ClearAssetReturnForm();
+            BindEmployeeAssetReturns(employeeUserId);
+        }
+
+        protected void gvEmployeeAssetReturns_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            int employeeUserId = GetEmployeeUserIdFromQuery();
+            int assetReturnId;
+            if (!int.TryParse(Convert.ToString(e.CommandArgument), out assetReturnId) || assetReturnId <= 0)
+            {
+                ShowAssetMessage("Failed", "Asset return Id is required.");
+                return;
+            }
+
+            if (string.Equals(e.CommandName, "EditAssetReturn", StringComparison.OrdinalIgnoreCase))
+            {
+                UserDetailsBL userBAL = new UserDetailsBL();
+                List<EmployeeAssetDetailsDO> assetReturns = userBAL.GetEmployeeAssetReturns(employeeUserId) ?? new List<EmployeeAssetDetailsDO>();
+                EmployeeAssetDetailsDO asset = assetReturns.FirstOrDefault(x => x.AssetAssignmentId == assetReturnId);
+                if (asset == null)
+                {
+                    ShowAssetMessage("Failed", "Asset return record not found.");
+                    return;
+                }
+
+                hdnAssetReturnId.Value = asset.AssetAssignmentId.ToString();
+                txtAssetTypeReturn.Text = asset.AssetType;
+                txtAssetNumberReturn.Text = asset.AssetNumber;
+                txtAssetNameReturn.Text = asset.AssetName;
+                txtReturnDateReturn.Text = FormatDateForInput(asset.ReturnDate);
+                SelectDropdownValue(ddlAssetReturnCondition, asset.AssetConditionId.ToString());
+                SelectDropdownValue(ddlAssetReturnStatus, asset.AssetStatusId.ToString());
+                btnSaveAssetReturn.Text = "Update Asset Return";
+                ShowAssetReturnEditor();
+            }
+            else if (string.Equals(e.CommandName, "DeleteAssetReturn", StringComparison.OrdinalIgnoreCase))
+            {
+                int deletedBy = ParseIntValue(Convert.ToString(Session["userId"]));
+                EmployeeOnboardingBL onboardingBL = new EmployeeOnboardingBL();
+                EmployeeOnboardingResponseDO response = onboardingBL.DeleteEmployeeAssetReturn(assetReturnId, employeeUserId, deletedBy);
+                if (!string.Equals(response.Status, "Success", StringComparison.OrdinalIgnoreCase))
+                {
+                    ShowAssetMessage("Failed", string.IsNullOrWhiteSpace(response.Message) ? "Asset return delete failed." : response.Message);
+                    return;
+                }
+                ClearAssetReturnForm();
+                BindEmployeeAssetReturns(employeeUserId);
+            }
+        }
+
+        private void ShowAssetReturnEditor()
+        {
+            assetReturnEditorCard.Attributes["class"] = "asset-editor-card";
+        }
+
+        private void HideAssetReturnEditor()
+        {
+            assetReturnEditorCard.Attributes["class"] = "asset-editor-card collapsed";
+        }
+
+        private void ClearAssetReturnForm()
+        {
+            hdnAssetReturnId.Value = "0";
+            txtAssetTypeReturn.Text = string.Empty;
+            txtAssetNumberReturn.Text = string.Empty;
+            txtAssetNameReturn.Text = string.Empty;
+            txtReturnDateReturn.Text = string.Empty;
+            ddlAssetReturnCondition.SelectedIndex = 0;
+            ddlAssetReturnStatus.SelectedIndex = 0;
+            btnSaveAssetReturn.Text = "Save Asset Return";
+            HideAssetReturnEditor();
         }
 
         private void BindUpdateLookupDropdowns()

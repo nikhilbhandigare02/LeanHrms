@@ -71,9 +71,7 @@ namespace HRMS.View.Modules
             BindLookup(ddlAttendancePolicy, "Attendance Policy");
             BindLookup(ddlWorkLocation, "Work Location");
             BindLookup(ddlAssetCondition, "Asset Condition");
-            BindLookup(ddlAssetReturnConditionR, "Asset Condition");
             // BindLookup(ddlAssetStatus, "Asset Status");
-            BindLookup(ddlAssetReturnStatusR, "Asset Status");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
         }
 
@@ -141,23 +139,23 @@ namespace HRMS.View.Modules
                 if (string.Equals(response.Status, "Success", StringComparison.OrdinalIgnoreCase))
                 {
                     List<EmployeeAssetDO> assets = GetSubmittedAssets();
-                    foreach (EmployeeAssetDO asset in assets)
+                foreach (EmployeeAssetDO asset in assets)
+                {
+                    EmployeeOnboardingResponseDO assetResponse = onboardingBL.SaveEmployeeAsset(response.UserId, asset, employee.InsertedBy);
+                    if (!string.Equals(assetResponse.Status, "Success", StringComparison.OrdinalIgnoreCase))
                     {
-                        EmployeeOnboardingResponseDO assetResponse = onboardingBL.SaveEmployeeAsset(response.UserId, asset, employee.InsertedBy);
-                        if (!string.Equals(assetResponse.Status, "Success", StringComparison.OrdinalIgnoreCase))
-                        {
-                            string assetMessage = HttpUtility.JavaScriptStringEncode(string.IsNullOrWhiteSpace(assetResponse.Message)
-                                ? "Employee asset save failed."
-                                : assetResponse.Message);
+                        string assetMessage = HttpUtility.JavaScriptStringEncode(string.IsNullOrWhiteSpace(assetResponse.Message)
+                            ? "Employee asset save failed."
+                            : assetResponse.Message);
 
-                            ClientScript.RegisterStartupScript(
-                                GetType(),
-                                "EmployeeAssetSaveFailed",
-                                "if(window.Swal){Swal.fire({icon:'error',title:'Employee onboarding save failed',text:'" + assetMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + assetMessage + "');}",
-                                true);
-                            return;
-                        }
+                        ClientScript.RegisterStartupScript(
+                            GetType(),
+                            "EmployeeAssetSaveFailed",
+                            "if(window.Swal){Swal.fire({icon:'error',title:'Employee onboarding save failed',text:'" + assetMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + assetMessage + "');}",
+                            true);
+                        return;
                     }
+                }
 
                     string generatedPassword = DefaultEmployeePassword;
 
@@ -288,7 +286,8 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeCategory))) return "Employee Category is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtJoiningDate))) return "Joining Date is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlProbationPeriod))) return "Probation Period is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeStatus))) return "Employee Status is required.";
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Status is required.";
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Sub Status is required.";
             //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlCompany))) return "Company is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDepartment))) return "Department is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtBranchOffice))) return "Branch Office is required.";
@@ -380,7 +379,7 @@ namespace HRMS.View.Modules
                     AssetNumber = ValueOf(txtAssetNumber),
                     AssetName = ValueOf(txtAssetName),
                     AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-                    ReturnDate = ParseDate(ValueOf(txtReturnDate)),
+                    //ReturnDate = ParseDate(ValueOf(txtReturnDate)),
                     AssetCondition = SelectedValueOf(ddlAssetCondition),
                     //AssetStatus = SelectedValueOf(ddlAssetStatus)
                 });
@@ -424,12 +423,14 @@ namespace HRMS.View.Modules
                 Nationality = SelectedValueOf(ddlNationality),
                 EmploymentType = SelectedValueOf(ddlEmploymentType),
                 EmployeeCategory = SelectedValueOf(ddlEmployeeCategory),
+              
                 JoiningDate = ParseDate(ValueOf(txtJoiningDate)),
-                ConfirmationDate = ParseDate(ValueOf(txtConfirmationDate)),
-                ProbationEndDate = ParseDate(ValueOf(txtProbationEndDate)),
+                //ConfirmationDate = ParseDate(ValueOf(txtConfirmationDate)),
+                //ProbationEndDate = ParseDate(ValueOf(txtProbationEndDate)),
                 RetirementDate = null,
                 ProbationMonths = ParseInt(SelectedValueOf(ddlProbationPeriod)),
                 EmployeeStatus = SelectedValueOf(ddlEmployeeStatus),
+                EmployeeSubStatus = SelectedValueOf(ddlEmployeeSubStatus),
                 NoticePeriod = ParseInt(ValueOf(txtNoticePeriod)),
                 ExitDate = ParseDate(ValueOf(txtExitDate)),
                 SeparationReason = SelectedValueOf(ddlSeparationReason),
@@ -470,7 +471,7 @@ namespace HRMS.View.Modules
                 AssetNumber = ValueOf(txtAssetNumber),
                 AssetName = ValueOf(txtAssetName),
                 AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-                ReturnDate = ParseDate(ValueOf(txtReturnDate)),
+               // ReturnDate = ParseDate(ValueOf(txtReturnDate)),
                 AssetCondition = SelectedValueOf(ddlAssetCondition),
               //  AssetStatus = SelectedValueOf(ddlAssetStatus),
                 InsertedBy = ParseInt(Convert.ToString(Session["userId"]))
@@ -480,13 +481,14 @@ namespace HRMS.View.Modules
         private int GetProbationMonths()
         {
             DateTime? joiningDate = ParseDate(ValueOf(txtJoiningDate));
-            DateTime? probationEndDate = ParseDate(ValueOf(txtProbationEndDate));
-            if (!joiningDate.HasValue || !probationEndDate.HasValue || probationEndDate.Value <= joiningDate.Value)
-            {
-                return 0;
-            }
+            // DateTime? probationEndDate = ParseDate(ValueOf(txtProbationEndDate));
+            //if (!joiningDate.HasValue || !probationEndDate.HasValue || probationEndDate.Value <= joiningDate.Value)
+            //{
+            //    return 0;
+            //}
 
-            return ((probationEndDate.Value.Year - joiningDate.Value.Year) * 12) + probationEndDate.Value.Month - joiningDate.Value.Month;
+            //return ((probationEndDate.Value.Year - joiningDate.Value.Year) * 12) + probationEndDate.Value.Month - joiningDate.Value.Month;
+            return 0;
         }
 
         private string TextOf(DropDownList ddl)

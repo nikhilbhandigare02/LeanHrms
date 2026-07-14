@@ -2192,6 +2192,71 @@
                 </div>
             </details>
 
+            <details class="update-section">
+                <summary>
+                    <span class="section-icon"><i class="fas fa-undo-alt"></i></span>
+                    <span class="section-title">Assets Return</span>
+                    <span class="section-owner">HRMS</span>
+                    <i class="fas fa-chevron-down section-chevron"></i>
+                </summary>
+                <div class="section-body">
+                    <div class="managed-entry-block">
+                        <div class="managed-entry-header">
+                            <button type="button" class="managed-entry-button" onclick="showAssetReturnEditor(false)">Add Asset Return</button>
+                        </div>
+                        <div class="asset-table-wrap">
+                            <asp:GridView ID="gvEmployeeAssetReturns" runat="server" AutoGenerateColumns="false"
+                                CssClass="table table-hover managed-entry-table" GridLines="None"
+                                EmptyDataText="No asset returns found."
+                                OnRowCommand="gvEmployeeAssetReturns_RowCommand">
+                                <Columns>
+                                    <asp:BoundField DataField="AssetType" HeaderText="Asset Type" />
+                                    <asp:BoundField DataField="AssetNumber" HeaderText="Asset Number" />
+                                    <asp:BoundField DataField="AssetName" HeaderText="Asset Name" />
+                                    <asp:BoundField DataField="ReturnDate" HeaderText="Return Date" DataFormatString="{0:dd MMM yyyy}" />
+                                    <asp:BoundField DataField="AssetCondition" HeaderText="Condition" />
+                                    <asp:BoundField DataField="AssetStatus" HeaderText="Status" />
+                                    <asp:TemplateField HeaderText="Actions">
+                                        <ItemTemplate>
+                                            <asp:LinkButton runat="server" CommandName="EditAssetReturn" CommandArgument='<%# Eval("AssetAssignmentId") %>' CssClass="btn-link-action" CausesValidation="false"><i class="fas fa-edit"></i></asp:LinkButton>
+                                            <asp:LinkButton runat="server" CommandName="DeleteAssetReturn" CommandArgument='<%# Eval("AssetAssignmentId") %>' CssClass="btn-link-action text-danger" CausesValidation="false" OnClientClick="return confirm('Delete this asset return record?');"><i class="fas fa-trash-alt"></i></asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
+
+                    <div id="assetReturnEditorCard" runat="server" class="entry-editor-card asset-editor-card collapsed">
+                        <asp:HiddenField ID="hdnAssetReturnId" runat="server" Value="0" />
+                        <div class="entry-editor-header asset-editor-header">
+                            <div class="entry-editor-title-wrap">
+                                <div class="entry-editor-badge"><i class="fas fa-undo-alt"></i></div>
+                                <div>
+                                    <h4 class="entry-editor-title">Add / Edit Asset Return</h4>
+                                </div>
+                            </div>
+                            <button type="button" class="asset-editor-close" onclick="hideAssetReturnEditor()" title="Close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="entry-editor-body">
+                            <div class="form-grid">
+                                <div class="field-block"><label class="required-label">Asset Type</label><asp:TextBox ID="txtAssetTypeReturn" runat="server" CssClass="form-control" placeholder="Laptop / Mobile Phone / SIM Card" /></div>
+                                <div class="field-block"><label class="required-label">Asset Number</label><asp:TextBox ID="txtAssetNumberReturn" runat="server" CssClass="form-control" /></div>
+                                <div class="field-block"><label class="required-label">Asset Name</label><asp:TextBox ID="txtAssetNameReturn" runat="server" CssClass="form-control" /></div>
+                                <div class="field-block"><label class="required-label">Return Date</label><asp:TextBox ID="txtReturnDateReturn" runat="server" CssClass="form-control" TextMode="Date" /></div>
+                                <div class="field-block"><label class="required-label">Asset Condition</label><asp:DropDownList ID="ddlAssetReturnCondition" runat="server" CssClass="form-control"></asp:DropDownList></div>
+                                <div class="field-block"><label class="required-label">Asset Status</label><asp:DropDownList ID="ddlAssetReturnStatus" runat="server" CssClass="form-control"></asp:DropDownList></div>
+                            </div>
+                        </div>
+                        <div class="entry-editor-actions asset-editor-actions">
+                            <asp:Button ID="btnSaveAssetReturn" runat="server" CssClass="btn btn-primary" Text="Save Asset Return" OnClick="btnSaveAssetReturn_Click" CausesValidation="false" OnClientClick="return validateAssetReturnClientForm();" />
+                        </div>
+                    </div>
+                </div>
+            </details>
+
         </div>
 
         <div class="hidden-password-row">
@@ -2880,6 +2945,71 @@
                 return false;
             }
 
+            return true;
+        }
+
+        function showAssetReturnEditor(isEdit) {
+            var editor = document.getElementById('<%= assetReturnEditorCard.ClientID %>');
+            if (editor) {
+                editor.classList.remove('collapsed');
+                editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            if (!isEdit) {
+                clearAssetReturnEditor();
+            }
+        }
+
+        function hideAssetReturnEditor() {
+            var editor = document.getElementById('<%= assetReturnEditorCard.ClientID %>');
+            if (editor) {
+                editor.classList.add('collapsed');
+            }
+        }
+
+        function clearAssetReturnEditor() {
+            var setValue = function (id, value) {
+                var element = document.getElementById(id);
+                if (element) element.value = value;
+            };
+            setValue('<%= hdnAssetReturnId.ClientID %>', '0');
+            setValue('<%= txtAssetTypeReturn.ClientID %>', '');
+            setValue('<%= txtAssetNumberReturn.ClientID %>', '');
+            setValue('<%= txtAssetNameReturn.ClientID %>', '');
+            setValue('<%= txtReturnDateReturn.ClientID %>', '');
+            setValue('<%= ddlAssetReturnCondition.ClientID %>', '');
+            setValue('<%= ddlAssetReturnStatus.ClientID %>', '');
+            var saveButton = document.getElementById('<%= btnSaveAssetReturn.ClientID %>');
+            if (saveButton) saveButton.value = 'Save Asset Return';
+        }
+
+        function validateAssetReturnClientForm() {
+            var validations = [
+                { element: document.getElementById('<%= txtAssetTypeReturn.ClientID %>'), type: 'required', name: 'Asset Type' },
+                { element: document.getElementById('<%= txtAssetNumberReturn.ClientID %>'), type: 'required', name: 'Asset Number' },
+                { element: document.getElementById('<%= txtAssetNameReturn.ClientID %>'), type: 'required', name: 'Asset Name' },
+                { element: document.getElementById('<%= txtReturnDateReturn.ClientID %>'), type: 'required', name: 'Return Date' },
+                { element: document.getElementById('<%= ddlAssetReturnCondition.ClientID %>'), type: 'select', name: 'Asset Condition' },
+                { element: document.getElementById('<%= ddlAssetReturnStatus.ClientID %>'), type: 'select', name: 'Asset Status' }
+            ];
+
+            var firstInvalidElement = null;
+            var firstMessage = '';
+
+            validations.forEach(function (item) {
+                var result = item.type === 'select'
+                    ? validateRequiredSelect(item.element, item.name)
+                    : validateRequiredInput(item.element, item.name);
+                if (!result.valid && !firstInvalidElement) {
+                    firstInvalidElement = item.element;
+                    firstMessage = result.message;
+                }
+            });
+
+            if (firstInvalidElement) {
+                firstInvalidElement.focus();
+                showUserSavedMessage('Failed', firstMessage);
+                return false;
+            }
             return true;
         }
 

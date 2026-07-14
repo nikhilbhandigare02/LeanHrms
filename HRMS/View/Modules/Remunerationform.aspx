@@ -166,34 +166,20 @@
                                 <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-control"></asp:DropDownList>
                             </div>
                         </div>
-                   
-
-               
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">CTC Amount <span class="required">*</span></label>
-                                <asp:TextBox ID="txtCTCAmount" runat="server" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtCTCAmount_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
-                            </div>
-                        </div>
-                         </div>
-                         <div class="form-row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Gross Salary <span class="required">*</span></label>
-                                <asp:TextBox ID="txtGrossSalary" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                                <asp:TextBox ID="txtGrossSalary" runat="server" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtGrossSalary_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
                             </div>
                         </div>
-               
-
-              
+                    </div>
+                    <div class="form-row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Monthly Salary <span class="required">*</span></label>
                                 <asp:TextBox ID="txtMonthlySalary" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
                             </div>
                         </div>
-                             </div>
-                          <div class="form-row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Annual Salary <span class="required">*</span></label>

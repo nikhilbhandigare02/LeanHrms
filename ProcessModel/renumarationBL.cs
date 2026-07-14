@@ -137,7 +137,6 @@ namespace ProcessModel
             DateTime effectiveFromDate,
             DateTime? effectiveToDate,
             int? employeeCategory,
-            decimal ctcAmount,
             decimal grossSalary,
             decimal monthlySalary,
             decimal annualSalary,
@@ -183,7 +182,6 @@ namespace ProcessModel
                     cmd.Parameters.AddWithValue("@p_effective_from_date", effectiveFromDate);
                     cmd.Parameters.AddWithValue("@p_effective_to_date", ToDbValue(effectiveToDate));
                     cmd.Parameters.AddWithValue("@p_employee_category", ToDbIntValue(employeeCategory));
-                    cmd.Parameters.AddWithValue("@p_ctc_amount", ctcAmount);
                     cmd.Parameters.AddWithValue("@p_gross_salary", grossSalary);
                     cmd.Parameters.AddWithValue("@p_monthly_salary", monthlySalary);
                     cmd.Parameters.AddWithValue("@p_annual_salary", annualSalary);
@@ -241,7 +239,6 @@ namespace ProcessModel
             DateTime effectiveFromDate,
             DateTime? effectiveToDate,
             int? employeeCategory,
-            decimal ctcAmount,
             decimal grossSalary,
             decimal monthlySalary,
             decimal annualSalary,
@@ -287,7 +284,6 @@ namespace ProcessModel
                     cmd.Parameters.AddWithValue("@p_effective_from_date", effectiveFromDate);
                     cmd.Parameters.AddWithValue("@p_effective_to_date", ToDbValue(effectiveToDate));
                     cmd.Parameters.AddWithValue("@p_employee_category", ToDbIntValue(employeeCategory));
-                    cmd.Parameters.AddWithValue("@p_ctc_amount", ctcAmount);
                     cmd.Parameters.AddWithValue("@p_gross_salary", grossSalary);
                     cmd.Parameters.AddWithValue("@p_monthly_salary", monthlySalary);
                     cmd.Parameters.AddWithValue("@p_annual_salary", annualSalary);

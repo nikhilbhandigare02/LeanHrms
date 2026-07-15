@@ -10,7 +10,7 @@ namespace DataObject
     {
         public int UserId { get; set; }
 
-        public int employeecode { get; set; }
+        public string employeecode { get; set; }
         public string Username { get; set; }
         public string Month { get; set; }
         public int Year { get; set; }
@@ -33,6 +33,7 @@ namespace DataObject
         public decimal Bonus { get; set; }
         public decimal Incentive { get; set; }
         public decimal Others { get; set; }
+        public string Department { get; set; }
 
         public decimal? AppraisalPercentage { get; set; }
         public decimal? IncrementAmount { get; set; }

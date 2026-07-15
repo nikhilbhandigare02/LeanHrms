@@ -167,7 +167,8 @@
                                     <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
                                             <asp:LinkButton ID="lnkDownload" runat="server" CssClass="ss-dl"
-                                                CommandName="DownloadSlip" CommandArgument='<%# Eval("Month") %>'>
+                                                CommandName="DownloadSlip"
+                                                CommandArgument='<%# string.Format("{0}|{1}|{2}", Eval("employeecode"), Eval("Year"), Eval("Month")) %>'>
                                                 <i class="fa fa-download"></i>&nbsp;Download
                                             </asp:LinkButton>
                                         </ItemTemplate>

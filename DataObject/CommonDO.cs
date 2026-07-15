@@ -84,4 +84,17 @@ namespace DataObject
 
         public List<DropDownData> DesignationList { get; set; }
     }
+
+    public class AppImageDO
+    {
+        public int ImageId { get; set; }
+        public string ImageType { get; set; }
+        public string ImageName { get; set; }
+        public string ImageBase64 { get; set; }
+        public string ContentType { get; set; }
+        public string FileExtension { get; set; }
+        public DateTime? InsertedDate { get; set; }
+        public string Status { get; set; }
+        public string Remarks { get; set; }
+    }
 }

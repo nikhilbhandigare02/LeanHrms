@@ -219,7 +219,7 @@ namespace HRMS.View.Modules
 
             decimal fullBasicSalary = masterData[0].BasicSalary;
             string designation = masterData[0].DesignationName;
-            int employeecode = masterData[0].employeecode;
+            string employeecode = masterData[0].employeecode;
             decimal professionalTax = masterData[0].ProfessionalTax;
 
             int totalWorkingDays = 30;

@@ -338,6 +338,93 @@ namespace ProcessModel
             }
             return dropDownData;
         }
+        // Employee list for the Salary Slip dropdown.
+        // SP must return columns aliased: Id (user_id), Text (employee name), Value (emp code, optional).
+        public List<DropDownData> dropdownEmployee()
+        {
+            List<DropDownData> dropDownData = new List<DropDownData>();
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+                dropDownData = getDrtolistParam.getdatafromreder<DropDownData>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_get_employee_dropdown_salarySlip"));
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "dropdownEmployee", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return dropDownData;
+        }
+
+        // ---- Image library (logo / signature / etc. stored as base64) ----
+
+        public AppImageDO SaveAppImage(AppImageDO img, int insertedBy)
+        {
+            AppImageDO result = new AppImageDO { Status = "Failed", Remarks = "Unable to save image." };
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("@p_image_type", img.ImageType),
+                    DataClass.GetParameter("@p_image_name", img.ImageName),
+                    DataClass.GetParameter("@p_image_base64", img.ImageBase64),
+                    DataClass.GetParameter("@p_content_type", img.ContentType),
+                    DataClass.GetParameter("@p_file_extension", img.FileExtension),
+                    DataClass.GetParameter("@p_inserted_by", insertedBy)
+                };
+                result = getDrtolistParam.getdatafromreder<AppImageDO>(
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_save_app_image")).FirstOrDefault() ?? result;
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "SaveAppImage", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return result;
+        }
+
+        public List<AppImageDO> GetAppImages()
+        {
+            List<AppImageDO> list = new List<AppImageDO>();
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+                list = getDrtolistParam.getdatafromreder<AppImageDO>(
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_get_app_images"));
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "GetAppImages", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return list;
+        }
+
+        public AppImageDO DeleteAppImage(int imageId, int updatedBy)
+        {
+            AppImageDO result = new AppImageDO { Status = "Failed", Remarks = "Unable to delete image." };
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("@p_image_id", imageId),
+                    DataClass.GetParameter("@p_updated_by", updatedBy)
+                };
+                result = getDrtolistParam.getdatafromreder<AppImageDO>(
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_delete_app_image")).FirstOrDefault() ?? result;
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "DeleteAppImage", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return result;
+        }
+
         public List<DropDownData> dropdowterminationReason()
         {
             List<DropDownData> dropDownData = new List<DropDownData>();

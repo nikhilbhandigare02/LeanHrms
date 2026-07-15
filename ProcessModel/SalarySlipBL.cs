@@ -319,7 +319,7 @@ namespace ProcessModel
                             listdata.Add(new SalarySlipDO
                             {
                                 UserId = dr["user_id"] != DBNull.Value ? Convert.ToInt32(dr["user_id"]) : 0,
-                                employeecode = dr["employeecode"] != DBNull.Value ? Convert.ToInt32(dr["employeecode"]) : 0,
+                                employeecode = dr["employeecode"] != DBNull.Value ? Convert.ToString(dr["employeecode"]) : string.Empty,
                                 Username = dr["username"] != DBNull.Value ? Convert.ToString(dr["username"]) : string.Empty,
                                 Month = dr["month"] != DBNull.Value ? Convert.ToString(dr["month"]) : string.Empty,
                                 Year = dr["year"] != DBNull.Value ? Convert.ToInt32(dr["year"]) : 0,
@@ -349,23 +349,21 @@ namespace ProcessModel
 
             return listdata;
         }
-        // Fetches saved salary slips for an employee within a month range (single year)
-        // via stored procedure sp_get_salary_slip_list. Falls back to a direct query on
-        // employee_salary_master if the SP is not deployed.
-        public List<SalarySlipDO> GetSalarySlipList(int userId, int year, int fromMonth, int toMonth)
+        // Fetches saved salary slips for an employee (by employee code) within a month range
+        // via stored procedure sp_get_salary_slip_list. Source table: salary_slip_details.
+        public List<SalarySlipDO> GetSalarySlipList(string employeeCode, int year, int fromMonth, int toMonth)
         {
             List<SalarySlipDO> list = new List<SalarySlipDO>();
-            if (userId <= 0)
+            if (employeeCode == "0")
             {
                 return list;
             }
 
-            // Preferred: stored procedure.
             try
             {
                 List<MySqlParameter> spParams = new List<MySqlParameter>
                 {
-                    DataClass.GetParameter("@p_user_id", userId),
+                    DataClass.GetParameter("@p_employee_code", employeeCode),
                     DataClass.GetParameter("@p_year", year),
                     DataClass.GetParameter("@p_from_month", fromMonth),
                     DataClass.GetParameter("@p_to_month", toMonth)
@@ -382,77 +380,75 @@ namespace ProcessModel
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipList(SP)",
-                    "Exception Message: " + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
-            }
-
-            if (list.Count > 0)
-            {
-                return list;
-            }
-
-            // Fallback: direct query when the SP is not present.
-            try
-            {
-                using (MySqlConnection con = new MySqlConnection(MySqlconnection))
-                using (MySqlCommand cmd = new MySqlCommand(@"
-                    SELECT t.user_id, t.employeeCode, t.employeeName, t.month, t.year, t.designation,
-                           t.DaysPaid, t.BasicSalary, t.HouseRentAllowance, t.SpecialAllowance,
-                           t.LeaveTravelAllowance, t.ProfessionalTax, t.TotalEarnings, t.TotalDeductions, t.NetPay
-                    FROM employee_salary_master t
-                    INNER JOIN (
-                        SELECT user_id, month, year, MAX(emp_salary_master_id) AS latest_id
-                        FROM employee_salary_master
-                        WHERE user_id = @p_user_id AND year = @p_year
-                              AND month BETWEEN @p_from_month AND @p_to_month
-                        GROUP BY user_id, month, year
-                    ) latest ON latest.latest_id = t.emp_salary_master_id
-                    ORDER BY t.month;", con))
-                {
-                    cmd.Parameters.AddWithValue("@p_user_id", userId);
-                    cmd.Parameters.AddWithValue("@p_year", year);
-                    cmd.Parameters.AddWithValue("@p_from_month", fromMonth);
-                    cmd.Parameters.AddWithValue("@p_to_month", toMonth);
-                    con.Open();
-                    using (MySqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        while (dr.Read())
-                        {
-                            list.Add(MapSlipRow(dr));
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipList(fallback)",
+                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipList",
                     "Exception Message: " + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
             }
 
             return list;
         }
 
-        // Maps a salary-slip row (from the SP or the fallback query) into a SalarySlipDO.
+        // Returns the payslip HTML for the Download button, by employee code + month + year
+        // (values taken from the grid row) via stored procedure sp_get_employee_payslip.
+        // The SP returns a single row whose first column holds the HTML (logo embedded as a data URI).
+        public string GetSalarySlipHtml(string employeeCode, int year, int month)
+        {
+            if (string.IsNullOrWhiteSpace(employeeCode))
+            {
+                return null;
+            }
+
+            string html = null;
+            try
+            {
+                List<MySqlParameter> spParams = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("@p_emp_code", employeeCode),
+                    DataClass.GetParameter("@p_year", year),
+                    DataClass.GetParameter("@p_month", month)
+                };
+
+                using (MySqlDataReader dr = DataClass.GetDataReaderFromSpWithParam(spParams, DBName, "sp_get_employee_payslip"))
+                {
+                    if (dr != null && dr.Read() && dr.FieldCount > 0 && dr[0] != DBNull.Value)
+                    {
+                        html = Convert.ToString(dr[0]);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("SalarySlipBL", "GetSalarySlipHtml",
+                    "Exception Message: " + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+
+            return html;
+        }
+
+        // Maps a salary_slip_details row (from sp_get_salary_slip_list / sp_get_salary_slip_by_month)
+        // into a SalarySlipDO.
         private SalarySlipDO MapSlipRow(IDataRecord dr)
         {
             return new SalarySlipDO
             {
-                UserId = SlipInt(dr, "user_id"),
-                employeecode = SlipInt(dr, "employeeCode"),
-                Username = SlipStr(dr, "employeeName"),
+                employeecode = SlipStr(dr, "employeecode"),
+                Username = SlipStr(dr, "username"),
                 Month = SlipStr(dr, "month"),
                 Year = SlipInt(dr, "year"),
-                DesignationName = SlipStr(dr, "designation"),
-                DaysPaid = SlipInt(dr, "DaysPaid"),
-                BasicSalary = SlipDec(dr, "BasicSalary"),
-                HouseRentAllowance = SlipDec(dr, "HouseRentAllowance"),
-                SpecialAllowance = SlipDec(dr, "SpecialAllowance"),
-                LeaveTravelAllowance = SlipDec(dr, "LeaveTravelAllowance"),
-                ProfessionalTax = SlipDec(dr, "ProfessionalTax"),
-                TotalEarnings = SlipDec(dr, "TotalEarnings"),
-                TotalDeductions = SlipDec(dr, "TotalDeductions"),
-                NetPay = SlipDec(dr, "NetPay")
+                DesignationName = SlipStr(dr, "designation_name"),
+                Department = SlipStr(dr, "department"),
+                DaysPaid = SlipInt(dr, "days_paid"),
+                BasicSalary = SlipDec(dr, "basic_salary"),
+                HouseRentAllowance = SlipDec(dr, "house_rent_allowance"),
+                SpecialAllowance = SlipDec(dr, "special_allowance"),
+                LeaveTravelAllowance = SlipDec(dr, "leave_travel_allowance"),
+                Bonus = SlipDec(dr, "Bonus"),
+                Incentive = SlipDec(dr, "Incentive"),
+                Others = SlipDec(dr, "Others"),
+                ProfessionalTax = SlipDec(dr, "professional_tax"),
+                TotalEarnings = SlipDec(dr, "total_earnings"),
+                TotalDeductions = SlipDec(dr, "total_deductions"),
+                NetPay = SlipDec(dr, "net_pay")
             };
         }
 
@@ -646,7 +642,7 @@ namespace ProcessModel
                         slip = new SalarySlipDO
                         {
                             UserId = dr["user_id"] != DBNull.Value ? Convert.ToInt32(dr["user_id"]) : 0,
-                            employeecode = dr["employeecode"] != DBNull.Value ? Convert.ToInt32(dr["employeecode"]) : 0,
+                            employeecode = dr["employeecode"] != DBNull.Value ? Convert.ToString(dr["employeecode"]) : string.Empty,
                             Username = dr["username"] != DBNull.Value ? dr["username"].ToString() : string.Empty,
                             Month = dr["month"] != DBNull.Value ? dr["month"].ToString() : string.Empty,
                             Year = dr["year"] != DBNull.Value ? Convert.ToInt32(dr["year"]) : 0,

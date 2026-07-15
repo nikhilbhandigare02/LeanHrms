@@ -650,7 +650,7 @@ namespace HRMS.View.Modules
                 slip.Year = DateTime.Now.Year;
                 slip.Username = ddl_employeename.SelectedItem != null ? ddl_employeename.SelectedItem.Text : "";
                 slip.DesignationName = ddldesign.SelectedItem != null ? ddldesign.SelectedItem.Text : "";
-                slip.employeecode = string.IsNullOrEmpty(txtEmployeeId.Text) ? 0 : Convert.ToInt32(txtEmployeeId.Text);
+                slip.employeecode = string.IsNullOrEmpty(txtEmployeeId.Text) ? "0" : Convert.ToString(txtEmployeeId.Text);
 
                 slip.DaysPaid = string.IsNullOrEmpty(txtDaysPaid.Text) ? 0 : Convert.ToInt32(txtDaysPaid.Text);
                 slip.DaysPresent = string.IsNullOrEmpty(txtDaysPresent.Text) ? 0 : Convert.ToInt32(txtDaysPresent.Text);

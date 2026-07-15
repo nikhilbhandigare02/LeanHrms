@@ -97,6 +97,10 @@
     <Reference Include="itext.svg, Version=9.4.0.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\itext.9.4.0\lib\net461\itext.svg.dll</HintPath>
     </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.6.1\lib\net47\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.AspNet.FriendlyUrls, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.FriendlyUrls.Core.1.0.2\lib\net45\Microsoft.AspNet.FriendlyUrls.dll</HintPath>
     </Reference>
@@ -1752,6 +1756,7 @@
     <Content Include="View\Modules\Home.aspx" />
     <Content Include="View\Modules\HolidayList.aspx" />
     <Content Include="View\Modules\LeaveConfiguration.aspx" />
+    <Content Include="View\Modules\ImageLibrary.aspx" />
     <Content Include="View\Modules\Remunerationdetails.aspx" />
     <Content Include="View\Modules\Remunerationform.aspx" />
     <Content Include="View\Modules\ResignationList.aspx" />
@@ -2006,6 +2011,13 @@
     </Compile>
     <Compile Include="View\Modules\LeaveConfiguration.aspx.designer.cs">
       <DependentUpon>LeaveConfiguration.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\ImageLibrary.aspx.cs">
+      <DependentUpon>ImageLibrary.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\ImageLibrary.aspx.designer.cs">
+      <DependentUpon>ImageLibrary.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\Remunerationdetails.aspx.cs">
       <DependentUpon>Remunerationdetails.aspx</DependentUpon>

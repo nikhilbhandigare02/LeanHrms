@@ -70,7 +70,6 @@ namespace HRMS.View.Modules
                // txtEffectiveToDate.ReadOnly = true;
                 ddlStatus.Enabled = false;
                 ddlEmployeeCategory.Enabled = false;
-                txtCTCAmount.ReadOnly = true;
                 txtGrossSalary.ReadOnly = true;
                 txtMonthlySalary.ReadOnly = true;
                 txtAnnualSalary.ReadOnly = true;
@@ -133,12 +132,6 @@ namespace HRMS.View.Modules
                 {
                     ddlEmployeeCategory.SelectedValue = renum.EmployeeCategory;
                 }
-
-                // Amounts
-                                if (renum.CTCAmount.HasValue)
-                                {
-                                    txtCTCAmount.Text = renum.CTCAmount.Value.ToString("F2");
-                                }
 
                 // Load repeater data (earnings)
                 LoadRepeaterData(rptEarnings, renum, "earning");
@@ -320,18 +313,13 @@ namespace HRMS.View.Modules
             UpdatePanel1.Update();
         }
 
-        protected void txtMonthlySalary_TextChanged(object sender, EventArgs e)
+        protected void txtGrossSalary_TextChanged(object sender, EventArgs e)
         {
-            if (decimal.TryParse(txtMonthlySalary.Text, out decimal monthly))
+            if (decimal.TryParse(txtGrossSalary.Text, out decimal gross))
             {
-                txtAnnualSalary.Text = (monthly * 12).ToString("F2");
+                txtMonthlySalary.Text = gross.ToString("F2");
+                txtAnnualSalary.Text = (gross * 12).ToString("F2");
             }
-            UpdatePanel1.Update();
-        }
-
-        protected void txtCTCAmount_TextChanged(object sender, EventArgs e)
-        {
-            // Can implement any CTC related logic here
             UpdatePanel1.Update();
         }
 
@@ -353,20 +341,26 @@ namespace HRMS.View.Modules
 
             txtGrossSalary.Text = totalEarnings.ToString("F2");
 
-            // Calculate total deductions
+            // Calculate total deductions (excluding exceed paid leave)
             decimal totalDeductions = 0;
             foreach (RepeaterItem item in rptDeductions.Items)
             {
+                HiddenField hfName = (HiddenField)item.FindControl("hfComponentName");
                 CheckBox chk = (CheckBox)item.FindControl("chkComponent");
                 TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
 
-                if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
+                if (hfName != null && chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
                 {
-                    totalDeductions += amount;
+                    string compName = hfName.Value.ToLower().Trim();
+                    // Exclude exceed paid leave from deductions
+                    if (!compName.Contains("exceed") && !compName.Contains("paid leave"))
+                    {
+                        totalDeductions += amount;
+                    }
                 }
             }
 
-            // Calculate net monthly salary and annual salary
+            // Calculate monthly and annual salary (deductions subtracted from gross)
             decimal netMonthly = totalEarnings - totalDeductions;
             txtMonthlySalary.Text = netMonthly.ToString("F2");
             txtAnnualSalary.Text = (totalEarnings * 12).ToString("F2");
@@ -512,13 +506,6 @@ namespace HRMS.View.Modules
                     }
                 }
 
-                // Validate CTC > 0
-                if (string.IsNullOrEmpty(txtCTCAmount.Text) || !decimal.TryParse(txtCTCAmount.Text, out decimal ctc) || ctc <= 0)
-                {
-                    ShowAlert("CTC amount must be greater than zero!");
-                    return;
-                }
-
                 // Validate Gross Salary
                 if (string.IsNullOrEmpty(txtGrossSalary.Text) || !decimal.TryParse(txtGrossSalary.Text, out decimal gross) || gross <= 0)
                 {
@@ -583,7 +570,6 @@ namespace HRMS.View.Modules
                         effectiveFromDate,
                         effectiveToDate,
                         employeeCategory,
-                        ctc,
                         gross,
                         monthlySalary,
                         annualSalary,
@@ -630,7 +616,6 @@ namespace HRMS.View.Modules
                         effectiveFromDate,
                         effectiveToDate,
                         employeeCategory,
-                        ctc,
                         gross,
                         monthlySalary,
                         annualSalary,

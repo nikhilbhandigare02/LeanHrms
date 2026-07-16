@@ -330,7 +330,7 @@ namespace HRMS.View.Modules
                 if (string.IsNullOrWhiteSpace(asset.AssetName)) return "Asset Name is required" + suffix + ".";
                 if (!asset.AssignedDate.HasValue) return "Assigned Date is required" + suffix + ".";
                 if (string.IsNullOrWhiteSpace(asset.AssetCondition)) return "Asset Condition is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetStatus)) return "Asset Status is required" + suffix + ".";
+                //if (string.IsNullOrWhiteSpace(asset.AssetStatus)) return "Asset Status is required" + suffix + ".";
             }
 
             return string.Empty;

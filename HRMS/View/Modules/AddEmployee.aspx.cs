@@ -1329,7 +1329,7 @@ namespace HRMS.View.Modules
                     ddl_reportingmanager.DataSource = null;
                 }
                 ddl_reportingmanager.DataBind();
-                ddl_reportingmanager.Items.Insert(0, new ListItem("-- Please Select --", ""));
+               // ddl_reportingmanager.Items.Insert(0, new ListItem("-- Please Select --", ""));
             }
             catch (Exception ex)
             {

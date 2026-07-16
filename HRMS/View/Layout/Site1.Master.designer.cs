@@ -51,22 +51,22 @@ namespace Lean.View.Layout
         protected global::System.Web.UI.WebControls.LinkButton Logo;
 
         /// <summary>
-        /// imgLogoSmall control.
+        /// litLogoSmall control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Image imgLogoSmall;
+        protected global::System.Web.UI.WebControls.Literal litLogoSmall;
 
         /// <summary>
-        /// imgLogoLarge control.
+        /// litLogoLarge control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Image imgLogoLarge;
+        protected global::System.Web.UI.WebControls.Literal litLogoLarge;
 
         /// <summary>
         /// TimerUpdatePanel control.

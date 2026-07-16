@@ -260,7 +260,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("@p_UserId", userId));
 
                 listdata = getDrtolistParam.getdatafromreder<CompanyLogoDO>(
-                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_GetCompanyLogoByUserId")
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_GetCompanyLogoNew")
                 ).ToList();
             }
             catch (Exception ex)
@@ -283,7 +283,7 @@ namespace ProcessModel
             List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
             if (listdata != null && listdata.Count > 0 && !string.IsNullOrWhiteSpace(listdata[0].LogoPath))
             {
-                return listdata[0].LogoPath;
+                return listdata[0].LogoHtml;
             }
             return null;
         }
@@ -320,6 +320,74 @@ namespace ProcessModel
                 path = GetDefaultCompanyLogoPath();
             }
             return path;
+        }
+
+        // Looks up the user's company logo row, falling back to the "DefaultLogoUserId"
+        // company when the user has none. Returns null when neither has a base64/html logo.
+        private CompanyLogoDO GetEffectiveCompanyLogo(int userId)
+        {
+            if (userId <= 0)
+            {
+                return null;
+            }
+
+            List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
+            CompanyLogoDO logo = listdata != null && listdata.Count > 0 ? listdata[0] : null;
+
+            bool hasImageData = logo != null && (!string.IsNullOrWhiteSpace(logo.LogoHtml) || !string.IsNullOrWhiteSpace(logo.LogoBase64));
+            if (!hasImageData)
+            {
+                int defaultUserId = 0;
+                int.TryParse(ConfigurationManager.AppSettings["DefaultLogoUserId"], out defaultUserId);
+                if (defaultUserId > 0 && defaultUserId != userId)
+                {
+                    List<CompanyLogoDO> defaultData = GetCompanyLogoByUser(defaultUserId);
+                    logo = defaultData != null && defaultData.Count > 0 ? defaultData[0] : null;
+                }
+            }
+
+            return logo;
+        }
+
+        // Returns a ready-to-use "data:<contentType>;base64,<data>" URI for the user's
+        // company logo when sp_GetCompanyLogoByUserId returns base64 image data, else null
+        // so callers can fall back to ResolveCompanyLogoPath/the bundled static image.
+        public string ResolveCompanyLogoImageUrl(int userId)
+        {
+            CompanyLogoDO logo = GetEffectiveCompanyLogo(userId);
+            if (logo == null || string.IsNullOrWhiteSpace(logo.LogoBase64))
+            {
+                return null;
+            }
+
+            string contentType = string.IsNullOrWhiteSpace(logo.ContentType) ? "image/png" : logo.ContentType;
+            return "data:" + contentType + ";base64," + logo.LogoBase64;
+        }
+
+        // Returns the ready-made <img> markup when sp_GetCompanyLogoByUserId builds it itself
+        // (e.g. CONCAT('<img src="data:', v_logo_ct, ';base64,', v_logo_base64, '" style="max-height:60px;"/>')),
+        // else builds the same markup from the base64/content-type columns, else null so the
+        // caller can fall back to ResolveCompanyLogoPath/the bundled static image.
+        public string ResolveCompanyLogoHtml(int userId)
+        {
+            CompanyLogoDO logo = GetEffectiveCompanyLogo(userId);
+            if (logo == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(logo.LogoHtml))
+            {
+                return logo.LogoHtml;
+            }
+
+            if (!string.IsNullOrWhiteSpace(logo.LogoBase64))
+            {
+                string contentType = string.IsNullOrWhiteSpace(logo.ContentType) ? "image/png" : logo.ContentType;
+                return "<img src=\"data:" + contentType + ";base64," + logo.LogoBase64 + "\" style=\"max-height:60px;\"/>";
+            }
+
+            return null;
         }
 
         public List<DropDownData> dropdowCompany()

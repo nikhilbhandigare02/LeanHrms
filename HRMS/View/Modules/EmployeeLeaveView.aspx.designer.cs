@@ -10,13 +10,16 @@ namespace HRMS.View.Modules
     {
         protected global::System.Web.UI.WebControls.TextBox txtStartDate;
         protected global::System.Web.UI.WebControls.TextBox txtEndDate;
-        protected global::System.Web.UI.WebControls.TextBox txtApprovalStatus;
+        protected global::System.Web.UI.WebControls.Label lblApprovalStatus;
         protected global::System.Web.UI.WebControls.TextBox txtLookupId;
         protected global::System.Web.UI.WebControls.TextBox txtLeaveTypeId;
+        protected global::System.Web.UI.WebControls.Panel pnlApprovedDates;
         protected global::System.Web.UI.WebControls.TextBox txtApprovedFromDate;
         protected global::System.Web.UI.WebControls.TextBox txtApprovedToDate;
         protected global::System.Web.UI.WebControls.TextBox txtDescription;
+        protected global::System.Web.UI.WebControls.Panel pnlRejectionReason;
         protected global::System.Web.UI.WebControls.TextBox txtRejectionRemark;
+        protected global::System.Web.UI.WebControls.Panel pnlPendingNote;
         protected global::System.Web.UI.WebControls.Button btnBack;
     }
 }

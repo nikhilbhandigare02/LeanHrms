@@ -104,11 +104,10 @@
     <Compile Include="EmployeeLeaveBL.cs" />
     <Compile Include="HandoverprocessBL.cs" />
     <Compile Include="HolidayListBL.cs" />
+    <Compile Include="HomeBL.cs" />
     <Compile Include="LoginBAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-
     <Compile Include="ReimbursementBL.cs" />
-
     <Compile Include="renumarationBL.cs" />
     <Compile Include="RoleDetailsBL.cs" />
     <Compile Include="SalarySlipBL.cs" />

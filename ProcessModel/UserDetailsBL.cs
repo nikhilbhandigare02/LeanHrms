@@ -1450,6 +1450,7 @@ namespace ProcessModel
                             object dojVal = getVal(dr, new[] { "date_of_joining", "DateOfJoining", "joining_date", "doj" });
                             object probationVal = getVal(dr, new[] { "probation_period_months", "ProbationPeriodMonths", "probation_months" });
                             object employeeTypeVal = getVal(dr, new[] { "employee_type", "EmployeeType", "employment_type" });
+                            object probationEndDate = getVal(dr, new[] { "probation_end_date", "ProbationEndDate", "probation_end_date" });
                             string designationName = designationNameVal != null ? Convert.ToString(designationNameVal) : string.Empty;
                             string designationIdRaw = designationIdVal != null ? Convert.ToString(designationIdVal) : string.Empty;
                             int designationIdParsed = 0;
@@ -1479,7 +1480,8 @@ namespace ProcessModel
                                 Isactive = isActiveVal != null && IsActiveValue(isActiveVal),
                                 date_of_joining = dojVal != null ? Convert.ToDateTime(dojVal) : DateTime.MinValue,
                                 probation_period_months = probationVal != null && int.TryParse(Convert.ToString(probationVal), out var probationParsed) ? probationParsed : 0,
-                                employee_type = employeeTypeVal != null ? Convert.ToString(employeeTypeVal) : string.Empty
+                                employee_type = employeeTypeVal != null ? Convert.ToString(employeeTypeVal) : string.Empty,
+                                ProbationEndDate= dojVal != null ? Convert.ToDateTime(probationEndDate) : DateTime.MinValue,
                             });
                         }
                     }
@@ -2181,6 +2183,7 @@ namespace ProcessModel
                 object divVal = getVal((IDataRecord)dr, new[] { "division", "Division", "div", "division_name" });
                 object dojVal = getVal((IDataRecord)dr, new[] { "date_of_joining", "DateOfJoining", "joining_date", "doj" });
                 object probVal = getVal((IDataRecord)dr, new[] { "probation_period_months", "ProbationPeriodMonths", "probation_period", "probation_months" });
+                object probendVal = getVal((IDataRecord)dr, new[] { "probation_end_date", "ProbationEndDate", "probation_period", "probation_end_date" });
                 object mgrVal = getVal((IDataRecord)dr, new[] { "reporting_manager_id", "reporting_manager", "ReportingManager", "reportingmanager", "manager_id", "manager" });
                 object typeVal = getVal((IDataRecord)dr, new[] { "employee_type", "EmployeeType", "employment_type", "emp_type" });
                 object employmentTypeIdVal = getVal((IDataRecord)dr, new[] { "EmploymentTypeId", "employment_type_id" });

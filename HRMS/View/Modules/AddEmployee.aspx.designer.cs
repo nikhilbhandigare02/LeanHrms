@@ -600,33 +600,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList txtEmployeeStatus;
 
         /// <summary>
-        /// txtNoticePeriod control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNoticePeriod;
-
-        /// <summary>
-        /// txtExitDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtExitDate;
-
-        /// <summary>
-        /// txtSeparationReason control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList txtSeparationReason;
-
-        /// <summary>
         /// txtProbationStatus control.
         /// </summary>
         /// <remarks>
@@ -735,15 +708,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtLocation;
 
         /// <summary>
-        /// txtFunctionalManager control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFunctionalManager;
-
-        /// <summary>
         /// txtHod control.
         /// </summary>
         /// <remarks>
@@ -751,15 +715,6 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtHod;
-
-        /// <summary>
-        /// txtEmployeeLevel control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList txtEmployeeLevel;
 
         /// <summary>
         /// attendanceSectionStatus control.
@@ -1311,15 +1266,6 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtAssignedDate;
 
         /// <summary>
-        /// txtReturnDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtReturnDate;
-
-        /// <summary>
         /// ddlAssetCondition control.
         /// </summary>
         /// <remarks>
@@ -1327,15 +1273,6 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlAssetCondition;
-
-        /// <summary>
-        /// ddlAssetStatus control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAssetStatus;
 
         /// <summary>
         /// btnSaveAsset control.

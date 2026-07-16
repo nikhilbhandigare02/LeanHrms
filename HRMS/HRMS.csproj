@@ -314,7 +314,6 @@
     <Content Include="assets\fonts\fa-brands-400.svg" />
     <Content Include="assets\fonts\fa-regular-400.svg" />
     <Content Include="assets\fonts\fa-solid-900.svg" />
-    <Content Include="assets\images\alphonsol_logo.png" />
     <Content Include="assets\images\appt2.png" />
     <Content Include="assets\images\bg-auth-overlay.png" />
     <Content Include="assets\images\brands\bitbucket.png" />

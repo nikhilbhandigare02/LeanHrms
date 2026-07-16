@@ -49,6 +49,7 @@
     <Compile Include="EmployeeOnboardingDO.cs" />
     <Compile Include="EmployeeLeaveListDO.cs" />
     <Compile Include="HolidayListDO.cs" />
+    <Compile Include="HomeDO.cs" />
     <Compile Include="LoginBO.cs" />
     <Compile Include="LoginDO.cs" />
     <Compile Include="MenuDO.cs" />

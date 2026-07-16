@@ -65,8 +65,11 @@ namespace HRMS.View.Modules
             users = users ?? new List<UserDetailsDO>();
             int total = users.Count;
             int active = users.Count(u => u.Isactive);
-            int probation = users.Count(u => u.probation_period_months > 0 || string.Equals(Convert.ToString(u.employee_type), "Probation", StringComparison.OrdinalIgnoreCase));
             DateTime today = DateTime.Today;
+            int probation = users.Count(u => (u.ProbationEndDate.HasValue && u.ProbationEndDate.Value.Date >= today)
+);
+            //int probation = users.Count(u => u.probation_period_months > 0 || string.Equals(Convert.ToString(u.employee_type), "Probation", StringComparison.OrdinalIgnoreCase));
+            
             int newJoiners = users.Count(u => u.date_of_joining != DateTime.MinValue && u.date_of_joining.Month == today.Month && u.date_of_joining.Year == today.Year);
 
             litTotalEmployees.Text = total.ToString();
@@ -83,9 +86,10 @@ namespace HRMS.View.Modules
 
         private bool IsProbationEmployee(UserDetailsDO user)
         {
+            DateTime today = DateTime.Today;
             return user != null &&
-                   (user.probation_period_months > 0 ||
-                    string.Equals(Convert.ToString(user.employee_type), "Probation", StringComparison.OrdinalIgnoreCase));
+                   (user.ProbationEndDate.HasValue && user.ProbationEndDate.Value.Date >= today) ||
+                    string.Equals(Convert.ToString(user.employee_type), "Probation", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool IsNewJoiner(UserDetailsDO user)

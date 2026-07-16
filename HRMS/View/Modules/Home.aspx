@@ -1,4 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="Home.aspx.cs" Inherits="HRMS.View.Modules.Home" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -68,9 +69,9 @@
             padding: 24px 32px;
         }
 
-        .hb-slide.active {
-            opacity: 1;
-        }
+            .hb-slide.active {
+                opacity: 1;
+            }
 
         .hb-slide-text {
             z-index: 10;
@@ -119,8 +120,13 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .hb-slideshow-controls {
@@ -143,15 +149,15 @@
             border: 2px solid transparent;
         }
 
-        .hb-slideshow-dot:hover {
-            background: rgba(255,255,255,0.6);
-        }
+            .hb-slideshow-dot:hover {
+                background: rgba(255,255,255,0.6);
+            }
 
-        .hb-slideshow-dot.active {
-            background: white;
-            transform: scale(1.3);
-            border-color: rgba(255,255,255,0.5);
-        }
+            .hb-slideshow-dot.active {
+                background: white;
+                transform: scale(1.3);
+                border-color: rgba(255,255,255,0.5);
+            }
 
         .hb-card {
             background: #ffffff;
@@ -181,15 +187,26 @@
             flex-shrink: 0;
         }
 
-        .hb-icon svg {
-            width: 20px;
-            height: 20px;
-        }
+            .hb-icon svg {
+                width: 20px;
+                height: 20px;
+            }
 
-        .hb-icon.news { background: #e8f0fe; }
-        .hb-icon.birthday { background: #fdeaea; }
-        .hb-icon.events { background: #e9f9ef; }
-        .hb-icon.holiday { background: #fff4e0; }
+            .hb-icon.news {
+                background: #e8f0fe;
+            }
+
+            .hb-icon.birthday {
+                background: #fdeaea;
+            }
+
+            .hb-icon.events {
+                background: #e9f9ef;
+            }
+
+            .hb-icon.holiday {
+                background: #fff4e0;
+            }
 
         .hb-card-title {
             font-size: 15px;
@@ -215,9 +232,9 @@
             border-bottom: 1px dashed #eef0f3;
         }
 
-        .hb-item:last-child {
-            border-bottom: none;
-        }
+            .hb-item:last-child {
+                border-bottom: none;
+            }
 
         .hb-avatar {
             width: 34px;
@@ -255,9 +272,25 @@
             height: fit-content;
         }
 
-        .hb-badge.today { background: #fdeaea; color: #e0455a; }
-        .hb-badge.upcoming { background: #e8f0fe; color: #2f6fed; }
-        .hb-badge.date { background: #f0f2f5; color: #666; }
+            .hb-badge.today {
+                background: #e7f1ff;
+                color: #2563eb;
+            }
+
+            .hb-badge.normal {
+                background: #fdeaea;
+                color: #e0455a;
+            }
+
+            .hb-badge.upcoming {
+                background: #e8f0fe;
+                color: #2f6fed;
+            }
+
+            .hb-badge.date {
+                background: #f0f2f5;
+                color: #666;
+            }
 
         .hb-empty {
             font-size: 13px;
@@ -278,10 +311,10 @@
             cursor: pointer;
         }
 
-        .hb-viewall:hover {
-            background: #f7f9fc;
-            color: #1d54c4;
-        }
+            .hb-viewall:hover {
+                background: #f7f9fc;
+                color: #1d54c4;
+            }
 
         .hb-stats-row {
             display: grid;
@@ -291,10 +324,15 @@
         }
 
         @media (max-width: 992px) {
-            .hb-stats-row { grid-template-columns: repeat(2, 1fr); }
+            .hb-stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
+
         @media (max-width: 640px) {
-            .hb-stats-row { grid-template-columns: 1fr; }
+            .hb-stats-row {
+                grid-template-columns: 1fr;
+            }
         }
 
         .hb-stat {
@@ -346,10 +384,10 @@
             flex-shrink: 0;
         }
 
-        .hb-add-btn:hover {
-            background: #d2e3fc;
-            color: #1d54c4;
-        }
+            .hb-add-btn:hover {
+                background: #d2e3fc;
+                color: #1d54c4;
+            }
 
         /* Modal */
         .hb-modal-overlay {
@@ -362,9 +400,9 @@
             justify-content: center;
         }
 
-        .hb-modal-overlay.active {
-            display: flex;
-        }
+            .hb-modal-overlay.active {
+                display: flex;
+            }
 
         .hb-modal {
             background: #fff;
@@ -377,8 +415,15 @@
         }
 
         @keyframes hb-modal-in {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .hb-modal-header {
@@ -412,7 +457,9 @@
             padding: 0;
         }
 
-        .hb-modal-close:hover { background: #e0e4ea; }
+            .hb-modal-close:hover {
+                background: #e0e4ea;
+            }
 
         .hb-modal-body {
             padding: 18px 20px;
@@ -427,37 +474,37 @@
             gap: 5px;
         }
 
-        .hb-field label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #555;
-        }
+            .hb-field label {
+                font-size: 12px;
+                font-weight: 600;
+                color: #555;
+            }
 
-        .hb-field input,
-        .hb-field select,
-        .hb-field textarea {
-            border: 1px solid #dde1e8;
-            border-radius: 8px;
-            padding: 8px 11px;
-            font-size: 13.5px;
-            color: #222;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.15s;
-            background: #fff;
-        }
+            .hb-field input,
+            .hb-field select,
+            .hb-field textarea {
+                border: 1px solid #dde1e8;
+                border-radius: 8px;
+                padding: 8px 11px;
+                font-size: 13.5px;
+                color: #222;
+                font-family: inherit;
+                outline: none;
+                transition: border-color 0.15s;
+                background: #fff;
+            }
 
-        .hb-field input:focus,
-        .hb-field select:focus,
-        .hb-field textarea:focus {
-            border-color: #2f6fed;
-            box-shadow: 0 0 0 3px rgba(47,111,237,0.1);
-        }
+                .hb-field input:focus,
+                .hb-field select:focus,
+                .hb-field textarea:focus {
+                    border-color: #2f6fed;
+                    box-shadow: 0 0 0 3px rgba(47,111,237,0.1);
+                }
 
-        .hb-field textarea {
-            resize: vertical;
-            min-height: 72px;
-        }
+            .hb-field textarea {
+                resize: vertical;
+                min-height: 72px;
+            }
 
         .hb-field-row {
             display: grid;
@@ -487,29 +534,36 @@
             color: #555;
         }
 
-        .hb-btn-ghost:hover { background: #e0e4ea; }
+            .hb-btn-ghost:hover {
+                background: #e0e4ea;
+            }
 
         .hb-btn-primary {
             background: #2f6fed;
             color: #fff;
         }
 
-        .hb-btn-primary:hover { background: #1d54c4; }
+            .hb-btn-primary:hover {
+                background: #1d54c4;
+            }
     </style>
 
     <div class="hb-wrap">
 
-        <div class="hb-welcome">Welcome back, <asp:Literal ID="litUserName" runat="server" Text="meera123" />!</div>
+        <div class="hb-welcome">
+            Welcome back,
+            <asp:Literal ID="litUserName" runat="server" />!
+        </div>
         <div class="hb-subtext">Here's what's happening today.</div>
 
         <!-- Slideshow Banner -->
-        <div class="hb-slideshow">
+   <%--     <div class="hb-slideshow">
             <div class="hb-slideshow-content">
                 <div class="hb-slide active" data-slide="0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <div class="hb-slide-text">
                         <span class="hb-slide-badge">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
-                                <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+                                <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
                             </svg>
                             Event
                         </span>
@@ -523,11 +577,11 @@
                     <div class="hb-slide-text">
                         <span class="hb-slide-badge">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                                <polyline points="10,9 9,9 8,9"/>
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14,2 14,8 20,8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10,9 9,9 8,9" />
                             </svg>
                             News
                         </span>
@@ -541,7 +595,7 @@
                     <div class="hb-slide-text">
                         <span class="hb-slide-badge">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
-                                <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0"/>
+                                <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0" />
                             </svg>
                             Birthday
                         </span>
@@ -555,7 +609,7 @@
                     <div class="hb-slide-text">
                         <span class="hb-slide-badge">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
-                                <path d="M23 6a2 2 0 0 1-2 2H7l-4 4V4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                <path d="M23 6a2 2 0 0 1-2 2H7l-4 4V4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                             </svg>
                             Town Hall
                         </span>
@@ -569,9 +623,9 @@
                     <div class="hb-slide-text">
                         <span class="hb-slide-badge">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                                <line x1="8" y1="21" x2="16" y2="21"/>
-                                <line x1="12" y1="17" x2="12" y2="21"/>
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
                             </svg>
                             Maintenance
                         </span>
@@ -589,43 +643,117 @@
                     <div class="hb-slideshow-dot" data-slide="4"></div>
                 </div>
             </div>
+        </div>--%>
+        <div class="hb-slideshow">
+    <div class="hb-slideshow-content">
+
+        <asp:Repeater ID="rptBanner" runat="server">
+            <ItemTemplate>
+
+                <div class='hb-slide <%# Container.ItemIndex==0 ? "active" : "" %>'
+                     data-slide='<%# Container.ItemIndex %>'
+                     style='background:<%# Eval("Background") %>'>
+
+                    <div class="hb-slide-text">
+
+                        <span class="hb-slide-badge">
+                            <%# Eval("IconHtml") %>
+                            <%# Eval("Category") %>
+                        </span>
+
+                        <div class="hb-slide-title">
+                            <%# Eval("Title") %>
+                        </div>
+
+                        <div class="hb-slide-meta">
+                            <%# Eval("Meta") %>
+                        </div>
+
+                        <div class="hb-slide-description">
+                            <%# Eval("Description") %>
+                        </div>
+
+                    </div>
+
+                    <img class="hb-slide-image"
+                         src='<%# Eval("ImageUrl") %>'
+                         alt='<%# Eval("Category") %>' />
+
+                </div>
+
+            </ItemTemplate>
+
+        </asp:Repeater>
+
+        <div class="hb-slideshow-controls">
+
+            <asp:Repeater ID="rptDots" runat="server">
+                <ItemTemplate>
+
+                    <div class='hb-slideshow-dot <%# Container.ItemIndex==0 ? "active" : "" %>'
+                         data-slide='<%# Container.ItemIndex %>'>
+                    </div>
+
+                </ItemTemplate>
+            </asp:Repeater>
+
         </div>
 
+    </div>
+</div>
         <!-- Quick stats row -->
         <div class="hb-stats-row">
             <div class="hb-stat">
-                <div class="hb-icon events" style="width:44px;height:44px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                <div class="hb-icon events" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2">
+                        <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                    </svg>
                 </div>
                 <div>
-                    <div class="hb-stat-num"><asp:Literal ID="litUpcomingEvents" runat="server" Text="3" /></div>
+                    <div class="hb-stat-num">
+                        <asp:Literal ID="litUpcomingEvents" runat="server" />
+                    </div>
                     <div class="hb-stat-label">Upcoming Events</div>
                 </div>
             </div>
             <div class="hb-stat">
-                <div class="hb-icon birthday" style="width:44px;height:44px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2"><path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0"/></svg>
+                <div class="hb-icon birthday" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2">
+                        <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0" />
+                    </svg>
                 </div>
                 <div>
-                    <div class="hb-stat-num"><asp:Literal ID="litUpcomingBirthdays" runat="server" Text="2" /></div>
+                    <div class="hb-stat-num">
+                        <asp:Literal ID="litUpcomingBirthdays" runat="server" />
+                    </div>
                     <div class="hb-stat-label">Birthdays This Week</div>
                 </div>
             </div>
             <div class="hb-stat">
-                <div class="hb-icon holiday" style="width:44px;height:44px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#e8a33d" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <div class="hb-icon holiday" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#e8a33d" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
                 </div>
                 <div>
-                    <div class="hb-stat-num"><asp:Literal ID="litNextHoliday" runat="server" Text="15 Aug" /></div>
+                    <div class="hb-stat-num">
+                        <asp:Literal ID="litNextHoliday" runat="server" />
+                    </div>
                     <div class="hb-stat-label">Next Holiday</div>
                 </div>
             </div>
             <div class="hb-stat">
-                <div class="hb-icon news" style="width:44px;height:44px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><path d="M4 4h16v14a2 2 0 0 1-2 2H4z"/><path d="M4 4v16M8 8h8M8 12h8M8 16h5"/></svg>
+                <div class="hb-icon news" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2">
+                        <path d="M4 4h16v14a2 2 0 0 1-2 2H4z" />
+                        <path d="M4 4v16M8 8h8M8 12h8M8 16h5" />
+                    </svg>
                 </div>
                 <div>
-                    <div class="hb-stat-num"><asp:Literal ID="litNewsCount" runat="server" Text="4" /></div>
+                    <div class="hb-stat-num">
+                        <asp:Literal ID="litNewsCount" runat="server" />
+                    </div>
                     <div class="hb-stat-label">New Announcements</div>
                 </div>
             </div>
@@ -638,18 +766,86 @@
             <div class="hb-card">
                 <div class="hb-card-head">
                     <div class="hb-icon news">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><path d="M4 4h16v14a2 2 0 0 1-2 2H4z"/><path d="M4 4v16M8 8h8M8 12h8M8 16h5"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2">
+                            <path d="M4 4h16v14a2 2 0 0 1-2 2H4z" />
+                            <path d="M4 4v16M8 8h8M8 12h8M8 16h5" />
+                        </svg>
                     </div>
-                    <div style="flex:1;">
+                    <div style="flex: 1;">
                         <div class="hb-card-title">Company News</div>
                         <div class="hb-card-sub">Latest updates & announcements</div>
                     </div>
                     <a class="hb-add-btn" href="#" onclick="openModal('modalNews'); return false;" title="Add News">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
                         Add News
                     </a>
                 </div>
                 <div class="hb-card-body">
+
+                    <!-- First 3 News -->
+                    <asp:Repeater ID="rptNews" runat="server">
+                        <ItemTemplate>
+                            <div class="hb-item">
+                                <div class="hb-avatar" style="background: #2f6fed;">
+                                    <%# Eval("Initials") %>
+                                </div>
+
+                                <div style="flex: 1;">
+                                    <div class="hb-item-title">
+                                        <%# Eval("news_title") %>
+                                    </div>
+
+                                    <div class="hb-item-meta">
+                                        <%# Eval("PostedOn") %>
+                                    </div>
+                                </div>
+
+                                <span class="hb-badge upcoming">
+                                    <%# Eval("category") %>
+                                </span>
+                            </div>
+                        </ItemTemplate>
+                    </asp:Repeater>
+
+                    <!-- Remaining News -->
+                    <div class="hb-extra" id="newsExtra">
+                        <asp:Repeater ID="rptMoreNews" runat="server">
+                            <ItemTemplate>
+                                <div class="hb-item">
+                                    <div class="hb-avatar" style="background: #2f6fed;">
+                                        <%# Eval("Initials") %>
+                                    </div>
+
+                                    <div style="flex: 1;">
+                                        <div class="hb-item-title">
+                                            <%# Eval("news_title") %>
+                                        </div>
+
+                                        <div class="hb-item-meta">
+                                            <%# Eval("PostedOn") %>
+                                        </div>
+                                    </div>
+
+                                    <span class="hb-badge upcoming">
+                                        <%# Eval("category") %>
+                                    </span>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+
+                </div>
+
+                <a class="hb-viewall"
+                    onclick="toggleExtra('newsExtra', this, 'View All News', 'Show Less')"
+                    href="#">View All News
+    <span class="hb-extra-count">(+<asp:Literal ID="litMoreCount" runat="server"></asp:Literal>)
+    </span>
+                </a>
+                <%-- <div class="hb-card-body">
                     <asp:Repeater ID="rptNews" runat="server">
                         <ItemTemplate>
                             <div class="hb-item">
@@ -664,7 +860,6 @@
                             </div>
                         </ItemTemplate>
                     </asp:Repeater>
-                    <%-- Visible items (always shown) --%>
                     <div class="hb-item">
                         <div class="hb-avatar" style="background:#2f6fed;">HR</div>
                         <div style="flex:1;">
@@ -689,7 +884,6 @@
                         </div>
                         <span class="hb-badge upcoming">Reminder</span>
                     </div>
-                    <%-- Hidden extras --%>
                     <div class="hb-extra" id="newsExtra">
                         <div class="hb-item">
                             <div class="hb-avatar" style="background:#e8a33d;">FN</div>
@@ -708,13 +902,126 @@
                             <span class="hb-badge date">General</span>
                         </div>
                     </div>
-                </div>
-                <a class="hb-viewall" onclick="toggleExtra('newsExtra', this, 'View All News', 'Show Less')" href="#">View All News <span class="hb-extra-count">(+2)</span></a>
+                </div>--%>
+                <%--                <a class="hb-viewall" onclick="toggleExtra('newsExtra', this, 'View All News', 'Show Less')" href="#">View All News <span class="hb-extra-count">(+2)</span></a>--%>
             </div>
 
             <!-- Birthdays -->
+
             <div class="hb-card">
+
                 <div class="hb-card-head">
+                    <div class="hb-icon birthday">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2">
+                            <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0" />
+                        </svg>
+                    </div>
+
+                    <div style="flex: 1;">
+                        <div class="hb-card-title">Upcoming Birthdays</div>
+                        <div class="hb-card-sub">Celebrate with your teammates</div>
+                    </div>
+
+                    <%--<a class="hb-add-btn"
+                        href="#"
+                        onclick="openModal('modalBirthday'); return false;"
+                        title="Add Birthday">
+
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+
+                        Add Birthday
+                    </a>--%>
+                </div>
+
+                <div class="hb-card-body">
+
+                    <!-- First 3 Birthdays -->
+                    <asp:Repeater ID="rptBirthdays" runat="server">
+                        <ItemTemplate>
+
+                            <div class="hb-item">
+
+                                <div class="hb-avatar">
+                                    <%# Eval("Initials") %>
+                                </div>
+
+                                <div style="flex: 1;">
+                                    <div class="hb-item-title">
+                                        <%# Eval("EmployeeName") %>
+                                    </div>
+
+                                    <div class="hb-item-meta">
+                                        <%# Eval("Department") %>
+                                    </div>
+                                </div>
+
+                                <%-- <span class="hb-badge today">
+                                    <%# Eval("DateLabel") %>
+                                </span>--%>
+                                <span class='hb-badge <%# Eval("BadgeClass") %>'>
+                                    <%# Eval("DateLabel") %>
+                                </span>
+
+                            </div>
+
+                        </ItemTemplate>
+                    </asp:Repeater>
+
+                    <!-- Remaining Birthdays -->
+                    <div class="hb-extra" id="bdayExtra">
+
+                        <asp:Repeater ID="rptMoreBirthdays" runat="server">
+                            <ItemTemplate>
+
+                                <div class="hb-item">
+
+                                    <div class="hb-avatar">
+                                        <%# Eval("Initials") %>
+                                    </div>
+
+                                    <div style="flex: 1;">
+                                        <div class="hb-item-title">
+                                            <%# Eval("EmployeeName") %>
+                                        </div>
+
+                                        <div class="hb-item-meta">
+                                            <%# Eval("Department") %>
+                                        </div>
+                                    </div>
+
+                                    <%-- <span class="hb-badge today">
+                                        <%# Eval("DateLabel") %>
+                                    </span>--%>
+
+                                    <span class='hb-badge <%# Eval("BadgeClass") %>'>
+                                        <%# Eval("DateLabel") %>
+                                    </span>
+
+                                </div>
+
+                            </ItemTemplate>
+                        </asp:Repeater>
+
+                    </div>
+
+                </div>
+
+                <a class="hb-viewall"
+                    href="#"
+                    onclick="toggleExtra('bdayExtra', this, 'View All Birthdays', 'Show Less'); return false;">View All Birthdays
+
+        <span class="hb-extra-count">(+<asp:Literal ID="litMoreBirthdayCount" runat="server"></asp:Literal>)
+        </span>
+
+                </a>
+
+            </div>
+            <%--                            <div class="hb-card">--%>
+
+            <%--     <div class="hb-card-head">
                     <div class="hb-icon birthday">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2"><path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0"/></svg>
                     </div>
@@ -726,8 +1033,8 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Add Birthday
                     </a>
-                </div>
-                <div class="hb-card-body">
+                </div>--%>
+            <%--<div class="hb-card-body">
                     <asp:Repeater ID="rptBirthdays" runat="server">
                         <ItemTemplate>
                             <div class="hb-item">
@@ -739,9 +1046,9 @@
                                 <span class="hb-badge today"><%# Eval("DateLabel") %></span>
                             </div>
                         </ItemTemplate>
-                    </asp:Repeater>
-                    <%-- Visible items --%>
-                    <div class="hb-item">
+                    </asp:Repeater>--%>
+            <%-- Visible items --%>
+            <%-- <div class="hb-item">
                         <div class="hb-avatar" style="background:#e0455a;">RS</div>
                         <div style="flex:1;">
                             <div class="hb-item-title">Riya Sharma</div>
@@ -764,9 +1071,9 @@
                             <div class="hb-item-meta">Finance</div>
                         </div>
                         <span class="hb-badge date">19 Jul</span>
-                    </div>
-                    <%-- Hidden extras --%>
-                    <div class="hb-extra" id="bdayExtra">
+                    </div>--%>
+            <%-- Hidden extras --%>
+            <%--<div class="hb-extra" id="bdayExtra">
                         <div class="hb-item">
                             <div class="hb-avatar" style="background:#2ea44f;">VN</div>
                             <div style="flex:1;">
@@ -785,12 +1092,114 @@
                         </div>
                     </div>
                 </div>
-                <a class="hb-viewall" onclick="toggleExtra('bdayExtra', this, 'View All Birthdays', 'Show Less')" href="#">View All Birthdays <span class="hb-extra-count">(+2)</span></a>
-            </div>
+                <a class="hb-viewall" onclick="toggleExtra('bdayExtra', this, 'View All Birthdays', 'Show Less')" href="#">View All Birthdays <span class="hb-extra-count">(+2)</span></a>--%>
+            <%--</div>--%>
 
             <!-- Events / Holidays -->
             <div class="hb-card">
+
                 <div class="hb-card-head">
+                    <div class="hb-icon events">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2">
+                            <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                        </svg>
+                    </div>
+
+                    <div style="flex: 1;">
+                        <div class="hb-card-title">Events &amp; Holidays</div>
+                        <div class="hb-card-sub">What's coming up next</div>
+                    </div>
+
+                    <a class="hb-add-btn"
+                        href="#"
+                        onclick="openModal('modalEvent'); return false;"
+                        title="Add Event">
+
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+
+                        Add Event
+                    </a>
+                </div>
+
+                <div class="hb-card-body">
+
+                    <!-- First 3 Events -->
+                    <asp:Repeater ID="rptEvents" runat="server">
+                        <ItemTemplate>
+
+                            <div class="hb-item">
+
+                                <div class="hb-avatar" style="background: #2f6fed;">
+                                    <%# Eval("EventDay") %>
+                                </div>
+
+                                <div style="flex: 1;">
+                                    <div class="hb-item-title">
+                                        <%# Eval("event_title") %>
+                                    </div>
+
+                                    <div class="hb-item-meta">
+                                        <%# Eval("EventDate") %>
+                                    </div>
+                                </div>
+
+                                <span class="hb-badge upcoming">
+                                    <%# Eval("event_type") %>
+                                </span>
+
+                            </div>
+
+                        </ItemTemplate>
+                    </asp:Repeater>
+
+                    <!-- Remaining Events -->
+                    <div class="hb-extra" id="eventsExtra">
+
+                        <asp:Repeater ID="rptMoreEvents" runat="server">
+                            <ItemTemplate>
+
+                                <div class="hb-item">
+
+                                    <div class="hb-avatar" style="background: #2f6fed;">
+                                        <%# Eval("EventDay") %>
+                                    </div>
+
+                                    <div style="flex: 1;">
+                                        <div class="hb-item-title">
+                                            <%# Eval("event_title") %>
+                                        </div>
+
+                                        <div class="hb-item-meta">
+                                            <%# Eval("EventDate") %>
+                                        </div>
+                                    </div>
+
+                                    <span class="hb-badge upcoming">
+                                        <%# Eval("event_type") %>
+                                    </span>
+
+                                </div>
+
+                            </ItemTemplate>
+                        </asp:Repeater>
+
+                    </div>
+
+                </div>
+
+                <a class="hb-viewall"
+                    href="#"
+                    onclick="toggleExtra('eventsExtra', this, 'View Full Calendar', 'Show Less'); return false;">View Full Calendar
+
+        <span class="hb-extra-count">(+<asp:Literal ID="litMoreEventCount" runat="server"></asp:Literal>)
+        </span>
+
+                </a>
+
+                <%--  <div class="hb-card-head">
                     <div class="hb-icon events">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
                     </div>
@@ -802,8 +1211,8 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Add Event
                     </a>
-                </div>
-                <div class="hb-card-body">
+                </div>--%>
+                <%--<div class="hb-card-body">
                     <asp:Repeater ID="rptEvents" runat="server">
                         <ItemTemplate>
                             <div class="hb-item">
@@ -817,9 +1226,9 @@
                                 <span class="hb-badge upcoming"><%# Eval("EventType") %></span>
                             </div>
                         </ItemTemplate>
-                    </asp:Repeater>
-                    <%-- Visible items --%>
-                    <div class="hb-item">
+                    </asp:Repeater>--%>
+                <%-- Visible items --%>
+                <%-- <div class="hb-item">
                         <div class="hb-avatar" style="background:#2f6fed;">18</div>
                         <div style="flex:1;">
                             <div class="hb-item-title">Team Building Activity</div>
@@ -842,9 +1251,9 @@
                             <div class="hb-item-meta">31 July 2026 &middot; 10:00 AM</div>
                         </div>
                         <span class="hb-badge upcoming">Event</span>
-                    </div>
-                    <%-- Hidden extras --%>
-                    <div class="hb-extra" id="eventsExtra">
+                    </div>--%>
+                <%-- Hidden extras --%>
+                <%-- <div class="hb-extra" id="eventsExtra">
                         <div class="hb-item">
                             <div class="hb-avatar" style="background:#e8a33d;">15</div>
                             <div style="flex:1;">
@@ -864,13 +1273,14 @@
                     </div>
                 </div>
                 <a class="hb-viewall" onclick="toggleExtra('eventsExtra', this, 'View Full Calendar', 'Show Less')" href="#">View Full Calendar <span class="hb-extra-count">(+2)</span></a>
+            </div>--%>
             </div>
 
-        </div>
-    </div>
 
-    <!-- Add News Modal -->
-    <div class="hb-modal-overlay" id="modalNews" onclick="overlayClose(event, 'modalNews')">
+        </div>
+
+        <!-- Add News Modal -->
+        <%--   <div class="hb-modal-overlay" id="modalNews" onclick="overlayClose(event, 'modalNews')">
         <div class="hb-modal">
             <div class="hb-modal-header">
                 <div class="hb-icon news" style="flex-shrink:0;">
@@ -911,52 +1321,287 @@
                 <button class="hb-btn hb-btn-primary" onclick="saveNews()">Post Announcement</button>
             </div>
         </div>
-    </div>
+    </div>--%>
+        <div class="hb-modal-overlay" id="modalNews" onclick="overlayClose(event, 'modalNews')">
+            <div class="hb-modal">
 
-    <!-- Add Birthday Modal -->
-    <div class="hb-modal-overlay" id="modalBirthday" onclick="overlayClose(event, 'modalBirthday')">
-        <div class="hb-modal">
-            <div class="hb-modal-header">
-                <div class="hb-icon birthday" style="flex-shrink:0;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2"><path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0"/></svg>
-                </div>
-                <div class="hb-modal-title">Add Birthday</div>
-                <button class="hb-modal-close" onclick="closeModal('modalBirthday')">&#x2715;</button>
-            </div>
-            <div class="hb-modal-body">
-                <div class="hb-field">
-                    <label>Employee Name <span style="color:#e0455a;">*</span></label>
-                    <input type="text" id="bdayName" placeholder="Full name" />
-                </div>
-                <div class="hb-field-row">
-                    <div class="hb-field">
-                        <label>Department <span style="color:#e0455a;">*</span></label>
-                        <select id="bdayDept">
-                            <option value="">Select department</option>
-                            <option>Human Resources</option>
-                            <option>Development</option>
-                            <option>Finance</option>
-                            <option>Operations</option>
-                            <option>Marketing</option>
-                            <option>Sales</option>
-                            <option>Administration</option>
-                        </select>
+                <div class="hb-modal-header">
+                    <div class="hb-icon news" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2">
+                            <path d="M4 4h16v14a2 2 0 0 1-2 2H4z" />
+                            <path d="M4 4v16M8 8h8M8 12h8M8 16h5" />
+                        </svg>
                     </div>
-                    <div class="hb-field">
-                        <label>Date of Birth <span style="color:#e0455a;">*</span></label>
-                        <input type="date" id="bdayDate" />
+
+                    <div class="hb-modal-title">
+                        Add News / Announcement
                     </div>
+
+                    <button type="button" class="hb-modal-close" onclick="closeModal('modalNews')">
+                        &#x2715;
+                    </button>
                 </div>
-            </div>
-            <div class="hb-modal-footer">
-                <button class="hb-btn hb-btn-ghost" onclick="closeModal('modalBirthday')">Cancel</button>
-                <button class="hb-btn hb-btn-primary" onclick="saveBirthday()">Save Birthday</button>
+
+                <div class="hb-modal-body">
+
+                    <div class="hb-field">
+                        <label>Title <span style="color: #e0455a;">*</span></label>
+
+                        <asp:TextBox ID="newsTitle"
+                            runat="server"
+                            CssClass="form-control"
+                            placeholder="e.g. New leave policy update">
+                        </asp:TextBox>
+
+                        <span id="lblNewsTitleError" style="color: red; font-size: 12px;"></span>
+                    </div>
+
+                    <div class="hb-field-row">
+
+                        <div class="hb-field">
+                            <label>Category</label>
+
+                            <asp:DropDownList
+                                ID="newsTag"
+                                runat="server"
+                                CssClass="hb-select">
+
+                                <asp:ListItem Text="Policy" Value="Policy"></asp:ListItem>
+                                <asp:ListItem Text="Notice" Value="Notice"></asp:ListItem>
+                                <asp:ListItem Text="Reminder" Value="Reminder"></asp:ListItem>
+                                <asp:ListItem Text="Finance" Value="Finance"></asp:ListItem>
+                                <asp:ListItem Text="General" Value="General"></asp:ListItem>
+                                <asp:ListItem Text="IT" Value="IT"></asp:ListItem>
+
+                            </asp:DropDownList>
+                        </div>
+
+                        <div class="hb-field">
+                            <label>Posted By <span style="color: #e0455a;">*</span></label>
+
+                            <asp:TextBox
+                                ID="newsPostedBy"
+                                runat="server"
+                                CssClass="hb-input"
+                                placeholder="e.g. HR, Admin">
+    </asp:TextBox>
+
+                            <span id="lblPostedByError" style="color: red; font-size: 12px;"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="hb-field">
+
+                        <label>Description <span style="color: #e0455a;">*</span></label>
+
+                        <asp:TextBox
+                            ID="newsDesc"
+                            runat="server"
+                            CssClass="hb-textarea"
+                            TextMode="MultiLine"
+                            Rows="4"
+                            placeholder="Brief description">
+    </asp:TextBox>
+
+                        <span id="lblDescriptionError" style="color: red; font-size: 12px;"></span>
+
+                    </div>
+
+                </div>
+
+                <div class="hb-modal-footer">
+
+                    <button type="button"
+                        class="hb-btn hb-btn-ghost"
+                        onclick="closeModal('modalNews')">
+                        Cancel
+                    </button>
+
+                    <asp:Button
+                        ID="btnSaveNews"
+                        runat="server"
+                        Text="Post Announcement"
+                        CssClass="hb-btn hb-btn-primary"
+                        OnClick="saveNews"
+                        OnClientClick="return validateNews();" />
+
+                </div>
+
             </div>
         </div>
-    </div>
+        <!-- Add Birthday Modal -->
+        <%-- <div class="hb-modal-overlay" id="modalBirthday" onclick="overlayClose(event, 'modalBirthday')">
+            <div class="hb-modal">
+                <div class="hb-modal-header">
+                    <div class="hb-icon birthday" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2">
+                            <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0" />
+                        </svg>
+                    </div>
+                    <div class="hb-modal-title">Add Birthday</div>
+                    <button class="hb-modal-close" onclick="closeModal('modalBirthday')">&#x2715;</button>
+                </div>
+                <div class="hb-modal-body">
+                    <div class="hb-field">
+                        <label>Employee Name <span style="color: #e0455a;">*</span></label>
+                        <input type="text" id="bdayName" placeholder="Full name" />
+                    </div>
+                    <div class="hb-field-row">
+                        <div class="hb-field">
+                            <label>Department <span style="color: #e0455a;">*</span></label>
+                            <select id="bdayDept">
+                                <option value="">Select department</option>
+                                <option>Human Resources</option>
+                                <option>Development</option>
+                                <option>Finance</option>
+                                <option>Operations</option>
+                                <option>Marketing</option>
+                                <option>Sales</option>
+                                <option>Administration</option>
+                            </select>
+                        </div>
+                        <div class="hb-field">
+                            <label>Date of Birth <span style="color: #e0455a;">*</span></label>
+                            <input type="date" id="bdayDate" />
+                        </div>
+                    </div>
+                </div>
+                <div class="hb-modal-footer">
+                    <button class="hb-btn hb-btn-ghost" onclick="closeModal('modalBirthday')">Cancel</button>
+                    <button class="hb-btn hb-btn-primary" onclick="saveBirthday()">Save Birthday</button>
+                </div>
+            </div>
+        </div>--%>
+        <%-- <div class="hb-modal-overlay" id="modalBirthday" onclick="overlayClose(event, 'modalBirthday')">
+            <div class="hb-modal">
 
-    <!-- Add Event / Holiday Modal -->
-    <div class="hb-modal-overlay" id="modalEvent" onclick="overlayClose(event, 'modalEvent')">
+                <div class="hb-modal-header">
+                    <div class="hb-icon birthday" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#e0455a" stroke-width="2">
+                            <path d="M12 6c1 0 1.5-1 1-2s-1-1-1-2c-.5 1-1 1-1 2s0 2 1 2zM4 22v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 22h20M4 14c1-1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0 2 1 3 0" />
+                        </svg>
+                    </div>
+
+                    <div class="hb-modal-title">
+                        Add Birthday
+                    </div>
+
+                    <button type="button"
+                        class="hb-modal-close"
+                        onclick="closeModal('modalBirthday')">
+                        &#x2715;
+                    </button>
+                </div>
+
+                <div class="hb-modal-body">
+
+                    <!-- Employee Name -->
+                    <div class="hb-field-row">
+                        <div class="hb-field">
+
+                            <label>Employee Name <span style="color: #e0455a;">*</span></label>
+
+                            <asp:TextBox
+                                ID="bdayName"
+                                runat="server"
+                                CssClass="hb-input"
+                                placeholder="Full name">
+                            </asp:TextBox>
+
+                            <span id="lblBdayNameError"
+                                style="color: red; font-size: 12px;"></span>
+
+                        </div>
+                        <div class="hb-field">
+
+                            <label>Employee Code <span style="color: #e0455a;">*</span></label>
+
+                            <asp:TextBox
+                                ID="bdayempCode"
+                                runat="server"
+                                CssClass="hb-input"
+                                placeholder="Employee Code">
+                            </asp:TextBox>
+
+                            <span id="lblBdayemployeecodeError"
+                                style="color: red; font-size: 12px;"></span>
+
+                        </div>
+                    </div>
+
+                    <div class="hb-field-row">
+
+                        <!-- Department -->
+                        <div class="hb-field">
+
+                            <label>Department <span style="color: #e0455a;">*</span></label>
+
+                            <asp:DropDownList
+                                ID="bdayDept"
+                                runat="server"
+                                CssClass="hb-select">
+
+                                <asp:ListItem Value="">Select Department</asp:ListItem>
+                                <asp:ListItem Value="Human Resources">Human Resources</asp:ListItem>
+                                <asp:ListItem Value="Development">Development</asp:ListItem>
+                                <asp:ListItem Value="Finance">Finance</asp:ListItem>
+                                <asp:ListItem Value="Operations">Operations</asp:ListItem>
+                                <asp:ListItem Value="Marketing">Marketing</asp:ListItem>
+                                <asp:ListItem Value="Sales">Sales</asp:ListItem>
+                                <asp:ListItem Value="Administration">Administration</asp:ListItem>
+
+                            </asp:DropDownList>
+
+                            <span id="lblBdayDeptError"
+                                style="color: red; font-size: 12px;"></span>
+
+                        </div>
+
+                        <!-- DOB -->
+                        <div class="hb-field">
+
+                            <label>Date of Birth <span style="color: #e0455a;">*</span></label>
+
+                            <asp:TextBox
+                                ID="bdayDate"
+                                runat="server"
+                                CssClass="hb-input"
+                                TextMode="Date">
+                            </asp:TextBox>
+
+                            <span id="lblBdayDateError"
+                                style="color: red; font-size: 12px;"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="hb-modal-footer">
+
+                    <button type="button"
+                        class="hb-btn hb-btn-ghost"
+                        onclick="closeModal('modalBirthday')">
+                        Cancel
+                    </button>
+
+                    <asp:Button
+                        ID="btnSaveBirthday"
+                        runat="server"
+                        Text="Save Birthday"
+                        CssClass="hb-btn hb-btn-primary"
+                        OnClick="saveBirthday"
+                        OnClientClick="return validateBirthday();" />
+
+                </div>
+
+            </div>
+        </div>--%>
+
+        <!-- Add Event / Holiday Modal -->
+        <%--    <div class="hb-modal-overlay" id="modalEvent" onclick="overlayClose(event, 'modalEvent')">
         <div class="hb-modal">
             <div class="hb-modal-header">
                 <div class="hb-icon events" style="flex-shrink:0;">
@@ -995,6 +1640,126 @@
             <div class="hb-modal-footer">
                 <button class="hb-btn hb-btn-ghost" onclick="closeModal('modalEvent')">Cancel</button>
                 <button class="hb-btn hb-btn-primary" onclick="saveEvent()">Save</button>
+            </div>
+        </div>
+    </div>--%>
+        <div class="hb-modal-overlay" id="modalEvent" onclick="overlayClose(event, 'modalEvent')">
+            <div class="hb-modal">
+
+                <div class="hb-modal-header">
+                    <div class="hb-icon events" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2">
+                            <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                        </svg>
+                    </div>
+
+                    <div class="hb-modal-title">Add Event / Holiday</div>
+
+                    <button type="button" class="hb-modal-close" onclick="closeModal('modalEvent')">
+                        &#x2715;
+                    </button>
+                </div>
+
+                <div class="hb-modal-body">
+
+                    <div class="hb-field-row">
+
+                        <div class="hb-field">
+                            <label>
+                                Type <span style="color: #e0455a;">*</span>
+                            </label>
+
+                            <asp:DropDownList ID="eventType"
+                                runat="server"
+                                CssClass="hb-input"
+                                onchange="toggleEventTime()">
+
+                                <asp:ListItem Value="Event">Event</asp:ListItem>
+                                <asp:ListItem Value="Holiday">Holiday</asp:ListItem>
+
+                            </asp:DropDownList>
+
+                        </div>
+
+                        <div class="hb-field">
+
+                            <label>
+                                Date <span style="color: #e0455a;">*</span>
+                            </label>
+
+                            <asp:TextBox
+                                ID="eventDate"
+                                runat="server"
+                                CssClass="hb-input"
+                                TextMode="Date">
+                            </asp:TextBox>
+
+                        </div>
+
+                    </div>
+
+                    <div class="hb-field">
+
+                        <label>
+                            Title <span style="color: #e0455a;">*</span>
+                        </label>
+
+                        <asp:TextBox
+                            ID="eventTitle"
+                            runat="server"
+                            CssClass="hb-input"
+                            placeholder="e.g. Quarterly Town Hall">
+                        </asp:TextBox>
+
+                    </div>
+
+                    <div class="hb-field" id="eventTimeField">
+
+                        <label>Time</label>
+
+                        <asp:TextBox
+                            ID="eventTime"
+                            runat="server"
+                            CssClass="hb-input"
+                            TextMode="Time">
+                        </asp:TextBox>
+
+                    </div>
+
+                    <div class="hb-field">
+
+                        <label>Description</label>
+
+                        <asp:TextBox
+                            ID="eventDesc"
+                            runat="server"
+                            CssClass="hb-input"
+                            TextMode="MultiLine"
+                            Rows="4"
+                            placeholder="Additional details (optional)">
+                        </asp:TextBox>
+
+                    </div>
+
+                </div>
+
+                <div class="hb-modal-footer">
+
+                    <button type="button"
+                        class="hb-btn hb-btn-ghost"
+                        onclick="closeModal('modalEvent')">
+                        Cancel
+                    </button>
+
+                    <asp:Button
+                        ID="btnSaveEvent"
+                        runat="server"
+                        Text="Save"
+                        CssClass="hb-btn hb-btn-primary"
+                        OnClick="saveEvent" />
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -1037,6 +1802,237 @@
             document.getElementById('newsDesc').value = '';
         }
 
+        function validateNews() {
+
+            var title = document.getElementById('<%= newsTitle.ClientID %>');
+            var postedBy = document.getElementById('<%= newsPostedBy.ClientID %>');
+            var desc = document.getElementById('<%= newsDesc.ClientID %>');
+
+            var isValid = true;
+
+            document.getElementById("lblNewsTitleError").innerHTML = "";
+            document.getElementById("lblPostedByError").innerHTML = "";
+            document.getElementById("lblDescriptionError").innerHTML = "";
+
+            if (title.value.trim() == "") {
+                document.getElementById("lblNewsTitleError").innerHTML = "Please enter title.";
+                isValid = false;
+            }
+
+            if (postedBy.value.trim() == "") {
+                document.getElementById("lblPostedByError").innerHTML = "Please enter posted by.";
+                isValid = false;
+            }
+
+            if (desc.value.trim() == "") {
+                document.getElementById("lblDescriptionError").innerHTML = "Please enter description.";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+        function clearNewsFields() {
+
+            document.getElementById('<%= newsTitle.ClientID %>').value = "";
+            document.getElementById('<%= newsTag.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= newsPostedBy.ClientID %>').value = "";
+            document.getElementById('<%= newsDesc.ClientID %>').value = "";
+            // Clear values
+            newsTitle.value = "";
+            newsPostedBy.value = "";
+            newsDesc.value = "";
+
+            // Clear validation messages
+            document.getElementById("lblNewsTitleError").innerHTML = "";
+            document.getElementById("lblPostedByError").innerHTML = "";
+            document.getElementById("lblDescriptionError").innerHTML = "";
+
+            // Remove validation message while typing/selecting
+            //newsTitle.oninput = function () {
+            //    document.getElementById("lblNewsTitleError").innerHTML = "";
+            //};
+
+            //newsPostedBy.onchange = function () {
+            //    document.getElementById("lblPostedByError").innerHTML = "";
+            //};
+            //newsDesc.onchange = function () {
+            //    document.getElementById("lblDescriptionError").innerHTML = "";
+            //};
+        }
+
+        window.onload = function () {
+
+            var newsTitle = document.getElementById('<%= newsTitle.ClientID %>');
+            var newsPostedBy = document.getElementById('<%= newsPostedBy.ClientID %>');
+            var newsDesc = document.getElementById('<%= newsDesc.ClientID %>');
+
+            <%--var name = document.getElementById('<%= bdayName.ClientID %>');
+            var dept = document.getElementById('<%= bdayDept.ClientID %>');
+ var dob = document.getElementById('<%= bdayDate.ClientID %>');
+            var empcode = document.getElementById('<%= bdayempCode.ClientID %>');--%>
+
+
+
+            newsTitle.oninput = function () {
+                document.getElementById("lblNewsTitleError").innerHTML = "";
+            };
+
+            newsPostedBy.oninput = function () {
+                document.getElementById("lblPostedByError").innerHTML = "";
+            };
+
+            newsDesc.oninput = function () {
+                document.getElementById("lblDescriptionError").innerHTML = "";
+            };
+
+            //name.oninput = function () {
+            //    document.getElementById("lblBdayNameError").innerHTML = "";
+            //};
+
+            //dept.oninput = function () {
+            //    document.getElementById("lblBdayDeptError").innerHTML = "";
+            //};
+
+            //dob.oninput = function () {
+            //    document.getElementById("lblBdayDateError").innerHTML = "";
+            //};
+            //empcode.oninput = function () {
+            //    document.getElementById("lblBdayemployeecodeError").innerHTML = "";
+            //};
+
+        };
+
+<%--        function validateBirthday() {
+
+            var name = document.getElementById('<%= bdayName.ClientID %>');
+            var dept = document.getElementById('<%= bdayDept.ClientID %>');
+            var dob = document.getElementById('<%= bdayDate.ClientID %>');
+            var empcode = document.getElementById('<%= bdayempCode.ClientID %>');
+
+    var isValid = true;
+
+            document.getElementById("lblBdayNameError").innerHTML = "";
+            document.getElementById("lblBdayDeptError").innerHTML = "";
+            document.getElementById("lblBdayDateError").innerHTML = "";
+            document.getElementById("lblBdayemployeecodeError").innerHTML = "";
+
+
+            if (name.value.trim() == "") {
+                document.getElementById("lblBdayNameError").innerHTML = "Please enter employee name.";
+                isValid = false;
+            }
+
+            if (dept.value == "") {
+                document.getElementById("lblBdayDeptError").innerHTML = "Please select department.";
+                isValid = false;
+            }
+
+            if (dob.value == "") {
+                document.getElementById("lblBdayDateError").innerHTML = "Please select date of birth.";
+                isValid = false;
+            }
+            if (empcode.value == "") {
+                document.getElementById("lblBdayemployeecodeError").innerHTML = "Please select Employee code.";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+        function clearBirthdayFields() {
+
+            var name = document.getElementById('<%= bdayName.ClientID %>');
+            var dept = document.getElementById('<%= bdayDept.ClientID %>');
+            var dob = document.getElementById('<%= bdayDate.ClientID %>');
+            var empcode = document.getElementById('<%= bdayempCode.ClientID %>');
+
+            // Clear values
+            name.value = "";
+            dept.selectedIndex = 0;
+            dob.value = "";
+            empcode.value = "";
+            // Clear validation messages
+            document.getElementById("lblBdayNameError").innerHTML = "";
+            document.getElementById("lblBdayDeptError").innerHTML = "";
+            document.getElementById("lblBdayDateError").innerHTML = "";
+            document.getElementById("lblBdayemployeecodeError").innerHTML = "";
+
+            // Remove validation message while typing/selecting
+            //name.oninput = function () {
+            //    document.getElementById("lblBdayNameError").innerHTML = "";
+            //};
+
+            //dept.onchange = function () {
+            //    document.getElementById("lblBdayDeptError").innerHTML = "";
+            //};
+
+            //dob.onchange = function () {
+            //    document.getElementById("lblBdayDateError").innerHTML = "";
+            //};
+            //empcode.onchange = function () {
+            //    document.getElementById("lblBdayemployeecodeError").innerHTML = "";
+            //};
+        }--%>
+
+    <%--    function validateEvent() {
+
+            var type = document.getElementById('<%= eventType.ClientID %>');
+           var date = document.getElementById('<%= eventDate.ClientID %>');
+    var title = document.getElementById('<%= eventTitle.ClientID %>');
+            var desc = document.getElementById('<%= eventDesc.ClientID %>');
+            var desc = document.getElementById('<%= eventTime.ClientID %>');
+
+
+           var isValid = true;
+
+           document.getElementById("lblEventTypeError").innerHTML = "";
+           document.getElementById("lblEventDateError").innerHTML = "";
+           document.getElementById("lblEventTitleError").innerHTML = "";
+            document.getElementById("lblEventDescError").innerHTML = "";
+            document.getElementById("lblEventTimeError").innerHTML = "";
+
+
+           if (type.value.trim() == "") {
+               document.getElementById("lblEventTypeError").innerHTML = "Please select type.";
+               isValid = false;
+           }
+
+           if (date.value.trim() == "") {
+               document.getElementById("lblEventDateError").innerHTML = "Please select date.";
+               isValid = false;
+           }
+
+           if (title.value.trim() == "") {
+               document.getElementById("lblEventTitleError").innerHTML = "Please enter title.";
+               isValid = false;
+           }
+
+           if (desc.value.trim() == "") {
+               document.getElementById("lblEventDescError").innerHTML = "Please enter description.";
+               isValid = false;
+            }
+            if (desc.value.trim() == "") {
+                document.getElementById("lblEventTimeError").innerHTML = "Please enter Time.";
+                isValid = false;
+            }
+
+           return isValid;
+        }
+        function clearEventFields() {
+
+            document.getElementById('<%= eventType.ClientID %>').selectedIndex = 0;
+           document.getElementById('<%= eventDate.ClientID %>').value = "";
+           document.getElementById('<%= eventTitle.ClientID %>').value = "";
+    document.getElementById('<%= eventTime.ClientID %>').value = "";
+           document.getElementById('<%= eventDesc.ClientID %>').value = "";
+
+           document.getElementById("lblEventTypeError").innerHTML = "";
+           document.getElementById("lblEventDateError").innerHTML = "";
+           document.getElementById("lblEventTitleError").innerHTML = "";
+            document.getElementById("lblEventDescError").innerHTML = "";
+            document.getElementById("lblEventTimeError").innerHTML = "";
+
+        }--%>
+
         function saveBirthday() {
             var name = document.getElementById('bdayName').value.trim();
             var dept = document.getElementById('bdayDept').value;
@@ -1077,7 +2073,7 @@
                 slide.classList.remove('active');
                 dots[i].classList.remove('active');
             });
-            
+
             if (index >= totalSlides) {
                 currentSlide = 0;
             } else if (index < 0) {
@@ -1085,7 +2081,7 @@
             } else {
                 currentSlide = index;
             }
-            
+
             slides[currentSlide].classList.add('active');
             dots[currentSlide].classList.add('active');
         }
@@ -1114,5 +2110,16 @@
         // Start slideshow when page loads
         document.addEventListener('DOMContentLoaded', startSlideshow);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        function showNewsSavedMessage(status, remark) {
+            Swal.fire({
 
+                icon: status === "Success" ? "success" : "error",
+                text: remark,
+                timer: 4000,
+                showConfirmButton: false
+            });
+        }
+    </script>
 </asp:Content>

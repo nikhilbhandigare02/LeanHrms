@@ -45,8 +45,14 @@ namespace DataObject
     public class CompanyLogoDO
     {
         public int CompanyId { get; set; }
-        public int UserId { get; set; }  
+        public int UserId { get; set; }
         public string LogoPath { get; set; }
+        public string LogoBase64 { get; set; }
+        public string ContentType { get; set; }
+
+        // Ready-to-use markup built by the SP itself, e.g.
+        // CONCAT('<img src="data:', v_logo_ct, ';base64,', v_logo_base64, '" style="max-height:60px;"/>')
+        public string LogoHtml { get; set; }
     }
 
 

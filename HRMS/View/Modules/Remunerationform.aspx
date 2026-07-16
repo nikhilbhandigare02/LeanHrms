@@ -130,8 +130,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">Salary Structure ID</label>
-                                <asp:TextBox ID="txtSalaryStructureID" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                                <%--<label class="form-label">Salary Structure ID</label>--%>
+                                <asp:TextBox ID="txtSalaryStructureID" runat="server" CssClass="form-control" ReadOnly="true" Visible="false" ></asp:TextBox>
                             </div>
                         </div>
                     </div>
@@ -169,7 +169,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Gross Salary <span class="required">*</span></label>
-                                <asp:TextBox ID="txtGrossSalary" runat="server" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtGrossSalary_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                                <asp:TextBox ID="txtGrossSalary" runat="server" ReadOnly="true" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtGrossSalary_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
                             </div>
                         </div>
                     </div>
@@ -182,7 +182,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">Annual Salary <span class="required">*</span></label>
+                                <label class="form-label">CTC <span class="required">*</span></label>
                                 <asp:TextBox ID="txtAnnualSalary" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
                             </div>
                         </div>

@@ -465,11 +465,11 @@ namespace HRMS.View.Modules
                 ddlAssetCondition.DataBind();
                 ddlAssetCondition.Items.Insert(0, new ListItem("-- Select --", ""));
 
-                ddlAssetStatus.DataSource = onboardingBL.BindLookupData("Asset Status");
-                ddlAssetStatus.DataTextField = "Text";
-                ddlAssetStatus.DataValueField = "Id";
-                ddlAssetStatus.DataBind();
-                ddlAssetStatus.Items.Insert(0, new ListItem("-- Select --", ""));
+                //ddlAssetStatus.DataSource = onboardingBL.BindLookupData("Asset Status");
+                //ddlAssetStatus.DataTextField = "Text";
+                //ddlAssetStatus.DataValueField = "Id";
+                //ddlAssetStatus.DataBind();
+                //ddlAssetStatus.Items.Insert(0, new ListItem("-- Select --", ""));
 
                 ddlAssetReturnCondition.DataSource = onboardingBL.BindLookupData("Asset Return Condition");
                 ddlAssetReturnCondition.DataTextField = "Text";
@@ -665,9 +665,9 @@ namespace HRMS.View.Modules
                 txtAssetNumber.Text = asset.AssetNumber;
                 txtAssetName.Text = asset.AssetName;
                 txtAssignedDate.Text = FormatDateForInput(asset.AssignedDate);
-                txtReturnDate.Text = FormatDateForInput(asset.ReturnDate);
+                //txtReturnDate.Text = FormatDateForInput(asset.ReturnDate);
                 SelectDropdownValue(ddlAssetCondition, asset.AssetConditionId.ToString());
-                SelectDropdownValue(ddlAssetStatus, asset.AssetStatusId.ToString());
+                //SelectDropdownValue(ddlAssetStatus, asset.AssetStatusId.ToString());
                 btnSaveAsset.Text = "Update Asset";
                 ShowAssetEditor();
             }
@@ -819,8 +819,8 @@ namespace HRMS.View.Modules
                 BindLookupDropdown(txtBloodGroup, onboardingBL.BindLookupData("Blood Group"));
                 BindLookupDropdown(txtNationality, onboardingBL.BindLookupData("Nationality"));
                 BindLookupDropdown(txtEmployeeStatus, onboardingBL.BindLookupData("EmpStatus"));
-                BindLookupDropdown(txtSeparationReason, onboardingBL.BindLookupData("Separation Reason"));
-                BindLookupDropdown(txtEmployeeLevel, onboardingBL.BindLookupData("Employee Level"));
+               // BindLookupDropdown(txtSeparationReason, onboardingBL.BindLookupData("Separation Reason"));
+               // BindLookupDropdown(txtEmployeeLevel, onboardingBL.BindLookupData("Employee Level"));
                 BindLookupDropdown(txtAttendanceType, onboardingBL.BindLookupData("Attendance Type"));
                 BindLookupDropdown(txtWeeklyOff, onboardingBL.BindLookupData("Weekly Off"));
                 BindLookupDropdown(txtAttendancePolicy, onboardingBL.BindLookupData("Attendance Policy"));
@@ -857,11 +857,11 @@ namespace HRMS.View.Modules
                 AssetNumber = txtAssetNumber.Text.Trim(),
                 AssetName = txtAssetName.Text.Trim(),
                 AssignedDate = ParseAssetDate(txtAssignedDate.Text),
-                ReturnDate = ParseAssetDate(txtReturnDate.Text),
+               // ReturnDate = ParseAssetDate(txtReturnDate.Text),
                 AssetConditionId = ParseIntValue(ddlAssetCondition.SelectedValue),
                 AssetCondition = ddlAssetCondition.SelectedItem != null ? ddlAssetCondition.SelectedItem.Text : string.Empty,
-                AssetStatusId = ParseIntValue(ddlAssetStatus.SelectedValue),
-                AssetStatus = ddlAssetStatus.SelectedItem != null ? ddlAssetStatus.SelectedItem.Text : string.Empty
+               // AssetStatusId = ParseIntValue(ddlAssetStatus.SelectedValue),
+               // AssetStatus = ddlAssetStatus.SelectedItem != null ? ddlAssetStatus.SelectedItem.Text : string.Empty
             };
         }
 
@@ -871,9 +871,9 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(txtAssetNumber.Text)) return "Asset Number is required.";
             if (string.IsNullOrWhiteSpace(txtAssetName.Text)) return "Asset Name is required.";
             if (!ParseAssetDate(txtAssignedDate.Text).HasValue) return "Assigned Date is required in dd-MM-yyyy format.";
-            if (!string.IsNullOrWhiteSpace(txtReturnDate.Text) && !ParseAssetDate(txtReturnDate.Text).HasValue) return "Return Date must be in dd-MM-yyyy format.";
+           // if (!string.IsNullOrWhiteSpace(txtReturnDate.Text) && !ParseAssetDate(txtReturnDate.Text).HasValue) return "Return Date must be in dd-MM-yyyy format.";
             if (string.IsNullOrWhiteSpace(ddlAssetCondition.SelectedValue)) return "Asset Condition is required.";
-            if (string.IsNullOrWhiteSpace(ddlAssetStatus.SelectedValue)) return "Asset Status is required.";
+           // if (string.IsNullOrWhiteSpace(ddlAssetStatus.SelectedValue)) return "Asset Status is required.";
             return string.Empty;
         }
 
@@ -898,9 +898,9 @@ namespace HRMS.View.Modules
             txtAssetNumber.Text = string.Empty;
             txtAssetName.Text = string.Empty;
             txtAssignedDate.Text = string.Empty;
-            txtReturnDate.Text = string.Empty;
+            //txtReturnDate.Text = string.Empty;
             ddlAssetCondition.SelectedIndex = 0;
-            ddlAssetStatus.SelectedIndex = 0;
+            //ddlAssetStatus.SelectedIndex = 0;
             btnSaveAsset.Text = "Add Asset";
             HideAssetEditor();
         }
@@ -1171,7 +1171,7 @@ namespace HRMS.View.Modules
             if (!string.IsNullOrWhiteSpace(ValueOf(txtConfirmationDate)) && !IsValidUiDate(ValueOf(txtConfirmationDate))) return "Confirmation Date must be in dd-MM-yyyy format.";
             if (!string.IsNullOrWhiteSpace(ValueOf(txtProbationEndDate)) && !IsValidUiDate(ValueOf(txtProbationEndDate))) return "Probation End Date must be in dd-MM-yyyy format.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(txtEmployeeStatus))) return "Employee Status is required.";
-            if (!string.IsNullOrWhiteSpace(ValueOf(txtExitDate)) && !IsValidUiDate(ValueOf(txtExitDate))) return "Exit Date must be in dd-MM-yyyy format.";
+            //if (!string.IsNullOrWhiteSpace(ValueOf(txtExitDate)) && !IsValidUiDate(ValueOf(txtExitDate))) return "Exit Date must be in dd-MM-yyyy format.";
 
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlcompany))) return "Company is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtdept))) return "Department is required.";
@@ -1179,7 +1179,7 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return "Location is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddldesign))) return "Designation is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddl_reportingmanager))) return "Reporting Manager is required..";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtFunctionalManager))) return "Functional Manager is required.";
+            //if (string.IsNullOrWhiteSpace(ValueOf(txtFunctionalManager))) return "Functional Manager is required.";
             if (string.IsNullOrWhiteSpace(ValueOf(txtHod))) return "HOD is required.";
 
             if (string.IsNullOrWhiteSpace(SelectedValueOf(txtAttendanceType))) return "Attendance Type is required.";
@@ -1498,15 +1498,15 @@ namespace HRMS.View.Modules
                         SetText(txtConfirmationDate, FormatDateForInput(userDetails.ConfirmationDate));
                         SetText(txtProbationEndDate, FormatDateForInput(userDetails.ProbationEndDate));
                         SetText(txtEmployeeStatus, userDetails.EmployeeStatus);
-                        SetText(txtNoticePeriod, userDetails.NoticePeriod > 0 ? userDetails.NoticePeriod.ToString() : string.Empty);
-                        SetText(txtExitDate, FormatDateForInput(userDetails.ExitDate));
-                        SetText(txtSeparationReason, userDetails.SeparationReason);
+                        //SetText(txtNoticePeriod, userDetails.NoticePeriod > 0 ? userDetails.NoticePeriod.ToString() : string.Empty);
+                        //SetText(txtExitDate, FormatDateForInput(userDetails.ExitDate));
+                        //SetText(txtSeparationReason, userDetails.SeparationReason);
                         SetText(txtProbationStatus, userDetails.ProbationStatus);
                         SetText(txtProbationRemarks, userDetails.ProbationRemarks);
                         SetText(txtLocation, userDetails.Location);
-                        SetText(txtFunctionalManager, userDetails.FunctionalManagerName);
+                      //  SetText(txtFunctionalManager, userDetails.FunctionalManagerName);
                         SetText(txtHod, userDetails.HodName);
-                        SetText(txtEmployeeLevel, userDetails.EmployeeLevel);
+                       // SetText(txtEmployeeLevel, userDetails.EmployeeLevel);
                         SetText(txtAttendanceType, userDetails.AttendanceType);
                         SetText(txtWeeklyOff, userDetails.WeeklyOff);
                         SetText(txtWorkingHours, FormatWorkingHours(userDetails.WorkingHours));
@@ -2194,13 +2194,13 @@ namespace HRMS.View.Modules
                     user.ConfirmationDate = ParseUiDate(ValueOf(txtConfirmationDate));
                     user.ProbationEndDate = ParseUiDate(ValueOf(txtProbationEndDate));
                     user.EmployeeStatus = SelectedValueOf(txtEmployeeStatus);
-                    user.NoticePeriod = ParseUiInt(ValueOf(txtNoticePeriod));
-                    user.ExitDate = ParseUiDate(ValueOf(txtExitDate));
-                    user.SeparationReason = SelectedValueOf(txtSeparationReason);
+                    //user.NoticePeriod = ParseUiInt(ValueOf(txtNoticePeriod));
+                    //user.ExitDate = ParseUiDate(ValueOf(txtExitDate));
+                    //user.SeparationReason = SelectedValueOf(txtSeparationReason);
                     user.Location = ValueOf(txtLocation);
-                    user.FunctionalManagerName = ValueOf(txtFunctionalManager);
+                    //user.FunctionalManagerName = ValueOf(txtFunctionalManager);
                     user.HodName = ValueOf(txtHod);
-                    user.EmployeeLevel = SelectedValueOf(txtEmployeeLevel);
+                    //user.EmployeeLevel = SelectedValueOf(txtEmployeeLevel);
                     user.AttendanceType = SelectedValueOf(txtAttendanceType);
                     user.WeeklyOff = SelectedValueOf(txtWeeklyOff);
                     user.WorkingHours = ValueOf(txtWorkingHours);

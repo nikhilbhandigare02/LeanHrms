@@ -1772,9 +1772,9 @@
                         <div class="field-block"><label>Confirmation Date</label><asp:TextBox ID="txtConfirmationDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
                         <div class="field-block"><label>Probation End Date</label><asp:TextBox ID="txtProbationEndDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
                         <div class="field-block"><label class="required-label">Employee Status</label><asp:DropDownList ID="txtEmployeeStatus" runat="server" CssClass="form-control custom-dropdown" /></div>
-                        <div class="field-block"><label>Notice Period</label><asp:TextBox ID="txtNoticePeriod" runat="server" CssClass="form-control" placeholder="Days" /></div>
+<%--                        <div class="field-block"><label>Notice Period</label><asp:TextBox ID="txtNoticePeriod" runat="server" CssClass="form-control" placeholder="Days" /></div>
                         <div class="field-block"><label>Exit Date</label><asp:TextBox ID="txtExitDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
-                        <div class="field-block"><label>Separation Reason</label><asp:DropDownList ID="txtSeparationReason" runat="server" CssClass="form-control custom-dropdown" /></div>
+                        <div class="field-block"><label>Separation Reason</label><asp:DropDownList ID="txtSeparationReason" runat="server" CssClass="form-control custom-dropdown" /></div>--%>
                         <div class="field-block"><label>Probation Status</label><asp:TextBox ID="txtProbationStatus" runat="server" CssClass="form-control" /></div>
                         <asp:TextBox ID="txtProbationRemarks" runat="server" CssClass="form-control" style="display:none;" />
                     </div>
@@ -1817,9 +1817,9 @@
                             <asp:RequiredFieldValidator runat="server" ControlToValidate="ddl_reportingmanager" InitialValue="" ErrorMessage="Reporting Manager is required." ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
                         </div>
                         <div class="field-block"><label class="required-label">Location</label><asp:TextBox ID="txtLocation" runat="server" CssClass="form-control" placeholder="Enter work location" /></div>
-                        <div class="field-block"><label class="required-label">Functional Manager</label><asp:TextBox ID="txtFunctionalManager" runat="server" CssClass="form-control" placeholder="Functional manager" /></div>
+                     <%--   <div class="field-block"><label class="required-label">Functional Manager</label><asp:TextBox ID="txtFunctionalManager" runat="server" CssClass="form-control" placeholder="Functional manager" /></div>--%>
                         <div class="field-block"><label class="required-label">HOD</label><asp:TextBox ID="txtHod" runat="server" CssClass="form-control" placeholder="Head of department" /></div>
-                        <div class="field-block"><label>Employee Level</label><asp:DropDownList ID="txtEmployeeLevel" runat="server" CssClass="form-control custom-dropdown" /></div>
+                       <%-- <div class="field-block"><label>Employee Level</label><asp:DropDownList ID="txtEmployeeLevel" runat="server" CssClass="form-control custom-dropdown" /></div>--%>
                     </div>
                 </div>
             </details>
@@ -2132,9 +2132,9 @@
                                     <asp:BoundField HeaderText="Asset Number" DataField="AssetNumber" />
                                     <asp:BoundField HeaderText="Asset Name" DataField="AssetName" />
                                     <asp:BoundField HeaderText="Assigned Date" DataField="AssignedDate" DataFormatString="{0:dd-MM-yyyy}" HtmlEncode="False" />
-                                    <asp:BoundField HeaderText="Return Date" DataField="ReturnDate" DataFormatString="{0:dd-MM-yyyy}" HtmlEncode="False" NullDisplayText="-" />
+                                    <%--<asp:BoundField HeaderText="Return Date" DataField="ReturnDate" DataFormatString="{0:dd-MM-yyyy}" HtmlEncode="False" NullDisplayText="-" />--%>
                                     <asp:BoundField HeaderText="Asset Condition" DataField="AssetCondition" />
-                                    <asp:BoundField HeaderText="Asset Status" DataField="AssetStatus" />
+                                   <%-- <asp:BoundField HeaderText="Asset Status" DataField="AssetStatus" />--%>
                                     <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
                                             <div class="asset-action-stack">
@@ -2144,9 +2144,9 @@
                                                     data-number='<%# Eval("AssetNumber") %>'
                                                     data-name='<%# Eval("AssetName") %>'
                                                     data-assigned='<%# Eval("AssignedDate", "{0:dd-MM-yyyy}") %>'
-                                                    data-return='<%# Eval("ReturnDate", "{0:dd-MM-yyyy}") %>'
+                                                   <%-- data-return='<%# Eval("ReturnDate", "{0:dd-MM-yyyy}") %>'--%>
                                                     data-condition-id='<%# Eval("AssetConditionId") %>'
-                                                    data-status-id='<%# Eval("AssetStatusId") %>'
+                                               <%--     data-status-id='<%# Eval("AssetStatusId") %>'--%>
                                                     onclick="openAssetEditorForEdit(this)">
                                                     <i class="far fa-edit"></i>
                                                 </button>
@@ -2180,9 +2180,9 @@
                                 <div class="field-block"><label class="required-label">Asset Number</label><asp:TextBox ID="txtAssetNumber" runat="server" CssClass="form-control" /></div>
                                 <div class="field-block"><label class="required-label">Asset Name</label><asp:TextBox ID="txtAssetName" runat="server" CssClass="form-control" /></div>
                                 <div class="field-block"><label class="required-label">Assigned Date</label><asp:TextBox ID="txtAssignedDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
-                                <div class="field-block"><label>Return Date</label><asp:TextBox ID="txtReturnDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
+<%--                                <div class="field-block"><label>Return Date</label><asp:TextBox ID="txtReturnDate" runat="server" CssClass="form-control" TextMode="Date" /></div>--%>
                                 <div class="field-block"><label class="required-label">Asset Condition</label><asp:DropDownList ID="ddlAssetCondition" runat="server" CssClass="form-control"></asp:DropDownList></div>
-                                <div class="field-block"><label class="required-label">Asset Status</label><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-control"></asp:DropDownList></div>
+<%--                                <div class="field-block"><label class="required-label">Asset Status</label><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-control"></asp:DropDownList></div>--%>
                             </div>
                         </div>
                         <div class="entry-editor-actions asset-editor-actions">
@@ -2213,9 +2213,9 @@
                                     <asp:BoundField DataField="AssetType" HeaderText="Asset Type" />
                                     <asp:BoundField DataField="AssetNumber" HeaderText="Asset Number" />
                                     <asp:BoundField DataField="AssetName" HeaderText="Asset Name" />
-                                    <asp:BoundField DataField="ReturnDate" HeaderText="Return Date" DataFormatString="{0:dd MMM yyyy}" />
+              <%--                      <asp:BoundField DataField="ReturnDate" HeaderText="Return Date" DataFormatString="{0:dd MMM yyyy}" />--%>
                                     <asp:BoundField DataField="AssetCondition" HeaderText="Condition" />
-                                    <asp:BoundField DataField="AssetStatus" HeaderText="Status" />
+                                  <%--  <asp:BoundField DataField="AssetStatus" HeaderText="Status" />--%>
                                     <asp:TemplateField HeaderText="Actions">
                                         <ItemTemplate>
                                             <asp:LinkButton runat="server" CommandName="EditAssetReturn" CommandArgument='<%# Eval("AssetAssignmentId") %>' CssClass="btn-link-action" CausesValidation="false"><i class="fas fa-edit"></i></asp:LinkButton>
@@ -2314,9 +2314,9 @@
             setValue('<%= txtAssetNumber.ClientID %>', '');
             setValue('<%= txtAssetName.ClientID %>', '');
             setValue('<%= txtAssignedDate.ClientID %>', '');
-            setValue('<%= txtReturnDate.ClientID %>', '');
+           <%-- setValue('<%= txtReturnDate.ClientID %>', '');--%>
             setValue('<%= ddlAssetCondition.ClientID %>', '');
-            setValue('<%= ddlAssetStatus.ClientID %>', '');
+           <%-- setValue('<%= ddlAssetStatus.ClientID %>', '');--%>
 
             var saveButton = document.getElementById('<%= btnSaveAsset.ClientID %>');
             if (saveButton) {
@@ -2339,9 +2339,9 @@
             setValue('<%= txtAssetNumber.ClientID %>', button.getAttribute('data-number'));
             setValue('<%= txtAssetName.ClientID %>', button.getAttribute('data-name'));
             setValue('<%= txtAssignedDate.ClientID %>', button.getAttribute('data-assigned'));
-            setValue('<%= txtReturnDate.ClientID %>', button.getAttribute('data-return'));
+           <%-- setValue('<%= txtReturnDate.ClientID %>', button.getAttribute('data-return'));--%>
             setValue('<%= ddlAssetCondition.ClientID %>', button.getAttribute('data-condition-id'));
-            setValue('<%= ddlAssetStatus.ClientID %>', button.getAttribute('data-status-id'));
+           <%-- setValue('<%= ddlAssetStatus.ClientID %>', button.getAttribute('data-status-id'));--%>
 
             var saveButton = document.getElementById('<%= btnSaveAsset.ClientID %>');
             if (saveButton) {
@@ -2652,7 +2652,7 @@
                 { element: document.getElementById('<%= txtConfirmationDate.ClientID %>'), type: 'required', name: 'Confirmation Date', optional: true },
                 { element: document.getElementById('<%= txtProbationEndDate.ClientID %>'), type: 'required', name: 'Probation End Date', optional: true },
                 { element: document.getElementById('<%= txtEmployeeStatus.ClientID %>'), type: 'select', name: 'Employee Status' },
-                { element: document.getElementById('<%= txtExitDate.ClientID %>'), type: 'required', name: 'Exit Date', optional: true },
+   
 
                 { element: document.getElementById('<%= ddlcompany.ClientID %>'), type: 'select', name: 'Company' },
                 { element: document.getElementById('<%= txtdept.ClientID %>'), type: 'required', name: 'Department' },
@@ -2660,9 +2660,9 @@
                 { element: document.getElementById('<%= txtLocation.ClientID %>'), type: 'required', name: 'Location' },
                 { element: document.getElementById('<%= ddldesign.ClientID %>'), type: 'select', name: 'Designation' },
                 { element: document.getElementById('<%= ddl_reportingmanager.ClientID %>'), type: 'select', name: 'Reporting Manager' },
-                { element: document.getElementById('<%= txtFunctionalManager.ClientID %>'), type: 'required', name: 'Functional Manager' },
+      <%--          { element: document.getElementById('<%= txtFunctionalManager.ClientID %>'), type: 'required', name: 'Functional Manager' },--%>
                 { element: document.getElementById('<%= txtHod.ClientID %>'), type: 'required', name: 'HOD' },
-                { element: document.getElementById('<%= txtEmployeeLevel.ClientID %>'), type: 'select', name: 'Employee Level', optional: true },
+    <%--            { element: document.getElementById('<%= txtEmployeeLevel.ClientID %>'), type: 'select', name: 'Employee Level', optional: true },--%>
 
                 { element: document.getElementById('<%= txtAttendanceType.ClientID %>'), type: 'select', name: 'Attendance Type' },
                 { element: document.getElementById('<%= txtWeeklyOff.ClientID %>'), type: 'select', name: 'Weekly Off' },
@@ -2920,7 +2920,7 @@
                 { element: document.getElementById('<%= txtAssetName.ClientID %>'), type: 'required', name: 'Asset Name' },
                 { element: document.getElementById('<%= txtAssignedDate.ClientID %>'), type: 'required', name: 'Assigned Date' },
                 { element: document.getElementById('<%= ddlAssetCondition.ClientID %>'), type: 'select', name: 'Asset Condition' },
-                { element: document.getElementById('<%= ddlAssetStatus.ClientID %>'), type: 'select', name: 'Asset Status' }
+                <%--{ element: document.getElementById('<%= ddlAssetStatus.ClientID %>'), type: 'select', name: 'Asset Status' }--%>
             ];
 
             var firstInvalidElement = null;
@@ -2937,7 +2937,7 @@
                 }
             });
 
-            setValidationState(document.getElementById('<%= txtReturnDate.ClientID %>'), false);
+         <%--  setValidationState(document.getElementById('<%= txtReturnDate.ClientID %>'), false);--%>
 
             if (firstInvalidElement) {
                 firstInvalidElement.focus();
@@ -3205,16 +3205,16 @@
                 { element: document.getElementById('<%= txtConfirmationDate.ClientID %>'), type: 'required', name: 'Confirmation Date', optional: true },
                 { element: document.getElementById('<%= txtProbationEndDate.ClientID %>'), type: 'required', name: 'Probation End Date', optional: true },
                 { element: document.getElementById('<%= txtEmployeeStatus.ClientID %>'), type: 'select', name: 'Employee Status' },
-                { element: document.getElementById('<%= txtExitDate.ClientID %>'), type: 'required', name: 'Exit Date', optional: true },
+              
                 { element: document.getElementById('<%= ddlcompany.ClientID %>'), type: 'select', name: 'Company' },
                 { element: document.getElementById('<%= txtdept.ClientID %>'), type: 'required', name: 'Department' },
                 { element: document.getElementById('<%= txtbranch.ClientID %>'), type: 'required', name: 'Branch Office' },
                 { element: document.getElementById('<%= txtLocation.ClientID %>'), type: 'required', name: 'Location' },
                 { element: document.getElementById('<%= ddldesign.ClientID %>'), type: 'select', name: 'Designation' },
                 { element: document.getElementById('<%= ddl_reportingmanager.ClientID %>'), type: 'select', name: 'Reporting Manager' },
-                { element: document.getElementById('<%= txtFunctionalManager.ClientID %>'), type: 'required', name: 'Functional Manager' },
+             
                 { element: document.getElementById('<%= txtHod.ClientID %>'), type: 'required', name: 'HOD' },
-                { element: document.getElementById('<%= txtEmployeeLevel.ClientID %>'), type: 'select', name: 'Employee Level', optional: true },
+               <%-- { element: document.getElementById('<%= txtEmployeeLevel.ClientID %>'), type: 'select', name: 'Employee Level', optional: true },--%>
                 { element: document.getElementById('<%= txtAttendanceType.ClientID %>'), type: 'select', name: 'Attendance Type' },
                 { element: document.getElementById('<%= txtWeeklyOff.ClientID %>'), type: 'select', name: 'Weekly Off' },
                 { element: document.getElementById('<%= txtWorkingHours.ClientID %>'), type: 'pattern', name: 'Working Hours', pattern: /^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$/, message: 'Working Hours must be in HH:mm format.' },
@@ -3227,7 +3227,7 @@
                 { element: document.getElementById('<%= txtAssetName.ClientID %>'), type: 'required', name: 'Asset Name' },
                 { element: document.getElementById('<%= txtAssignedDate.ClientID %>'), type: 'required', name: 'Assigned Date' },
                 { element: document.getElementById('<%= ddlAssetCondition.ClientID %>'), type: 'select', name: 'Asset Condition' },
-                { element: document.getElementById('<%= ddlAssetStatus.ClientID %>'), type: 'select', name: 'Asset Status' }
+                <%--{ element: document.getElementById('<%= ddlAssetStatus.ClientID %>'), type: 'select', name: 'Asset Status' }--%>
             ]);
 
             var overtimeRateElement = document.getElementById('<%= txtOvertimeRate.ClientID %>');

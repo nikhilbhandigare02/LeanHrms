@@ -219,14 +219,22 @@ namespace Lean.View.Layout
                     if (Session["userId"] != null)
                     {
                         CommonBL commonBL = new CommonBL();
-                        string logoPath = commonBL.ResolveCompanyLogoPath(userId); // e.g. "assets/images/NEW_IMSET_LOGO.png"
 
-                        string logoUrl = !string.IsNullOrWhiteSpace(logoPath)
-                            ? ResolveUrl("~/" + logoPath.TrimStart('~', '/'))
-                            : ResolveUrl("~/assets/images/alphonsol_logo.png");
+                        // Prefer the ready-made <img> markup the SP itself builds from the base64
+                        // logo in the DB; fall back to the file-path based logo, then to the
+                        // bundled static asset.
+                        string logoHtml = commonBL.ResolveCompanyLogoHtml(userId);
+                        if (string.IsNullOrWhiteSpace(logoHtml))
+                        {
+                            string logoPath = commonBL.ResolveCompanyLogoPath(userId); // e.g. "assets/images/NEW_IMSET_LOGO.png"
+                            string logoUrl = !string.IsNullOrWhiteSpace(logoPath)
+                                ? ResolveUrl("~/" + logoPath.TrimStart('~', '/'))
+                                : ResolveUrl("~/assets/images/alphonsol_logo.png");
+                            logoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(logoUrl) + "\" style=\"max-height:60px;\" alt=\"Logo\" />";
+                        }
 
-                        imgLogoSmall.ImageUrl = logoUrl;
-                        imgLogoLarge.ImageUrl = logoUrl;
+                        litLogoSmall.Text = logoHtml;
+                        litLogoLarge.Text = logoHtml;
                     }
 
 

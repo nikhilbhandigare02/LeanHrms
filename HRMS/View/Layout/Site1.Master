@@ -81,10 +81,12 @@
                             </asp:LinkButton>--%>
                             <asp:LinkButton runat="server" ID="Logo" OnClick="Logo_Click" class="logo logo-dark">
                                 <span class="logo-sm">
-                                    <asp:Image runat="server" ID="imgLogoSmall" Height="22" />
+                                    <%-- Filled in code-behind with the <img> markup for the small logo (base64 data URI from the DB, or a file path as fallback). --%>
+                                    <asp:Literal runat="server" ID="litLogoSmall" />
                                 </span>
                                 <span class="logo-lg logo-background" style="float: left;">
-                                    <asp:Image runat="server" ID="imgLogoLarge" Height="35" />
+                                    <%-- Filled in code-behind with the <img> markup for the large logo (base64 data URI from the DB, or a file path as fallback). --%>
+                                    <asp:Literal runat="server" ID="litLogoLarge" />
                                 </span>
                             </asp:LinkButton>
 

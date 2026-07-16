@@ -44,19 +44,39 @@ namespace HRMS.View.Modules
 
                 txtStartDate.Text = detail.start_date;
                 txtEndDate.Text = detail.end_date;
-                txtApprovalStatus.Text = !string.IsNullOrWhiteSpace(detail.approval_status_text)
-                    ? detail.approval_status_text
-                    : GetVerificationStatusText(detail.approval_status);
                 txtLookupId.Text = !string.IsNullOrWhiteSpace(detail.leave_daytype)
                     ? detail.leave_daytype
                     : GetLeaveDayTypeText(detail.lookupId);
                 txtLeaveTypeId.Text = !string.IsNullOrWhiteSpace(detail.leaves_types)
                     ? detail.leaves_types
                     : (detail.leaves_types_id.HasValue ? Convert.ToString(detail.leaves_types_id.Value) : "N/A");
-                txtApprovedFromDate.Text = detail.start_date;
-                txtApprovedToDate.Text = detail.end_date;
                 txtDescription.Text = detail.leave_description;
-                txtRejectionRemark.Text = detail.rejection_remark;
+
+                string verificationStatus = !string.IsNullOrWhiteSpace(detail.approval_status_text)
+                    ? detail.approval_status_text
+                    : GetVerificationStatusText(detail.approval_status);
+                lblApprovalStatus.Text = verificationStatus;
+
+                bool isAccepted = verificationStatus.IndexOf("accept", StringComparison.OrdinalIgnoreCase) >= 0
+                    || verificationStatus.IndexOf("approve", StringComparison.OrdinalIgnoreCase) >= 0;
+                bool isRejected = verificationStatus.IndexOf("reject", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                lblApprovalStatus.CssClass = "badge leave-status-badge " + (isAccepted ? "bg-success" : isRejected ? "bg-danger" : "bg-warning");
+
+                pnlApprovedDates.Visible = isAccepted;
+                if (isAccepted)
+                {
+                    txtApprovedFromDate.Text = detail.start_date;
+                    txtApprovedToDate.Text = detail.end_date;
+                }
+
+                pnlRejectionReason.Visible = isRejected;
+                if (isRejected)
+                {
+                    txtRejectionRemark.Text = detail.rejection_remark;
+                }
+
+                pnlPendingNote.Visible = !isAccepted && !isRejected;
             }
             catch (Exception ex)
             {

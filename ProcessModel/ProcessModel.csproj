@@ -111,6 +111,7 @@
     <Compile Include="renumarationBL.cs" />
     <Compile Include="RoleDetailsBL.cs" />
     <Compile Include="SalarySlipBL.cs" />
+    <Compile Include="SalaryCalculationBL.cs" />
     <Compile Include="userBAL.cs" />
     <Compile Include="UserDetailsBL.cs" />
     <Compile Include="userDocumentBL.cs" />

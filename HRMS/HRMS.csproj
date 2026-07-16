@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -1760,6 +1760,8 @@
     <Content Include="View\Modules\Remunerationform.aspx" />
     <Content Include="View\Modules\ResignationList.aspx" />
     <Content Include="View\Modules\SalarySlip.aspx" />
+    <Content Include="View\Modules\SalaryCalculation.aspx" />
+    <Content Include="View\Modules\SalaryCalculationDetails.aspx" />
     <Content Include="View\Modules\TerminationList.aspx" />
     <Content Include="View\Modules\updateprobationperiodflag.aspx" />
     <Content Include="View\Modules\UploadExcelforsalary.aspx" />
@@ -2045,6 +2047,20 @@
     </Compile>
     <Compile Include="View\Modules\SalarySlip.aspx.designer.cs">
       <DependentUpon>SalarySlip.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\SalaryCalculation.aspx.cs">
+      <DependentUpon>SalaryCalculation.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\SalaryCalculation.aspx.designer.cs">
+      <DependentUpon>SalaryCalculation.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\SalaryCalculationDetails.aspx.cs">
+      <DependentUpon>SalaryCalculationDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\SalaryCalculationDetails.aspx.designer.cs">
+      <DependentUpon>SalaryCalculationDetails.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\TerminationList.aspx.cs">
       <DependentUpon>TerminationList.aspx</DependentUpon>

@@ -60,6 +60,7 @@
     <Compile Include="rightsDO.cs" />
     <Compile Include="roleDO.cs" />
     <Compile Include="SalarySlipDO.cs" />
+    <Compile Include="SalaryCalculationDO.cs" />
     <Compile Include="UserDetailsDO.cs" />
     <Compile Include="userDocumentsDO.cs" />
   </ItemGroup>

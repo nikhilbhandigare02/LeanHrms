@@ -12,7 +12,7 @@ namespace HRMS.View.Authentication
     public partial class login : System.Web.UI.Page
     {
         protected string UserId = null;
-        protected string LogoUrl;
+        protected string LogoHtml;
         protected void Page_Load(object sender, EventArgs e)
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
@@ -28,22 +28,30 @@ namespace HRMS.View.Authentication
                 return;
             }
 
-            SetLogoUrl();
+            SetLogoHtml();
         }
 
-        // No user is logged in yet, so use the configured default company logo,
-        // falling back to the bundled image if none is configured.
-        private void SetLogoUrl()
+        // No user is logged in yet, so prefer the ready-made <img> markup the SP builds from
+        // the base64 logo in the DB (via the configured default company), falling back to the
+        // file-path based logo, then to the bundled static image.
+        private void SetLogoHtml()
         {
-            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
             try
             {
-                string path = new CommonBL().GetDefaultCompanyLogoPath();
-                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+                CommonBL commonBL = new CommonBL();
+                LogoHtml = commonBL.ResolveCompanyLogoHtml(0);
+                if (string.IsNullOrWhiteSpace(LogoHtml))
+                {
+                    string path = commonBL.GetDefaultCompanyLogoPath();
+                    string logoUrl = !string.IsNullOrWhiteSpace(path)
+                        ? ResolveUrl("~/" + path.TrimStart('~', '/'))
+                        : ResolveUrl("~/assets/images/user.png");
+                    LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(logoUrl) + "\" alt=\"\" height=\"30\" />";
+                }
             }
             catch
             {
-                LogoUrl = fallback;
+                LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(ResolveUrl("~/assets/images/user.png")) + "\" alt=\"\" height=\"30\" />";
             }
         }
         protected void loginButton_Click(object sender, EventArgs e)

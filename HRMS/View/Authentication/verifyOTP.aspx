@@ -174,7 +174,7 @@
                             <div class="row justify-content-center align-items-center">
                                 <div class="col-12 text-center">
                                     <div class="otp-logo">
-                                        <img src="<%= LogoUrl %>" alt="Alphonsol" height="30" />
+                                        <%= LogoHtml %>
                                     </div>
                                     <h6 class="otp-subtitle">Secure access to your HRMS account</h6>
                                 </div>

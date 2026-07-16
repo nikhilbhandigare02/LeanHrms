@@ -12,11 +12,11 @@ namespace HRMS.View.Authentication
     public partial class verifyOTP : System.Web.UI.Page
     {
         protected string UserId = null;
-        protected string LogoUrl;
+        protected string LogoHtml;
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SetLogoUrl();
+            SetLogoHtml();
 
             if (!IsPostBack)
             {
@@ -69,19 +69,28 @@ namespace HRMS.View.Authentication
 
         // Uses the logged-in user's company logo (set during login), then the configured
         // default, then the bundled image. Runs on every load so postbacks keep the logo.
-        private void SetLogoUrl()
+        // Prefers the SP's ready-made <img> markup built from the base64 logo in the DB.
+        private void SetLogoHtml()
         {
-            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
             try
             {
                 int userId = 0;
                 int.TryParse(Convert.ToString(Session["userId"]), out userId);
-                string path = new CommonBL().ResolveCompanyLogoPath(userId);
-                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+
+                CommonBL commonBL = new CommonBL();
+                LogoHtml = commonBL.ResolveCompanyLogoHtml(userId);
+                if (string.IsNullOrWhiteSpace(LogoHtml))
+                {
+                    string path = commonBL.ResolveCompanyLogoPath(userId);
+                    string logoUrl = !string.IsNullOrWhiteSpace(path)
+                        ? ResolveUrl("~/" + path.TrimStart('~', '/'))
+                        : ResolveUrl("~/assets/images/alphonsol_logo.png");
+                    LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(logoUrl) + "\" alt=\"Alphonsol\" height=\"30\" />";
+                }
             }
             catch
             {
-                LogoUrl = fallback;
+                LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(ResolveUrl("~/assets/images/alphonsol_logo.png")) + "\" alt=\"Alphonsol\" height=\"30\" />";
             }
         }
 

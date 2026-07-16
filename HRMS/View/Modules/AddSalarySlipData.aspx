@@ -54,9 +54,7 @@
 
                         <!-- Logo + Address (Centered) -->
                         <div class="text-center">
-                            <img src="<%= LogoUrl %>"
-                                alt="Alphonsol Logo"
-                                style="height: 40px; width: auto; margin-bottom: 6px;" />
+                            <%= LogoHtml %>
 
                             <p class="mb-0" style="font-size: 13px;">
                                 Address: High-street Corporate Center, FB-03, Kapurbawdi Junction, Thane(W)-400601

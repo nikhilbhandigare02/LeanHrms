@@ -17,12 +17,12 @@ namespace HRMS.View.Modules
     public partial class AddSalarySlipData : System.Web.UI.Page
     {
         protected string UserId = null;
-        protected string LogoUrl;
+        protected string LogoHtml;
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
             int userId = 0;
-            SetLogoUrl();
+            SetLogoHtml();
             if (!IsPostBack)
             {
                 ddlMonth.Items.Add(new ListItem("-- Select Month --", "0"));
@@ -56,21 +56,30 @@ namespace HRMS.View.Modules
             }
         }
 
-        // Salary-slip header logo: the logged-in user's company logo, then the configured
-        // default, then the bundled image.
-        private void SetLogoUrl()
+        // Salary-slip header logo: prefers the SP's ready-made <img> markup built from the
+        // base64 logo in the DB; falls back to the logged-in user's file-path based logo,
+        // then the configured default, then the bundled image.
+        private void SetLogoHtml()
         {
-            string fallback = ResolveUrl("~/assets/images/alphonsol_logo.png");
             try
             {
                 int loggedInUserId = 0;
                 int.TryParse(Convert.ToString(Session["userId"]), out loggedInUserId);
-                string path = new CommonBL().ResolveCompanyLogoPath(loggedInUserId);
-                LogoUrl = string.IsNullOrWhiteSpace(path) ? fallback : ResolveUrl("~/" + path.TrimStart('~', '/'));
+
+                CommonBL commonBL = new CommonBL();
+                LogoHtml = commonBL.ResolveCompanyLogoHtml(loggedInUserId);
+                if (string.IsNullOrWhiteSpace(LogoHtml))
+                {
+                    string path = commonBL.ResolveCompanyLogoPath(loggedInUserId);
+                    string logoUrl = !string.IsNullOrWhiteSpace(path)
+                        ? ResolveUrl("~/" + path.TrimStart('~', '/'))
+                        : ResolveUrl("~/assets/images/alphonsol_logo.png");
+                    LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(logoUrl) + "\" alt=\"Alphonsol Logo\" style=\"height: 40px; width: auto; margin-bottom: 6px;\" />";
+                }
             }
             catch
             {
-                LogoUrl = fallback;
+                LogoHtml = "<img src=\"" + HttpUtility.HtmlAttributeEncode(ResolveUrl("~/assets/images/alphonsol_logo.png")) + "\" alt=\"Alphonsol Logo\" style=\"height: 40px; width: auto; margin-bottom: 6px;\" />";
             }
         }
 

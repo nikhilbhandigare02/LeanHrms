@@ -283,7 +283,7 @@ namespace ProcessModel
             List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
             if (listdata != null && listdata.Count > 0 && !string.IsNullOrWhiteSpace(listdata[0].LogoPath))
             {
-                return listdata[0].LogoHtml;
+                return listdata[0].LogoPath;
             }
             return null;
         }
@@ -323,16 +323,16 @@ namespace ProcessModel
         }
 
         // Looks up the user's company logo row, falling back to the "DefaultLogoUserId"
-        // company when the user has none. Returns null when neither has a base64/html logo.
+        // company when the user has none (or isn't logged in yet, e.g. userId &lt;= 0 on the
+        // login/OTP pages). Returns null when neither has a base64/html logo.
         private CompanyLogoDO GetEffectiveCompanyLogo(int userId)
         {
-            if (userId <= 0)
+            CompanyLogoDO logo = null;
+            if (userId > 0)
             {
-                return null;
+                List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
+                logo = listdata != null && listdata.Count > 0 ? listdata[0] : null;
             }
-
-            List<CompanyLogoDO> listdata = GetCompanyLogoByUser(userId);
-            CompanyLogoDO logo = listdata != null && listdata.Count > 0 ? listdata[0] : null;
 
             bool hasImageData = logo != null && (!string.IsNullOrWhiteSpace(logo.LogoHtml) || !string.IsNullOrWhiteSpace(logo.LogoBase64));
             if (!hasImageData)

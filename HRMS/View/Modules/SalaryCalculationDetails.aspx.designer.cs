@@ -11,97 +11,133 @@ namespace HRMS.View.Modules
 {
 
 
-    public partial class Remunerationdetails
+    public partial class SalaryCalculationDetails
     {
 
         /// <summary>
-        /// lbluser control.
+        /// txtEmployeeCode control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbluser;
+        protected global::System.Web.UI.WebControls.TextBox txtEmployeeCode;
 
         /// <summary>
-        /// searchdata control.
+        /// txtEmployeeName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl searchdata;
+        protected global::System.Web.UI.WebControls.TextBox txtEmployeeName;
 
         /// <summary>
-        /// ddlYear control.
+        /// txtEmail control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlYear;
+        protected global::System.Web.UI.WebControls.TextBox txtEmail;
 
         /// <summary>
-        /// btnSearch control.
+        /// txtVerificationStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.TextBox txtVerificationStatus;
 
         /// <summary>
-        /// btnClear control.
+        /// txtMonthlySalary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnClear;
+        protected global::System.Web.UI.WebControls.TextBox txtMonthlySalary;
 
         /// <summary>
-        /// hfPageIndexViewUser control.
+        /// txtPerDaySalary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfPageIndexViewUser;
+        protected global::System.Web.UI.WebControls.TextBox txtPerDaySalary;
 
         /// <summary>
-        /// gridview control.
+        /// txtTotalWorkingDays control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gridview;
+        protected global::System.Web.UI.WebControls.TextBox txtTotalWorkingDays;
 
         /// <summary>
-        /// lblMessage control.
+        /// txtPresentDays control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMessage;
+        protected global::System.Web.UI.WebControls.TextBox txtPresentDays;
 
         /// <summary>
-        /// paginationContainer control.
+        /// txtAbsentDays control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel paginationContainer;
+        protected global::System.Web.UI.WebControls.TextBox txtAbsentDays;
 
         /// <summary>
-        /// ddlPageSelector control.
+        /// txtLeaveDeductionDays control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlPageSelector;
+        protected global::System.Web.UI.WebControls.TextBox txtLeaveDeductionDays;
+
+        /// <summary>
+        /// txtDeductedAmount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtDeductedAmount;
+
+        /// <summary>
+        /// txtNetSalary control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNetSalary;
+
+        /// <summary>
+        /// btnBack control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnBack;
+
+        /// <summary>
+        /// btnVerifyUpdate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnVerifyUpdate;
     }
 }

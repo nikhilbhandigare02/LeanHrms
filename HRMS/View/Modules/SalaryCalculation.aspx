@@ -102,7 +102,68 @@
             background: #fef3c7;
             color: #92400e;
         }
+
+        .salary-calc-page .sc-filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .salary-calc-page .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .salary-calc-page .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .salary-calc-page .filter-input,
+        .salary-calc-page .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .salary-calc-page .filter-btn {
+            padding: 8px 20px;
+            background: #2563EB;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .salary-calc-page .filter-btn:hover {
+            background: #1D4ED8;
+        }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var txtSearch = document.getElementById('<%= txtSearch.ClientID %>');
+            var btnFilter = document.getElementById('<%= btnFilter.ClientID %>');
+            var searchTimeout;
+
+            if (txtSearch && btnFilter) {
+                txtSearch.addEventListener('input', function () {
+                    clearTimeout(searchTimeout);
+                    // Wait 300ms after typing stops before triggering filter
+                    searchTimeout = setTimeout(function () {
+                        btnFilter.click();
+                    }, 300);
+                });
+            }
+        });
+    </script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -111,6 +172,23 @@
             <div class="col-14">
                 <div class="sc-card">
                     <div class="sc-title">Salary Calculation Details</div>
+
+                    <div class="sc-filters">
+                        <div class="filter-group">
+                            <label>Search</label>
+                            <asp:TextBox ID="txtSearch" runat="server" CssClass="filter-input" placeholder="Search by name or employee code" />
+                        </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <asp:DropDownList ID="ddlStatus" runat="server" CssClass="filter-select" AutoPostBack="true" OnSelectedIndexChanged="ddlStatus_SelectedIndexChanged">
+                                <asp:ListItem Value="">All</asp:ListItem>
+                                <asp:ListItem Value="Pending">Pending</asp:ListItem>
+                                <asp:ListItem Value="Verified">Verified</asp:ListItem>
+                            </asp:DropDownList>
+                        </div>
+                        <asp:Button ID="btnFilter" runat="server" Text="Filter" CssClass="filter-btn" OnClick="btnFilter_Click" Style="display: none;" />
+                        <asp:Button ID="btnExport" runat="server" Text="Export to Excel" CssClass="filter-btn" OnClick="btnExport_Click" Style="background: #10b981;" />
+                    </div>
 
                     <div class="sc-grid-wrap">
                         <asp:GridView ID="gvSalaryCalculations" runat="server" AutoGenerateColumns="false" CssClass="sc-grid"
@@ -166,7 +244,8 @@
                                                 CssClass="action-btn edit-btn"
                                                 ToolTip="Edit"
                                                 CommandArgument='<%# Eval("user_id") %>'
-                                                OnClick="btnEdit_Click">
+                                                OnClick="btnEdit_Click"
+                                                Visible='<%# Eval("verification_status").ToString() == "Pending" %>'>
                                                 <i class='bx bx-edit'></i>
                                             </asp:LinkButton>
                                         </ItemTemplate>

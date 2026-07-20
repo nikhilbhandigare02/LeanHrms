@@ -25,6 +25,8 @@ namespace HRMS.View.Modules
             UserId = Convert.ToString(Session["userId"]);
             if (!IsPostBack)
             {
+                eventDate.Attributes["min"] = DateTime.Today.ToString("yyyy-MM-dd");
+
                 if (Session["userId"] == null)
                 {
                     Response.Redirect("~/view/authentication/login.aspx", false);
@@ -537,6 +539,8 @@ namespace HRMS.View.Modules
         {
             if (e.CommandName == "ViewNews")
             {
+                litNewsModalTitle.Text = "View News / Announcement";
+
                 int news_announcement_id = Convert.ToInt32(e.CommandArgument);
 
                 List<NewsAnnouncementDO> newsList = objBL.GetNewsById(news_announcement_id);
@@ -601,6 +605,8 @@ namespace HRMS.View.Modules
 
         private void ResetNewsModal()
         {
+            litNewsModalTitle.Text = "Add News / Announcement";
+
             newsTitle.Text = "";
             newsTag.SelectedIndex = 0;
             newsPostedBy.Text = "";
@@ -677,6 +683,8 @@ namespace HRMS.View.Modules
         {
             if (e.CommandName == "ViewEvents")
             {
+                litEventModalTitle.Text = "View Event";
+
                 string[] args = e.CommandArgument.ToString().Split('|');
 
                 string recordType = args[0];
@@ -725,6 +733,8 @@ namespace HRMS.View.Modules
                 }
                 else if (recordType == "Holiday")
                 {
+                    litEventModalTitle.Text = "View Holiday";
+
                     List<HolidayDO> holidayList = objBL.GetHolidayById(id);
 
                     if (holidayList != null && holidayList.Count > 0)
@@ -782,6 +792,9 @@ namespace HRMS.View.Modules
 
         private void ResetEventModal()
         {
+
+            litEventModalTitle.Text = "Add Event / Holiday";
+
             eventTitle.Text = "";
             eventDate.Text = "";
             eventTime.Text = "";

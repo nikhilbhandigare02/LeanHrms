@@ -1456,10 +1456,15 @@
                         </svg>
                     </div>
 
-                    <div class="hb-modal-title">
+                    <%--  <div class="hb-modal-title">
                         Add News / Announcement
+                    </div>--%>
+                    <div class="hb-modal-title">
+                        <asp:Literal ID="litNewsModalTitle"
+                            runat="server"
+                            Text="Add News / Announcement">
+                        </asp:Literal>
                     </div>
-
                     <button type="button" class="hb-modal-close" onclick="closeModal('modalNews')">
                         &#x2715;
                     </button>
@@ -1476,7 +1481,10 @@
                             placeholder="e.g. New leave policy update">
                         </asp:TextBox>
 
-                        <span id="lblNewsTitleError" style="color: red; font-size: 12px;"></span>
+                        <asp:Label ID="lblNewsTitleError"
+                            runat="server"
+                            CssClass="text-danger">
+</asp:Label>
                     </div>
 
                     <div class="hb-field-row">
@@ -1488,6 +1496,7 @@
                                 ID="newsTag"
                                 runat="server"
                                 CssClass="hb-select">
+                                <asp:ListItem Value="">-- Select Category --</asp:ListItem>
 
                                 <asp:ListItem Text="Policy" Value="Policy"></asp:ListItem>
                                 <asp:ListItem Text="Notice" Value="Notice"></asp:ListItem>
@@ -1497,6 +1506,10 @@
                                 <asp:ListItem Text="IT" Value="IT"></asp:ListItem>
 
                             </asp:DropDownList>
+                            <asp:Label ID="lblnewtagError"
+                                runat="server"
+                                CssClass="text-danger">
+                            </asp:Label>
                         </div>
 
                         <div class="hb-field">
@@ -1509,7 +1522,10 @@
                                 placeholder="e.g. HR, Admin">
                             </asp:TextBox>
 
-                            <span id="lblPostedByError" style="color: red; font-size: 12px;"></span>
+                            <asp:Label ID="lblPostedByError"
+                                runat="server"
+                                CssClass="text-danger">
+</asp:Label>
                         </div>
 
                     </div>
@@ -1527,7 +1543,10 @@
                             placeholder="Brief description">
                         </asp:TextBox>
 
-                        <span id="lblDescriptionError" style="color: red; font-size: 12px;"></span>
+                        <asp:Label ID="lblDescriptionError"
+                            runat="server"
+                            CssClass="text-danger">
+</asp:Label>
 
                     </div>
 
@@ -1802,7 +1821,13 @@
                         </svg>
                     </div>
 
-                    <div class="hb-modal-title">Add Event / Holiday</div>
+                    <%--                    <div class="hb-modal-title">Add Event / Holiday</div>--%>
+                    <div class="hb-modal-title">
+                        <asp:Literal ID="litEventModalTitle"
+                            runat="server"
+                            Text="Add Event / Holiday">
+                        </asp:Literal>
+                    </div>
 
                     <button type="button" class="hb-modal-close" onclick="closeModal('modalEvent')">
                         &#x2715;
@@ -1823,14 +1848,16 @@
                                 runat="server"
                                 CssClass="hb-input"
                                 onchange="toggleEventTime()">
-
+                                <asp:ListItem Value="">-- Select Type --</asp:ListItem>
                                 <asp:ListItem Value="Event">Event</asp:ListItem>
                                 <asp:ListItem Value="Holiday">Holiday</asp:ListItem>
                                 <asp:ListItem Value="Meeting">Meeting</asp:ListItem>
                                 <asp:ListItem Value="Training">Training</asp:ListItem>
                                 <asp:ListItem Value="Celebration">Celebration</asp:ListItem>
                             </asp:DropDownList>
-
+                            <asp:Label ID="lblEventTypeError"
+                                runat="server"
+                                CssClass="text-danger"></asp:Label>
                         </div>
 
                         <div class="hb-field">
@@ -1845,7 +1872,9 @@
                                 CssClass="hb-input"
                                 TextMode="Date">
                             </asp:TextBox>
-
+                            <asp:Label ID="lblEventDateError"
+                                runat="server"
+                                CssClass="text-danger"></asp:Label>
                         </div>
 
                     </div>
@@ -1862,7 +1891,9 @@
                                 CssClass="hb-input"
                                 placeholder="e.g. Quarterly Town Hall">
                             </asp:TextBox>
-
+                            <asp:Label ID="lblEventTitleError"
+                                runat="server"
+                                CssClass="text-danger"></asp:Label>
                         </div>
 
                         <div class="hb-field" id="eventTimeField">
@@ -1875,7 +1906,9 @@
                                 CssClass="hb-input"
                                 TextMode="Time">
                             </asp:TextBox>
-
+                            <asp:Label ID="lblEventTimeError"
+                                runat="server"
+                                CssClass="text-danger"></asp:Label>
                         </div>
                     </div>
 
@@ -1891,7 +1924,9 @@
                             Rows="4"
                             placeholder="Additional details (optional)">
                         </asp:TextBox>
-
+                        <asp:Label ID="lblEventDescError"
+                            runat="server"
+                            CssClass="text-danger"></asp:Label>
                     </div>
 
                     <div class="hb-field">
@@ -1934,7 +1969,8 @@
                         runat="server"
                         Text="Save"
                         CssClass="hb-btn hb-btn-primary"
-                        OnClick="saveEvent" />
+                        OnClick="saveEvent"
+                        OnClientClick="return validateEvent();" />
 
                 </div>
 
@@ -1985,28 +2021,35 @@
             var title = document.getElementById('<%= newsTitle.ClientID %>');
             var postedBy = document.getElementById('<%= newsPostedBy.ClientID %>');
             var desc = document.getElementById('<%= newsDesc.ClientID %>');
+            var newsTag = document.getElementById('<%= newsTag.ClientID %>');
+
 
             var isValid = true;
 
-            document.getElementById("lblNewsTitleError").innerHTML = "";
-            document.getElementById("lblPostedByError").innerHTML = "";
-            document.getElementById("lblDescriptionError").innerHTML = "";
+            document.getElementById('<%= lblNewsTitleError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblPostedByError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblDescriptionError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "";
+
 
             if (title.value.trim() == "") {
-                document.getElementById("lblNewsTitleError").innerHTML = "Please enter title.";
+                document.getElementById('<%= lblNewsTitleError.ClientID %>').innerHTML = "Please enter title.";
                 isValid = false;
             }
 
             if (postedBy.value.trim() == "") {
-                document.getElementById("lblPostedByError").innerHTML = "Please enter posted by.";
+                document.getElementById('<%= lblPostedByError.ClientID %>').innerHTML = "Please enter posted by.";
                 isValid = false;
             }
 
             if (desc.value.trim() == "") {
-                document.getElementById("lblDescriptionError").innerHTML = "Please enter description.";
+                document.getElementById('<%= lblDescriptionError.ClientID %>').innerHTML = "Please enter description.";
                 isValid = false;
             }
-
+            if (newsTag.value.trim() == "") {
+                document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "Please select News Tag.";
+                isValid = false;
+            }
             return isValid;
         }
         function clearNewsFields() {
@@ -2019,11 +2062,12 @@
             newsTitle.value = "";
             newsPostedBy.value = "";
             newsDesc.value = "";
-
+            newsTag.value = "";
             // Clear validation messages
-            document.getElementById("lblNewsTitleError").innerHTML = "";
-            document.getElementById("lblPostedByError").innerHTML = "";
-            document.getElementById("lblDescriptionError").innerHTML = "";
+            document.getElementById('<%= lblNewsTitleError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblPostedByError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblDescriptionError.ClientID %>').innerHTML = "";
+            document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "";
 
             // Remove validation message while typing/selecting
             //newsTitle.oninput = function () {
@@ -2037,48 +2081,30 @@
             //    document.getElementById("lblDescriptionError").innerHTML = "";
             //};
         }
-
-        window.onload = function () {
+        document.addEventListener("DOMContentLoaded", function () {
 
             var newsTitle = document.getElementById('<%= newsTitle.ClientID %>');
             var newsPostedBy = document.getElementById('<%= newsPostedBy.ClientID %>');
             var newsDesc = document.getElementById('<%= newsDesc.ClientID %>');
+            var newsTag = document.getElementById('<%= newsTag.ClientID %>');
 
-            <%--var name = document.getElementById('<%= bdayName.ClientID %>');
-            var dept = document.getElementById('<%= bdayDept.ClientID %>');
- var dob = document.getElementById('<%= bdayDate.ClientID %>');
-            var empcode = document.getElementById('<%= bdayempCode.ClientID %>');--%>
+            newsTitle.addEventListener("input", function () {
+                document.getElementById('<%= lblNewsTitleError.ClientID %>').innerHTML = "";
+            });
 
+            newsPostedBy.addEventListener("input", function () {
+                document.getElementById('<%= lblPostedByError.ClientID %>').innerHTML = "";
+            });
 
+            newsDesc.addEventListener("input", function () {
+                document.getElementById('<%= lblDescriptionError.ClientID %>').innerHTML = "";
+            });
 
-            newsTitle.oninput = function () {
-                document.getElementById("lblNewsTitleError").innerHTML = "";
-            };
+            newsTag.addEventListener("change", function () {
+                document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "";
+            });
 
-            newsPostedBy.oninput = function () {
-                document.getElementById("lblPostedByError").innerHTML = "";
-            };
-
-            newsDesc.oninput = function () {
-                document.getElementById("lblDescriptionError").innerHTML = "";
-            };
-
-            //name.oninput = function () {
-            //    document.getElementById("lblBdayNameError").innerHTML = "";
-            //};
-
-            //dept.oninput = function () {
-            //    document.getElementById("lblBdayDeptError").innerHTML = "";
-            //};
-
-            //dob.oninput = function () {
-            //    document.getElementById("lblBdayDateError").innerHTML = "";
-            //};
-            //empcode.oninput = function () {
-            //    document.getElementById("lblBdayemployeecodeError").innerHTML = "";
-            //};
-
-        };
+        });
 
 <%--        function validateBirthday() {
 
@@ -2151,65 +2177,101 @@
             //};
         }--%>
 
-    <%--    function validateEvent() {
+        window.onload = function () {
+
+            var eventType = document.getElementById('<%= eventType.ClientID %>');
+            var eventDate = document.getElementById('<%= eventDate.ClientID %>');
+            var eventTitle = document.getElementById('<%= eventTitle.ClientID %>');
+            var eventDesc = document.getElementById('<%= eventDesc.ClientID %>');
+            var eventTime = document.getElementById('<%= eventTime.ClientID %>');
+
+            // Dropdown
+            eventType.addEventListener('change', function () {
+                document.getElementById('<%= lblEventTypeError.ClientID %>').innerHTML = '';
+            });
+
+            // Date picker
+            eventDate.addEventListener('change', function () {
+                document.getElementById('<%= lblEventDateError.ClientID %>').innerHTML = '';
+            });
+
+            // Title textbox
+            eventTitle.addEventListener('input', function () {
+                document.getElementById('<%= lblEventTitleError.ClientID %>').innerHTML = '';
+            });
+
+            // Description textbox
+            eventDesc.addEventListener('input', function () {
+                document.getElementById('<%= lblEventDescError.ClientID %>').innerHTML = '';
+            });
+
+            // Time picker
+            eventTime.addEventListener('change', function () {
+                document.getElementById('<%= lblEventTimeError.ClientID %>').innerHTML = '';
+            });
+        };
+
+        function validateEvent() {
 
             var type = document.getElementById('<%= eventType.ClientID %>');
-           var date = document.getElementById('<%= eventDate.ClientID %>');
-    var title = document.getElementById('<%= eventTitle.ClientID %>');
+            var date = document.getElementById('<%= eventDate.ClientID %>');
+            var title = document.getElementById('<%= eventTitle.ClientID %>');
             var desc = document.getElementById('<%= eventDesc.ClientID %>');
-            var desc = document.getElementById('<%= eventTime.ClientID %>');
+            var time = document.getElementById('<%= eventTime.ClientID %>');
 
+            var isValid = true;
 
-           var isValid = true;
+            // Clear old messages
+            document.getElementById('<%= lblEventTypeError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventDateError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventTitleError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventDescError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventTimeError.ClientID %>').innerHTML = '';
 
-           document.getElementById("lblEventTypeError").innerHTML = "";
-           document.getElementById("lblEventDateError").innerHTML = "";
-           document.getElementById("lblEventTitleError").innerHTML = "";
-            document.getElementById("lblEventDescError").innerHTML = "";
-            document.getElementById("lblEventTimeError").innerHTML = "";
-
-
-           if (type.value.trim() == "") {
-               document.getElementById("lblEventTypeError").innerHTML = "Please select type.";
-               isValid = false;
-           }
-
-           if (date.value.trim() == "") {
-               document.getElementById("lblEventDateError").innerHTML = "Please select date.";
-               isValid = false;
-           }
-
-           if (title.value.trim() == "") {
-               document.getElementById("lblEventTitleError").innerHTML = "Please enter title.";
-               isValid = false;
-           }
-
-           if (desc.value.trim() == "") {
-               document.getElementById("lblEventDescError").innerHTML = "Please enter description.";
-               isValid = false;
-            }
-            if (desc.value.trim() == "") {
-                document.getElementById("lblEventTimeError").innerHTML = "Please enter Time.";
+            if (type.value.trim() == '') {
+                document.getElementById('<%= lblEventTypeError.ClientID %>').innerHTML = 'Please select type.';
                 isValid = false;
             }
 
-           return isValid;
+            if (date.value.trim() == '') {
+                document.getElementById('<%= lblEventDateError.ClientID %>').innerHTML = 'Please select date.';
+                isValid = false;
+            }
+
+            if (title.value.trim() == '') {
+                document.getElementById('<%= lblEventTitleError.ClientID %>').innerHTML = 'Please enter title.';
+                isValid = false;
+            }
+
+            if (desc.value.trim() == '') {
+                document.getElementById('<%= lblEventDescError.ClientID %>').innerHTML = 'Please enter description.';
+                isValid = false;
+            }
+
+            if (time.value.trim() == '') {
+                document.getElementById('<%= lblEventTimeError.ClientID %>').innerHTML = 'Please enter time.';
+                isValid = false;
+            }
+
+            return isValid;
         }
+
         function clearEventFields() {
 
             document.getElementById('<%= eventType.ClientID %>').selectedIndex = 0;
-           document.getElementById('<%= eventDate.ClientID %>').value = "";
-           document.getElementById('<%= eventTitle.ClientID %>').value = "";
-    document.getElementById('<%= eventTime.ClientID %>').value = "";
-           document.getElementById('<%= eventDesc.ClientID %>').value = "";
+            document.getElementById('<%= eventDate.ClientID %>').value = '';
+            document.getElementById('<%= eventTitle.ClientID %>').value = '';
+            document.getElementById('<%= eventTime.ClientID %>').value = '';
+            document.getElementById('<%= eventDesc.ClientID %>').value = '';
 
-           document.getElementById("lblEventTypeError").innerHTML = "";
-           document.getElementById("lblEventDateError").innerHTML = "";
-           document.getElementById("lblEventTitleError").innerHTML = "";
-            document.getElementById("lblEventDescError").innerHTML = "";
-            document.getElementById("lblEventTimeError").innerHTML = "";
+            document.getElementById('<%= lblEventTypeError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventDateError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventTitleError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventDescError.ClientID %>').innerHTML = '';
+            document.getElementById('<%= lblEventTimeError.ClientID %>').innerHTML = '';
+        }
 
-        }--%>
+
 
         function saveBirthday() {
             var name = document.getElementById('bdayName').value.trim();

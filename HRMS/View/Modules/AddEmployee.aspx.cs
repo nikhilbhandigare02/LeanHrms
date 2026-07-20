@@ -1,6 +1,7 @@
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -74,6 +75,8 @@ namespace HRMS.View.Modules
                 BindEmployeeAssetReturns(userId);
                 BindEmployeeEducation(userId);
                 BindEmployeeWorkExperience(userId);
+                BindDocumentTypeDropdown();
+                BindEmployeeDocuments(userId);
                 UpdateSectionStatuses();
             }
 
@@ -140,6 +143,168 @@ namespace HRMS.View.Modules
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeWorkExperience", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        private void BindDocumentTypeDropdown()
+        {
+            try
+            {
+                ddlUploadDocumentType.DataSource = new CommonBL().dropdownDocuments();
+                ddlUploadDocumentType.DataTextField = "Text";
+                ddlUploadDocumentType.DataValueField = "Id";
+                ddlUploadDocumentType.DataBind();
+                ddlUploadDocumentType.Items.Insert(0, new ListItem("-- Select --", ""));
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "BindDocumentTypeDropdown", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void btnUploadDocument_Click(object sender, EventArgs e)
+        {
+            int employeeUserId = GetEmployeeUserIdFromQuery();
+            if (employeeUserId <= 0)
+            {
+                ShowAssetMessage("Failed", "Employee UserId is required to upload a document.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(ddlUploadDocumentType.SelectedValue))
+            {
+                ShowAssetMessage("Failed", "Document Type is required.");
+                return;
+            }
+
+            if (!fuUploadDocument.HasFile)
+            {
+                ShowAssetMessage("Failed", "Please choose a file to upload.");
+                return;
+            }
+
+            const int maxFileSize = 5 * 1024 * 1024;
+            if (fuUploadDocument.PostedFile.ContentLength > maxFileSize)
+            {
+                ShowAssetMessage("Failed", "File must be less than 5MB.");
+                return;
+            }
+
+            try
+            {
+                int documentMasterId = ParseIntValue(ddlUploadDocumentType.SelectedValue);
+                userDocumentBL docBL = new userDocumentBL();
+
+                List<userDocumentsDO> existingDocuments = docBL.GetUserDocuments(employeeUserId) ?? new List<userDocumentsDO>();
+                userDocumentsDO existingDocument = existingDocuments.FirstOrDefault(d => d.DocumentMasterId == documentMasterId);
+                if (existingDocument != null)
+                {
+                    docBL.DeactivateDocument(existingDocument.UserDocDetId);
+                }
+
+                string employeeCode = Convert.ToString(Request.QueryString["emp_code"]);
+                if (string.IsNullOrWhiteSpace(employeeCode))
+                {
+                    employeeCode = txtEmployeeCode.Text;
+                }
+
+                DateTime now = DateTime.Now;
+                string basePath = Path.Combine(
+                    @"\\103.118.17.144\Documents\",
+                    now.Year.ToString(),
+                    now.Month.ToString("00"),
+                    employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
+
+                if (!Directory.Exists(basePath))
+                {
+                    Directory.CreateDirectory(basePath);
+                }
+
+                string originalFileName = Path.GetFileName(fuUploadDocument.FileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+                string fileExt = Path.GetExtension(originalFileName);
+                string filePath = Path.Combine(basePath, originalFileName);
+
+                fuUploadDocument.SaveAs(filePath);
+
+                FileAttachment file = new FileAttachment
+                {
+                    FileName = fileNameWithoutExt,
+                    FilePath = filePath,
+                    DocumentMasterId = documentMasterId,
+                    ReferenceNumber = string.Empty,
+                    EmailId = txt_email.Text
+                };
+
+                docBL.SaveUserDocument(employeeUserId, file, fileExt, basePath);
+
+                ddlUploadDocumentType.ClearSelection();
+                BindEmployeeDocuments(employeeUserId);
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "btnUploadDocument_Click", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+                ShowAssetMessage("Failed", "An unexpected error occurred while uploading the document.");
+            }
+        }
+
+        private void BindEmployeeDocuments(int userId)
+        {
+            try
+            {
+                userDocumentBL docBL = new userDocumentBL();
+                List<userDocumentsDO> documents = docBL.GetUserDocuments(userId) ?? new List<userDocumentsDO>();
+                gvEmployeeDocuments.DataSource = documents;
+                gvEmployeeDocuments.DataBind();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeDocuments", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void gvEmployeeDocuments_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (!string.Equals(e.CommandName, "DownloadDocument", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            int userDocId;
+            if (!int.TryParse(Convert.ToString(e.CommandArgument), out userDocId) || userDocId <= 0)
+            {
+                ShowAssetMessage("Failed", "Invalid document ID.");
+                return;
+            }
+
+            try
+            {
+                userDocumentBL docBL = new userDocumentBL();
+                userDocumentsDO doc = docBL.GetUserDocumentById(userDocId);
+
+                if (doc == null || !File.Exists(doc.filepath))
+                {
+                    ShowAssetMessage("Failed", "File not found.");
+                    return;
+                }
+
+                FileInfo fileInfo = new FileInfo(doc.filepath);
+                Response.Clear();
+                Response.ContentType = "application/octet-stream";
+                Response.AddHeader("Content-Disposition", "attachment; filename=" + fileInfo.Name);
+                Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+                Response.TransmitFile(doc.filepath);
+                Response.Flush();
+                Response.End();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "gvEmployeeDocuments_RowCommand", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+                ShowAssetMessage("Failed", "An unexpected error occurred while downloading the file.");
             }
         }
 

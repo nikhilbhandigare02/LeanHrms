@@ -1293,6 +1293,42 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.GridView gvEmployeeAssetReturns;
 
         /// <summary>
+        /// gvEmployeeDocuments control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvEmployeeDocuments;
+
+        /// <summary>
+        /// ddlUploadDocumentType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlUploadDocumentType;
+
+        /// <summary>
+        /// fuUploadDocument control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fuUploadDocument;
+
+        /// <summary>
+        /// btnUploadDocument control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnUploadDocument;
+
+        /// <summary>
         /// assetReturnEditorCard control.
         /// </summary>
         /// <remarks>

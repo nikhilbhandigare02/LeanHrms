@@ -2033,7 +2033,63 @@
                         </div>
                     </div>
 
-                    
+
+                </div>
+            </details>
+
+            <details class="update-section">
+                <summary>
+                    <span class="section-icon"><i class="fas fa-folder-open"></i></span>
+                    <span class="section-title">Uploaded Documents</span>
+                    <span class="section-owner">HRMS</span>
+                    <i class="fas fa-chevron-down section-chevron"></i>
+                </summary>
+                <div class="section-body">
+                    <div class="managed-entry-block">
+                        <div class="managed-entry-header">
+                            <button type="button" class="managed-entry-button" onclick="showSectionEditor('documentEditorCard')">Add / Update Document</button>
+                        </div>
+                        <div class="entry-table-wrap">
+                            <asp:GridView ID="gvEmployeeDocuments" runat="server" AutoGenerateColumns="false"
+                                CssClass="table table-hover managed-entry-table" GridLines="None"
+                                EmptyDataText="No documents uploaded yet."
+                                OnRowCommand="gvEmployeeDocuments_RowCommand">
+                                <Columns>
+                                    <asp:BoundField DataField="FileName" HeaderText="File Name" />
+                                    <asp:BoundField DataField="InsertedDate" HeaderText="Uploaded On" DataFormatString="{0:dd MMM yyyy}" />
+                                    <asp:TemplateField HeaderText="Action">
+                                        <ItemTemplate>
+                                            <asp:LinkButton runat="server" CommandName="DownloadDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action" CausesValidation="false"><i class="fas fa-download"></i> Download</asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
+
+                    <div id="documentEditorCard" class="entry-editor-card collapsed">
+                        <div class="entry-editor-header">
+                            <div class="entry-editor-title-wrap">
+                                <div class="entry-editor-badge"><i class="fas fa-file-upload"></i></div>
+                                <div>
+                                    <h4 class="entry-editor-title">Add / Update Document</h4>
+                                    <p class="entry-editor-subtitle">Uploading a file for a document type that already has one will replace the existing file.</p>
+                                </div>
+                            </div>
+                            <button type="button" class="asset-editor-close" onclick="hideSectionEditor('documentEditorCard')" title="Close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="entry-editor-body">
+                            <div class="form-grid">
+                                <div class="field-block"><label>Document Type</label><asp:DropDownList ID="ddlUploadDocumentType" runat="server" CssClass="form-control"></asp:DropDownList></div>
+                                <div class="field-block"><label>File</label><asp:FileUpload ID="fuUploadDocument" runat="server" CssClass="form-control" /></div>
+                            </div>
+                        </div>
+                        <div class="entry-editor-actions">
+                            <asp:Button ID="btnUploadDocument" runat="server" CssClass="btn btn-primary" Text="Save Document" OnClick="btnUploadDocument_Click" CausesValidation="false" />
+                        </div>
+                    </div>
                 </div>
             </details>
 

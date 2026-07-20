@@ -186,6 +186,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Literal litMoreEventCount;
 
         /// <summary>
+        /// litNewsModalTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litNewsModalTitle;
+
+        /// <summary>
         /// newsTitle control.
         /// </summary>
         /// <remarks>
@@ -193,6 +202,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox newsTitle;
+
+        /// <summary>
+        /// lblNewsTitleError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblNewsTitleError;
 
         /// <summary>
         /// newsTag control.
@@ -204,6 +222,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList newsTag;
 
         /// <summary>
+        /// lblnewtagError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblnewtagError;
+
+        /// <summary>
         /// newsPostedBy control.
         /// </summary>
         /// <remarks>
@@ -213,6 +240,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox newsPostedBy;
 
         /// <summary>
+        /// lblPostedByError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPostedByError;
+
+        /// <summary>
         /// newsDesc control.
         /// </summary>
         /// <remarks>
@@ -220,6 +256,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox newsDesc;
+
+        /// <summary>
+        /// lblDescriptionError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblDescriptionError;
 
         /// <summary>
         /// fuNewsAttachment control.
@@ -249,6 +294,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Button btnSaveNews;
 
         /// <summary>
+        /// litEventModalTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litEventModalTitle;
+
+        /// <summary>
         /// eventType control.
         /// </summary>
         /// <remarks>
@@ -256,6 +310,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList eventType;
+
+        /// <summary>
+        /// lblEventTypeError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEventTypeError;
 
         /// <summary>
         /// eventDate control.
@@ -267,6 +330,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox eventDate;
 
         /// <summary>
+        /// lblEventDateError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEventDateError;
+
+        /// <summary>
         /// eventTitle control.
         /// </summary>
         /// <remarks>
@@ -274,6 +346,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox eventTitle;
+
+        /// <summary>
+        /// lblEventTitleError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEventTitleError;
 
         /// <summary>
         /// eventTime control.
@@ -285,6 +366,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox eventTime;
 
         /// <summary>
+        /// lblEventTimeError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEventTimeError;
+
+        /// <summary>
         /// eventDesc control.
         /// </summary>
         /// <remarks>
@@ -292,6 +382,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox eventDesc;
+
+        /// <summary>
+        /// lblEventDescError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEventDescError;
 
         /// <summary>
         /// fueventAttachment control.

@@ -1250,6 +1250,43 @@
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="5">Save</button></div>
                 </section>
 
+                <section class="wizard-step collapsed pending" data-step="6">
+                    <div class="card-heading">
+                        <div><span class="accordion-number">6</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
+                        <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
+                        <i class="fas fa-chevron-down registration-chevron"></i>
+                        <span class="step-pill">Step 6 of 6</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="asset-table">
+                            <thead><tr><th>Document Type</th><th>File</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td><asp:DropDownList ID="ddlDocumentType1" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                    <td><asp:FileUpload ID="fuDocument1" runat="server" CssClass="form-control-modern" /></td>
+                                </tr>
+                                <tr>
+                                    <td><asp:DropDownList ID="ddlDocumentType2" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                    <td><asp:FileUpload ID="fuDocument2" runat="server" CssClass="form-control-modern" /></td>
+                                </tr>
+                                <tr>
+                                    <td><asp:DropDownList ID="ddlDocumentType3" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                    <td><asp:FileUpload ID="fuDocument3" runat="server" CssClass="form-control-modern" /></td>
+                                </tr>
+                                <tr>
+                                    <td><asp:DropDownList ID="ddlDocumentType4" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                    <td><asp:FileUpload ID="fuDocument4" runat="server" CssClass="form-control-modern" /></td>
+                                </tr>
+                                <tr>
+                                    <td><asp:DropDownList ID="ddlDocumentType5" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
+                                    <td><asp:FileUpload ID="fuDocument5" runat="server" CssClass="form-control-modern" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="6">Save</button></div>
+                </section>
+
 
          <%--       <section class="wizard-step collapsed pending-neutral" data-step="7">
                     <div class="card-heading">

@@ -2,6 +2,7 @@ using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Script.Services;
@@ -73,6 +74,32 @@ namespace HRMS.View.Modules
             BindLookup(ddlAssetCondition, "Asset Condition");
             // BindLookup(ddlAssetStatus, "Asset Status");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
+
+            foreach (DropDownList documentTypeDropdown in GetDocumentUploadRows().Keys)
+            {
+                BindDocumentTypeDropdown(documentTypeDropdown);
+            }
+        }
+
+        private void BindDocumentTypeDropdown(DropDownList ddl)
+        {
+            ddl.DataSource = new CommonBL().dropdownDocuments();
+            ddl.DataTextField = "Text";
+            ddl.DataValueField = "Id";
+            ddl.DataBind();
+            AddDisabledSelectOption(ddl);
+        }
+
+        private Dictionary<DropDownList, FileUpload> GetDocumentUploadRows()
+        {
+            return new Dictionary<DropDownList, FileUpload>
+            {
+                { ddlDocumentType1, fuDocument1 },
+                { ddlDocumentType2, fuDocument2 },
+                { ddlDocumentType3, fuDocument3 },
+                { ddlDocumentType4, fuDocument4 },
+                { ddlDocumentType5, fuDocument5 }
+            };
         }
 
 
@@ -156,6 +183,8 @@ namespace HRMS.View.Modules
                         return;
                     }
                 }
+
+                    SaveEmployeeDocuments(response.UserId, employee.Email, employee.EmployeeCode);
 
                     string generatedPassword = DefaultEmployeePassword;
 
@@ -397,6 +426,68 @@ namespace HRMS.View.Modules
             public string return_date { get; set; }
             public string asset_condition { get; set; }
             public string asset_status { get; set; }
+        }
+
+        private void SaveEmployeeDocuments(int userId, string employeeEmail, string employeeCode)
+        {
+            const int maxFileSize = 5 * 1024 * 1024;
+            const string documentsRoot = @"\\103.118.17.144\Documents\";
+
+            DateTime now = DateTime.Now;
+            string basePath = Path.Combine(
+                documentsRoot,
+                now.Year.ToString(),
+                now.Month.ToString("00"),
+                employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
+
+            userDocumentBL userDocBL = new userDocumentBL();
+
+            foreach (KeyValuePair<DropDownList, FileUpload> row in GetDocumentUploadRows())
+            {
+                DropDownList documentTypeDropdown = row.Key;
+                FileUpload fileUpload = row.Value;
+
+                if (!fileUpload.HasFile || documentTypeDropdown.SelectedIndex <= 0)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    if (fileUpload.PostedFile.ContentLength > maxFileSize)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(basePath))
+                    {
+                        Directory.CreateDirectory(basePath);
+                    }
+
+                    string originalFileName = Path.GetFileName(fileUpload.FileName);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+                    string fileExt = Path.GetExtension(originalFileName);
+                    string filePath = Path.Combine(basePath, originalFileName);
+
+                    fileUpload.SaveAs(filePath);
+
+                    FileAttachment file = new FileAttachment
+                    {
+                        FileName = fileNameWithoutExt,
+                        FilePath = filePath,
+                        DocumentMasterId = ParseInt(documentTypeDropdown.SelectedValue),
+                        ReferenceNumber = string.Empty,
+                        EmailId = employeeEmail
+                    };
+
+                    userDocBL.SaveUserDocument(userId, file, fileExt, basePath);
+                }
+                catch (Exception ex)
+                {
+                    CommonBL errorlog = new CommonBL();
+                    errorlog.fnStoreErrorLog("EmployeeRegistration", "SaveEmployeeDocuments", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                }
+            }
         }
 
         private EmployeeOnboardingDO BuildEmployeeOnboarding()

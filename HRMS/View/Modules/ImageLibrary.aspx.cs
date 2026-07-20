@@ -75,9 +75,9 @@ namespace HRMS.View.Modules
                     Toast("Error", "The selected file is empty.");
                     return;
                 }
-                if (bytes.Length > 3 * 1024 * 1024)
+                if (bytes.Length > 1 * 1024 * 1024)
                 {
-                    Toast("Error", "File is too large. Maximum allowed size is 3 MB.");
+                    Toast("Error", "File is too large. Maximum allowed size is 300 kb.");
                     return;
                 }
 

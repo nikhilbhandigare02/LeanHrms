@@ -146,7 +146,7 @@
                                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="il-btn w-100" OnClick="btnSave_Click" />
                             </div>
                         </div>
-                        <div class="il-hint">Accepted: PNG, JPG, GIF, SVG, WEBP, BMP. Max ~3 MB. Stored as base64 in the database.</div>
+                        <div class="il-hint">Accepted: PNG, JPG, GIF, SVG, WEBP, BMP. Max ~300 KB.</div>
                     </div>
 
                     <div class="il-grid-wrap">

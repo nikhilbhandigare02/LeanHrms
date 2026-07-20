@@ -546,6 +546,29 @@
             .hb-btn-primary:hover {
                 background: #1d54c4;
             }
+
+        .hb-upload-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hb-file-upload {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .hb-upload-cross {
+            margin-left: -35px;
+            cursor: pointer;
+            color: #e0455a;
+            font-size: 16px;
+            z-index: 1;
+        }
     </style>
 
     <div class="hb-wrap">
@@ -557,7 +580,7 @@
         <div class="hb-subtext">Here's what's happening today.</div>
 
         <!-- Slideshow Banner -->
-   <%--     <div class="hb-slideshow">
+        <%--     <div class="hb-slideshow">
             <div class="hb-slideshow-content">
                 <div class="hb-slide active" data-slide="0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <div class="hb-slide-text">
@@ -645,62 +668,62 @@
             </div>
         </div>--%>
         <div class="hb-slideshow">
-    <div class="hb-slideshow-content">
+            <div class="hb-slideshow-content">
 
-        <asp:Repeater ID="rptBanner" runat="server">
-            <ItemTemplate>
+                <asp:Repeater ID="rptBanner" runat="server">
+                    <ItemTemplate>
 
-                <div class='hb-slide <%# Container.ItemIndex==0 ? "active" : "" %>'
-                     data-slide='<%# Container.ItemIndex %>'
-                     style='background:<%# Eval("Background") %>'>
+                        <div class='hb-slide <%# Container.ItemIndex==0 ? "active" : "" %>'
+                            data-slide='<%# Container.ItemIndex %>'
+                            style='background: <%# Eval("Background") %>'>
 
-                    <div class="hb-slide-text">
+                            <div class="hb-slide-text">
 
-                        <span class="hb-slide-badge">
-                            <%# Eval("IconHtml") %>
-                            <%# Eval("Category") %>
-                        </span>
+                                <span class="hb-slide-badge">
+                                    <%# Eval("IconHtml") %>
+                                    <%# Eval("Category") %>
+                                </span>
 
-                        <div class="hb-slide-title">
-                            <%# Eval("Title") %>
+                                <div class="hb-slide-title">
+                                    <%# Eval("Title") %>
+                                </div>
+
+                                <div class="hb-slide-meta">
+                                    <%# Eval("Meta") %>
+                                </div>
+
+                                <div class="hb-slide-description">
+                                    <%# Eval("Description") %>
+                                </div>
+
+                            </div>
+
+                            <img class="hb-slide-image"
+                                src='<%# Eval("ImageUrl") %>'
+                                alt='<%# Eval("Category") %>' />
+
                         </div>
 
-                        <div class="hb-slide-meta">
-                            <%# Eval("Meta") %>
-                        </div>
+                    </ItemTemplate>
 
-                        <div class="hb-slide-description">
-                            <%# Eval("Description") %>
-                        </div>
+                </asp:Repeater>
 
-                    </div>
+                <div class="hb-slideshow-controls">
 
-                    <img class="hb-slide-image"
-                         src='<%# Eval("ImageUrl") %>'
-                         alt='<%# Eval("Category") %>' />
+                    <asp:Repeater ID="rptDots" runat="server">
+                        <ItemTemplate>
+
+                            <div class='hb-slideshow-dot <%# Container.ItemIndex==0 ? "active" : "" %>'
+                                data-slide='<%# Container.ItemIndex %>'>
+                            </div>
+
+                        </ItemTemplate>
+                    </asp:Repeater>
 
                 </div>
 
-            </ItemTemplate>
-
-        </asp:Repeater>
-
-        <div class="hb-slideshow-controls">
-
-            <asp:Repeater ID="rptDots" runat="server">
-                <ItemTemplate>
-
-                    <div class='hb-slideshow-dot <%# Container.ItemIndex==0 ? "active" : "" %>'
-                         data-slide='<%# Container.ItemIndex %>'>
-                    </div>
-
-                </ItemTemplate>
-            </asp:Repeater>
-
+            </div>
         </div>
-
-    </div>
-</div>
         <!-- Quick stats row -->
         <div class="hb-stats-row">
             <div class="hb-stat">
@@ -775,20 +798,47 @@
                         <div class="hb-card-title">Company News</div>
                         <div class="hb-card-sub">Latest updates & announcements</div>
                     </div>
-                    <a class="hb-add-btn" href="#" onclick="openModal('modalNews'); return false;" title="Add News">
+                    <%--<a class="hb-add-btn" href="#" onclick="openModal('modalNews'); return false;" title="Add News">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                         </svg>
                         Add News
-                    </a>
+                    </a>--%>
+                    <asp:LinkButton
+                        ID="btnaddNews"
+                        runat="server"
+                        CssClass="hb-add-btn"
+                        OnClick="btnAddNews_Click"
+                        CausesValidation="false">
+
+                        <svg width="14"
+                             height="14"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+
+                        <span>Add News</span>
+
+                    </asp:LinkButton>
                 </div>
                 <div class="hb-card-body">
 
                     <!-- First 3 News -->
-                    <asp:Repeater ID="rptNews" runat="server">
+                    <asp:Repeater ID="rptNews" runat="server" OnItemCommand="rptNews_ItemCommand">
                         <ItemTemplate>
-                            <div class="hb-item">
+                            <%--                            <div class="hb-item">--%>
+                            <asp:LinkButton ID="lnkNews"
+                                runat="server"
+                                CssClass="hb-item"
+                                CommandName="ViewNews"
+                                CommandArgument='<%# Eval("news_announcement_id") %>'
+                                Style="text-decoration: none; color: inherit; display: flex;">
+
                                 <div class="hb-avatar" style="background: #2f6fed;">
                                     <%# Eval("Initials") %>
                                 </div>
@@ -806,15 +856,23 @@
                                 <span class="hb-badge upcoming">
                                     <%# Eval("category") %>
                                 </span>
-                            </div>
+                            </asp:LinkButton>
+
+                            <%--                            </div>--%>
                         </ItemTemplate>
                     </asp:Repeater>
 
                     <!-- Remaining News -->
                     <div class="hb-extra" id="newsExtra">
-                        <asp:Repeater ID="rptMoreNews" runat="server">
+                        <asp:Repeater ID="rptMoreNews" runat="server" OnItemCommand="rptNews_ItemCommand">
                             <ItemTemplate>
-                                <div class="hb-item">
+                                <%--                                <div class="hb-item">--%>
+                                <asp:LinkButton
+                                    ID="lnkMoreNews"
+                                    runat="server"
+                                    CssClass="hb-item"
+                                    CommandName="ViewNews"
+                                    CommandArgument='<%# Eval("news_announcement_id") %>'>
                                     <div class="hb-avatar" style="background: #2f6fed;">
                                         <%# Eval("Initials") %>
                                     </div>
@@ -832,7 +890,9 @@
                                     <span class="hb-badge upcoming">
                                         <%# Eval("category") %>
                                     </span>
-                                </div>
+                                </asp:LinkButton>
+
+                                <%--                                </div>--%>
                             </ItemTemplate>
                         </asp:Repeater>
                     </div>
@@ -845,7 +905,8 @@
     <span class="hb-extra-count">(+<asp:Literal ID="litMoreCount" runat="server"></asp:Literal>)
     </span>
                 </a>
-                <%-- <div class="hb-card-body">
+            </div>
+            <%-- <div class="hb-card-body">
                     <asp:Repeater ID="rptNews" runat="server">
                         <ItemTemplate>
                             <div class="hb-item">
@@ -903,8 +964,8 @@
                         </div>
                     </div>
                 </div>--%>
-                <%--                <a class="hb-viewall" onclick="toggleExtra('newsExtra', this, 'View All News', 'Show Less')" href="#">View All News <span class="hb-extra-count">(+2)</span></a>--%>
-            </div>
+            <%--                <a class="hb-viewall" onclick="toggleExtra('newsExtra', this, 'View All News', 'Show Less')" href="#">View All News <span class="hb-extra-count">(+2)</span></a>--%>
+            <%-- </div>--%>
 
             <!-- Birthdays -->
 
@@ -934,6 +995,28 @@
 
                         Add Birthday
                     </a>--%>
+
+                    <asp:LinkButton
+                        ID="btnsendmail"
+                        runat="server"
+                        CssClass="hb-add-btn"
+                        OnClick="btnsendmail_Click"
+                        CausesValidation="false">
+
+                        <svg width="14"
+                             height="14"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M22 2L11 13"></path>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                        </svg>
+
+                        <span>Send Mail</span>
+
+                    </asp:LinkButton>
+
                 </div>
 
                 <div class="hb-card-body">
@@ -1110,7 +1193,7 @@
                         <div class="hb-card-sub">What's coming up next</div>
                     </div>
 
-                    <a class="hb-add-btn"
+                    <%-- <a class="hb-add-btn"
                         href="#"
                         onclick="openModal('modalEvent'); return false;"
                         title="Add Event">
@@ -1121,16 +1204,43 @@
                         </svg>
 
                         Add Event
-                    </a>
+                    </a>--%>
+                    <asp:LinkButton
+                        ID="btnAddEvent"
+                        runat="server"
+                        CssClass="hb-add-btn"
+                        OnClick="btnAddEvent_Click"
+                        CausesValidation="false">
+
+                    <svg width="14"
+                         height="14"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+
+                    <span>Add Event</span>
+
+                    </asp:LinkButton>
                 </div>
 
                 <div class="hb-card-body">
 
                     <!-- First 3 Events -->
-                    <asp:Repeater ID="rptEvents" runat="server">
+                    <asp:Repeater ID="rptEvents" runat="server" OnItemCommand="rptEvents_ItemCommand">
                         <ItemTemplate>
 
-                            <div class="hb-item">
+                            <%--                            <div class="hb-item">--%>
+                            <asp:LinkButton
+                                ID="lnkEvents"
+                                runat="server"
+                                CssClass="hb-item"
+                                CommandName="ViewEvents"
+                                CommandArgument='<%# Eval("record_type") + "|" + Eval("id") %>'
+                                Style="text-decoration: none; color: inherit; display: flex;">
 
                                 <div class="hb-avatar" style="background: #2f6fed;">
                                     <%# Eval("EventDay") %>
@@ -1149,19 +1259,32 @@
                                 <span class="hb-badge upcoming">
                                     <%# Eval("event_type") %>
                                 </span>
-
-                            </div>
-
+                            </asp:LinkButton>
+                            <%--                            </div>--%>
                         </ItemTemplate>
                     </asp:Repeater>
 
                     <!-- Remaining Events -->
                     <div class="hb-extra" id="eventsExtra">
 
-                        <asp:Repeater ID="rptMoreEvents" runat="server">
+                        <asp:Repeater ID="rptMoreEvents" runat="server" OnItemCommand="rptEvents_ItemCommand">
                             <ItemTemplate>
 
-                                <div class="hb-item">
+                                <%--                                <div class="hb-item">--%>
+                                <%--      <asp:LinkButton ID="lnkEvents"
+                                    runat="server"
+                                    CssClass="hb-item"
+                                    CommandName="ViewEvents"
+                                    CommandArgument='<%# Eval("id") %>'
+                                    Style="text-decoration: none; color: inherit; display: flex;">--%>
+
+                                <asp:LinkButton
+                                    ID="lnkEvents"
+                                    runat="server"
+                                    CssClass="hb-item"
+                                    CommandName="ViewEvents"
+                                    CommandArgument='<%# Eval("record_type") + "|" + Eval("id") %>'
+                                    Style="text-decoration: none; color: inherit; display: flex;">
 
                                     <div class="hb-avatar" style="background: #2f6fed;">
                                         <%# Eval("EventDay") %>
@@ -1180,9 +1303,8 @@
                                     <span class="hb-badge upcoming">
                                         <%# Eval("event_type") %>
                                     </span>
-
-                                </div>
-
+                                </asp:LinkButton>
+                                <%--                                </div>--%>
                             </ItemTemplate>
                         </asp:Repeater>
 
@@ -1322,6 +1444,7 @@
             </div>
         </div>
     </div>--%>
+
         <div class="hb-modal-overlay" id="modalNews" onclick="overlayClose(event, 'modalNews')">
             <div class="hb-modal">
 
@@ -1384,7 +1507,7 @@
                                 runat="server"
                                 CssClass="hb-input"
                                 placeholder="e.g. HR, Admin">
-    </asp:TextBox>
+                            </asp:TextBox>
 
                             <span id="lblPostedByError" style="color: red; font-size: 12px;"></span>
                         </div>
@@ -1402,12 +1525,38 @@
                             TextMode="MultiLine"
                             Rows="4"
                             placeholder="Brief description">
-    </asp:TextBox>
+                        </asp:TextBox>
 
                         <span id="lblDescriptionError" style="color: red; font-size: 12px;"></span>
 
                     </div>
 
+                    <div class="hb-field">
+
+                        <div class="hb-upload-container">
+
+                            <asp:FileUpload
+                                ID="fuNewsAttachment"
+                                runat="server"
+                                CssClass="hb-file-upload" />
+
+                            <span class="hb-upload-cross"
+                                onclick="clearFileUpload()"
+                                title="Remove File">&#10006;
+                            </span>
+
+                        </div>
+
+                        <asp:Button
+                            ID="btnDownloadAttachment"
+                            runat="server"
+                            Text="Download Attachment"
+                            CssClass="hb-btn hb-btn-primary"
+                            Visible="false"
+                            OnClick="btnDownloadAttachment_Click" />
+
+
+                    </div>
                 </div>
 
                 <div class="hb-modal-footer">
@@ -1658,6 +1807,7 @@
                     <button type="button" class="hb-modal-close" onclick="closeModal('modalEvent')">
                         &#x2715;
                     </button>
+
                 </div>
 
                 <div class="hb-modal-body">
@@ -1676,7 +1826,9 @@
 
                                 <asp:ListItem Value="Event">Event</asp:ListItem>
                                 <asp:ListItem Value="Holiday">Holiday</asp:ListItem>
-
+                                <asp:ListItem Value="Meeting">Meeting</asp:ListItem>
+                                <asp:ListItem Value="Training">Training</asp:ListItem>
+                                <asp:ListItem Value="Celebration">Celebration</asp:ListItem>
                             </asp:DropDownList>
 
                         </div>
@@ -1697,33 +1849,34 @@
                         </div>
 
                     </div>
+                    <div class="hb-field-row">
+                        <div class="hb-field">
 
-                    <div class="hb-field">
+                            <label>
+                                Title <span style="color: #e0455a;">*</span>
+                            </label>
 
-                        <label>
-                            Title <span style="color: #e0455a;">*</span>
-                        </label>
+                            <asp:TextBox
+                                ID="eventTitle"
+                                runat="server"
+                                CssClass="hb-input"
+                                placeholder="e.g. Quarterly Town Hall">
+                            </asp:TextBox>
 
-                        <asp:TextBox
-                            ID="eventTitle"
-                            runat="server"
-                            CssClass="hb-input"
-                            placeholder="e.g. Quarterly Town Hall">
-                        </asp:TextBox>
+                        </div>
 
-                    </div>
+                        <div class="hb-field" id="eventTimeField">
 
-                    <div class="hb-field" id="eventTimeField">
+                            <label>Time</label>
 
-                        <label>Time</label>
+                            <asp:TextBox
+                                ID="eventTime"
+                                runat="server"
+                                CssClass="hb-input"
+                                TextMode="Time">
+                            </asp:TextBox>
 
-                        <asp:TextBox
-                            ID="eventTime"
-                            runat="server"
-                            CssClass="hb-input"
-                            TextMode="Time">
-                        </asp:TextBox>
-
+                        </div>
                     </div>
 
                     <div class="hb-field">
@@ -1741,6 +1894,31 @@
 
                     </div>
 
+                    <div class="hb-field">
+
+                        <div class="hb-upload-container">
+
+                            <asp:FileUpload
+                                ID="fueventAttachment"
+                                runat="server"
+                                CssClass="hb-file-upload" />
+
+                            <span class="hb-upload-cross"
+                                onclick="clearFileUpload()"
+                                title="Remove File">&#10006;
+                            </span>
+
+                        </div>
+
+                        <asp:Button
+                            ID="btnDownloadEvent"
+                            runat="server"
+                            Text="Download Attachment"
+                            CssClass="hb-btn hb-btn-primary"
+                            Visible="false"
+                            OnClick="btnDownloadEvent_Click" />
+
+                    </div>
                 </div>
 
                 <div class="hb-modal-footer">
@@ -2120,6 +2298,12 @@
                 timer: 4000,
                 showConfirmButton: false
             });
+        }
+    </script>
+    <script>
+        function clearFileUpload() {
+            document.getElementById('<%= fuNewsAttachment.ClientID %>').value = "";
+            document.getElementById('<%= fueventAttachment.ClientID %>').value = "";
         }
     </script>
 </asp:Content>

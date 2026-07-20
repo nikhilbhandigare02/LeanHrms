@@ -328,6 +328,7 @@
     <Content Include="assets\images\clients\4.png" />
     <Content Include="assets\images\clients\5.png" />
     <Content Include="assets\images\clients\6.png" />
+    <Content Include="assets\images\comanylogo.jpg" />
     <Content Include="assets\images\coming-soon.svg" />
     <Content Include="assets\images\companies\adobe.svg" />
     <Content Include="assets\images\companies\airbnb.svg" />
@@ -357,6 +358,7 @@
     <Content Include="assets\images\flags\russia.jpg" />
     <Content Include="assets\images\flags\spain.jpg" />
     <Content Include="assets\images\flags\us.jpg" />
+    <Content Include="assets\images\indianFestivalALL.png" />
     <Content Include="assets\images\jobs.png" />
     <Content Include="assets\images\laptop-img.png" />
     <Content Include="assets\images\layouts\layout-1.jpg" />

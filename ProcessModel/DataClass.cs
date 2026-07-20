@@ -37,7 +37,7 @@ namespace ProcessModel
                 cmd.Connection = Con;
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = SPName;
-                cmd.CommandTimeout = 0;
+                cmd.CommandTimeout = 3000;
 
                 if (sqlParamList != null)
                 {
@@ -47,8 +47,23 @@ namespace ProcessModel
                     }
                 }
 
-                dr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                return dr;
+                try
+                {
+                    // CommandBehavior.CloseConnection closes Con once the reader is closed,
+                    // but if ExecuteReader itself throws (e.g. packet too large, dropped
+                    // connection), that never happens - close it here instead so it isn't
+                    // left open/stranded in the connection pool.
+                    dr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    return dr;
+                }
+                catch
+                {
+                    if (Con.State != ConnectionState.Closed)
+                    {
+                        Con.Close();
+                    }
+                    throw;
+                }
             }
         }
 
@@ -92,6 +107,17 @@ namespace ProcessModel
         public static MySqlParameter GetParameter(string parametername, object value)
         {
             MySqlParameter param = new MySqlParameter(parametername, value);
+            return param;
+        }
+
+        // Use for large payloads (e.g. base64 image/file data). Letting MySqlParameter infer
+        // the type from a multi-megabyte string can make Connector/NET send it as a bounded
+        // VARCHAR instead of a long-text/blob value, which corrupts the packet write and
+        // surfaces as an unrelated NullReferenceException from MySqlConnection.AbortAsync.
+        public static MySqlParameter GetParameter(string parametername, object value, MySqlDbType dbType)
+        {
+            MySqlParameter param = new MySqlParameter(parametername, dbType);
+            param.Value = value ?? DBNull.Value;
             return param;
         }
 

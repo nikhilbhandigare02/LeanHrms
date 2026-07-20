@@ -42,6 +42,10 @@ namespace DataObject
 
             public string Success { get; set; }
             public string Result { get; set; }
+
+            public string file_name { get; set; }
+            public string file_type { get; set; }
+            public string file_base64 { get; set; }
             //Calculated fields
             public string PostedOn { get; set; }
             public string Initials { get; set; }
@@ -49,15 +53,21 @@ namespace DataObject
         public class CompanyEventDO
         {
             public int event_mast_id { get; set; }
+            public int id { get; set; }
+            public string record_type { get; set; }
 
             public string event_type { get; set; }
             public DateTime event_date { get; set; }
             public TimeSpan? event_time { get; set; }
 
+            public string eventtime { get; set; }
             public string event_title { get; set; }
             public string event_description { get; set; }
 
             public DateTime inserted_date { get; set; }
+            public string file_name { get; set; }
+            public string file_type { get; set; }
+            public string file_base64 { get; set; }
 
             //Display
             public string EventDate { get; set; }
@@ -66,6 +76,7 @@ namespace DataObject
 
         public class BirthdayDO
         {
+
             public int user_id { get; set; }
 
             public string EmployeeName { get; set; }
@@ -101,6 +112,9 @@ namespace DataObject
             public string Success { get; set; }
 
             public string Result { get; set; }
+            public string file_name { get; set; }
+            public string file_type { get; set; }
+            public string file_base64 { get; set; }
         }
         //public class SaveBirthdayDO
         //{
@@ -128,6 +142,24 @@ namespace DataObject
             public DateTime inserted_date { get; set; }
             // Used only for UI
             public string IconHtml { get; set; }
+        }
+        public class HolidayDO
+        {
+            public int holiday_id { get; set; }
+
+            public string holiday_name { get; set; }
+
+            public DateTime holiday_date { get; set; }
+
+            public string holiday_day { get; set; }
+        }
+
+        public class BirthdayMailDO
+        {
+            public string ToMail { get; set; }
+            public string CcMail { get; set; }
+            public string Subject { get; set; }
+            public string MailBody { get; set; }
         }
     }
 }

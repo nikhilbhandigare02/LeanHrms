@@ -78,6 +78,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Literal litNewsCount;
 
         /// <summary>
+        /// btnaddNews control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnaddNews;
+
+        /// <summary>
         /// rptNews control.
         /// </summary>
         /// <remarks>
@@ -105,6 +114,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Literal litMoreCount;
 
         /// <summary>
+        /// btnsendmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnsendmail;
+
+        /// <summary>
         /// rptBirthdays control.
         /// </summary>
         /// <remarks>
@@ -130,6 +148,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litMoreBirthdayCount;
+
+        /// <summary>
+        /// btnAddEvent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnAddEvent;
 
         /// <summary>
         /// rptEvents control.
@@ -195,6 +222,24 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox newsDesc;
 
         /// <summary>
+        /// fuNewsAttachment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fuNewsAttachment;
+
+        /// <summary>
+        /// btnDownloadAttachment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDownloadAttachment;
+
+        /// <summary>
         /// btnSaveNews control.
         /// </summary>
         /// <remarks>
@@ -247,6 +292,24 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox eventDesc;
+
+        /// <summary>
+        /// fueventAttachment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fueventAttachment;
+
+        /// <summary>
+        /// btnDownloadEvent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDownloadEvent;
 
         /// <summary>
         /// btnSaveEvent control.

@@ -339,14 +339,27 @@ namespace ProcessModel
             {
                 int defaultUserId = 0;
                 int.TryParse(ConfigurationManager.AppSettings["DefaultLogoUserId"], out defaultUserId);
-                if (defaultUserId > 0 && defaultUserId != userId)
-                {
+                //if (defaultUserId > 0 && defaultUserId != userId)
+                //{
                     List<CompanyLogoDO> defaultData = GetCompanyLogoByUser(defaultUserId);
                     logo = defaultData != null && defaultData.Count > 0 ? defaultData[0] : null;
-                }
+                //}
             }
 
             return logo;
+        }
+
+        // Shared "data:<contentType>;base64,<data>" builder for any SP-supplied image
+        // (company logo, dashboard banner slides, etc). Returns null when there's no base64.
+        public static string BuildImageDataUri(string base64, string contentType)
+        {
+            if (string.IsNullOrWhiteSpace(base64))
+            {
+                return null;
+            }
+
+            string ct = string.IsNullOrWhiteSpace(contentType) ? "image/png" : contentType;
+            return "data:" + ct + ";base64," + base64;
         }
 
         // Returns a ready-to-use "data:<contentType>;base64,<data>" URI for the user's
@@ -355,13 +368,7 @@ namespace ProcessModel
         public string ResolveCompanyLogoImageUrl(int userId)
         {
             CompanyLogoDO logo = GetEffectiveCompanyLogo(userId);
-            if (logo == null || string.IsNullOrWhiteSpace(logo.LogoBase64))
-            {
-                return null;
-            }
-
-            string contentType = string.IsNullOrWhiteSpace(logo.ContentType) ? "image/png" : logo.ContentType;
-            return "data:" + contentType + ";base64," + logo.LogoBase64;
+            return logo == null ? null : BuildImageDataUri(logo.LogoBase64, logo.ContentType);
         }
 
         // Returns the ready-made <img> markup when sp_GetCompanyLogoByUserId builds it itself
@@ -381,13 +388,8 @@ namespace ProcessModel
                 return logo.LogoHtml;
             }
 
-            if (!string.IsNullOrWhiteSpace(logo.LogoBase64))
-            {
-                string contentType = string.IsNullOrWhiteSpace(logo.ContentType) ? "image/png" : logo.ContentType;
-                return "<img src=\"data:" + contentType + ";base64," + logo.LogoBase64 + "\" style=\"max-height:60px;\"/>";
-            }
-
-            return null;
+            string dataUri = BuildImageDataUri(logo.LogoBase64, logo.ContentType);
+            return dataUri == null ? null : "<img src=\"" + dataUri + "\" style=\"max-height:60px;\"/>";
         }
 
         public List<DropDownData> dropdowCompany()
@@ -437,7 +439,7 @@ namespace ProcessModel
                 {
                     DataClass.GetParameter("@p_image_type", img.ImageType),
                     DataClass.GetParameter("@p_image_name", img.ImageName),
-                    DataClass.GetParameter("@p_image_base64", img.ImageBase64),
+                    DataClass.GetParameter("@p_image_base64", img.ImageBase64, MySqlDbType.LongText),
                     DataClass.GetParameter("@p_content_type", img.ContentType),
                     DataClass.GetParameter("@p_file_extension", img.FileExtension),
                     DataClass.GetParameter("@p_inserted_by", insertedBy)

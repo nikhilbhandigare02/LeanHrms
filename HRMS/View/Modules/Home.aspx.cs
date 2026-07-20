@@ -3,7 +3,11 @@ using MySql.Data.MySqlClient;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -277,6 +281,17 @@ namespace HRMS.View.Modules
                 news.description = newsDesc.Text.Trim();
                 news.inserted_by = UserId;
 
+                // File Upload Base64
+                if (fuNewsAttachment.HasFile)
+                {
+                    news.file_name = fuNewsAttachment.FileName;
+                    news.file_type = Path.GetExtension(fuNewsAttachment.FileName);
+
+                    byte[] fileBytes = fuNewsAttachment.FileBytes;
+
+                    news.file_base64 = Convert.ToBase64String(fileBytes);
+                }
+
                 List<NewsAnnouncementDO> result = objBL.SaveCompanyNews(news);
 
                 string status = result[0].Success;
@@ -285,7 +300,7 @@ namespace HRMS.View.Modules
                 if (status.Equals("Success", StringComparison.OrdinalIgnoreCase))
                 {
                     BindCompanyNews();
-
+                    BindAnnouncementCount();
                     ClientScript.RegisterStartupScript(
                         this.GetType(),
                         "NewsSaved",
@@ -335,6 +350,18 @@ namespace HRMS.View.Modules
                 eventDO.event_title = eventTitle.Text.Trim();
                 eventDO.event_description = eventDesc.Text.Trim();
                 eventDO.inserted_by = UserId;
+
+
+                // File Upload Base64
+                if (fueventAttachment.HasFile)
+                {
+                    eventDO.file_name = fueventAttachment.FileName;
+                    eventDO.file_type = Path.GetExtension(fueventAttachment.FileName);
+
+                    byte[] fileBytes = fueventAttachment.FileBytes;
+
+                    eventDO.file_base64 = Convert.ToBase64String(fileBytes);
+                }
 
                 List<SaveEventDO> result = objBL.SaveCompanyEvent(eventDO);
 
@@ -505,5 +532,333 @@ namespace HRMS.View.Modules
                     UserId);
             }
         }
+
+        protected void rptNews_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "ViewNews")
+            {
+                int news_announcement_id = Convert.ToInt32(e.CommandArgument);
+
+                List<NewsAnnouncementDO> newsList = objBL.GetNewsById(news_announcement_id);
+
+                if (newsList != null && newsList.Count > 0)
+                {
+                    NewsAnnouncementDO news = newsList[0];
+
+                    newsTitle.Text = news.news_title;
+                    newsTag.SelectedValue = news.category;
+                    newsPostedBy.Text = news.posted_by;
+                    newsDesc.Text = news.description;
+
+                    newsTitle.ReadOnly = true;
+                    newsPostedBy.ReadOnly = true;
+                    newsDesc.ReadOnly = true;
+                    newsTag.Enabled = false;
+
+                    btnSaveNews.Visible = false;
+                    fuNewsAttachment.Visible = false;
+                    if (!string.IsNullOrEmpty(news.file_base64))
+                    {
+                        btnDownloadAttachment.Visible = true;
+                        btnDownloadAttachment.CommandArgument = news.news_announcement_id.ToString();
+                    }
+                    else
+                    {
+                        btnDownloadAttachment.Visible = false;
+                    }
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        GetType(),
+                        "OpenModal",
+                        "openModal('modalNews');",
+                        true);
+                }
+            }
+        }
+
+        protected void btnDownloadAttachment_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+
+            int newsId = Convert.ToInt32(btn.CommandArgument);
+
+            List<NewsAnnouncementDO> newsList = objBL.GetNewsById(newsId);
+
+            if (newsList != null && newsList.Count > 0)
+            {
+                NewsAnnouncementDO news = newsList[0];
+
+                byte[] bytes = Convert.FromBase64String(news.file_base64);
+
+                Response.Clear();
+                Response.ContentType = news.file_type;
+                Response.AddHeader("Content-Disposition",
+                    "attachment; filename=" + news.file_name);
+                Response.BinaryWrite(bytes);
+                Response.End();
+            }
+        }
+
+        private void ResetNewsModal()
+        {
+            newsTitle.Text = "";
+            newsTag.SelectedIndex = 0;
+            newsPostedBy.Text = "";
+            newsDesc.Text = "";
+
+            newsTitle.ReadOnly = false;
+            newsPostedBy.ReadOnly = false;
+            newsDesc.ReadOnly = false;
+            newsTag.Enabled = true;
+
+            btnSaveNews.Visible = true;
+            fuNewsAttachment.Visible = true;
+            btnDownloadAttachment.Visible = false;
+        }
+        protected void btnAddNews_Click(object sender, EventArgs e)
+        {
+            ResetNewsModal();
+
+            ScriptManager.RegisterStartupScript(
+                this,
+                GetType(),
+                "OpenNews",
+                "openModal('modalNews');",
+                true);
+        }
+
+        //protected void rptEvents_ItemCommand(object source, RepeaterCommandEventArgs e)
+        //{
+        //    if (e.CommandName == "ViewEvents")
+        //    {
+        //        int event_mast_id = Convert.ToInt32(e.CommandArgument);
+
+        //        List<CompanyEventDO> eventList = objBL.GetEventById(event_mast_id);
+
+        //        if (eventList != null && eventList.Count > 0)
+        //        {
+        //            CompanyEventDO ev = eventList[0];
+
+        //            eventTitle.Text = ev.event_title;
+        //            eventType.SelectedValue = ev.event_type;
+        //            eventDate.Text = Convert.ToDateTime(ev.event_date).ToString("yyyy-MM-dd");
+        //            eventTime.Text = ev.eventtime;
+        //            eventDesc.Text = ev.event_description;
+
+        //            eventTitle.ReadOnly = true;
+        //            eventType.Enabled = false;
+        //            eventDate.ReadOnly = true;
+        //            eventTime.ReadOnly = true;
+        //            eventDesc.ReadOnly = true;
+
+        //            btnSaveEvent.Visible = false;
+        //            fueventAttachment.Visible = false;
+
+        //            if (!string.IsNullOrEmpty(ev.file_base64))
+        //            {
+        //                btnDownloadEvent.Visible = true;
+        //                btnDownloadEvent.CommandArgument = ev.event_mast_id.ToString();
+        //            }
+        //            else
+        //            {
+        //                btnDownloadEvent.Visible = false;
+        //            }
+
+        //            ScriptManager.RegisterStartupScript(
+        //                this,
+        //                GetType(),
+        //                "OpenEvent",
+        //                "openModal('modalEvent');",
+        //                true);
+        //        }
+        //    }
+        //}
+        protected void rptEvents_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "ViewEvents")
+            {
+                string[] args = e.CommandArgument.ToString().Split('|');
+
+                string recordType = args[0];
+                int id = Convert.ToInt32(args[1]);
+
+                if (recordType == "Event")
+                {
+                    List<CompanyEventDO> eventList = objBL.GetEventById(id);
+
+                    if (eventList != null && eventList.Count > 0)
+                    {
+                        CompanyEventDO ev = eventList[0];
+
+                        eventTitle.Text = ev.event_title;
+                        eventType.SelectedValue = ev.event_type;
+                        eventDate.Text = Convert.ToDateTime(ev.event_date).ToString("yyyy-MM-dd");
+                        eventTime.Text = ev.eventtime;
+                        eventDesc.Text = ev.event_description;
+
+                        eventTitle.ReadOnly = true;
+                        eventType.Enabled = false;
+                        eventDate.ReadOnly = true;
+                        eventTime.ReadOnly = true;
+                        eventDesc.ReadOnly = true;
+
+                        btnSaveEvent.Visible = false;
+                        fueventAttachment.Visible = false;
+
+                        if (!string.IsNullOrEmpty(ev.file_base64))
+                        {
+                            btnDownloadEvent.Visible = true;
+                            btnDownloadEvent.CommandArgument = ev.event_mast_id.ToString();
+                        }
+                        else
+                        {
+                            btnDownloadEvent.Visible = false;
+                        }
+
+                        ScriptManager.RegisterStartupScript(
+                            this,
+                            GetType(),
+                            "OpenEvent",
+                            "openModal('modalEvent');",
+                            true);
+                    }
+                }
+                else if (recordType == "Holiday")
+                {
+                    List<HolidayDO> holidayList = objBL.GetHolidayById(id);
+
+                    if (holidayList != null && holidayList.Count > 0)
+                    {
+                        HolidayDO h = holidayList[0];
+
+                        eventTitle.Text = h.holiday_name;
+                        eventType.SelectedValue = "Holiday";
+                        eventDate.Text = Convert.ToDateTime(h.holiday_date).ToString("yyyy-MM-dd");
+                        eventTime.Text = "";
+                        eventDesc.Text = h.holiday_day;
+
+                        eventTitle.ReadOnly = true;
+                        eventType.Enabled = false;
+                        eventDate.ReadOnly = true;
+                        eventTime.ReadOnly = true;
+                        eventDesc.ReadOnly = true;
+
+                        btnSaveEvent.Visible = false;
+                        fueventAttachment.Visible = false;
+                        btnDownloadEvent.Visible = false;
+
+                        ScriptManager.RegisterStartupScript(
+                            this,
+                            GetType(),
+                            "OpenEvent",
+                            "openModal('modalEvent');",
+                            true);
+                    }
+                }
+            }
+        }
+        protected void btnDownloadEvent_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+
+            int EventId = Convert.ToInt32(btn.CommandArgument);
+
+            List<CompanyEventDO> EventList = objBL.GetEventById(EventId);
+
+            if (EventList != null && EventList.Count > 0)
+            {
+                CompanyEventDO news = EventList[0];
+
+                byte[] bytes = Convert.FromBase64String(news.file_base64);
+
+                Response.Clear();
+                Response.ContentType = news.file_type;
+                Response.AddHeader("Content-Disposition",
+                    "attachment; filename=" + news.file_name);
+                Response.BinaryWrite(bytes);
+                Response.End();
+            }
+        }
+
+        private void ResetEventModal()
+        {
+            eventTitle.Text = "";
+            eventDate.Text = "";
+            eventTime.Text = "";
+            eventDesc.Text = "";
+            eventType.SelectedIndex = 0;
+
+            eventTitle.ReadOnly = false;
+            eventDate.ReadOnly = false;
+            eventTime.ReadOnly = false;
+            eventDesc.ReadOnly = false;
+            eventType.Enabled = true;
+
+            fueventAttachment.Visible = true;
+            btnSaveEvent.Visible = true;
+            btnDownloadEvent.Visible = false;
+        }
+        protected void btnAddEvent_Click(object sender, EventArgs e)
+        {
+            ResetEventModal();
+
+            ScriptManager.RegisterStartupScript(
+                this,
+                GetType(),
+                "OpenEvent",
+                "openModal('modalEvent');",
+                true);
+        }
+
+        protected void btnsendmail_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                List<BirthdayMailDO> birthdayList = objBL.GetBirthdayMailDetails();
+
+                if (birthdayList != null && birthdayList.Count > 0)
+                {
+                    foreach (BirthdayMailDO item in birthdayList)
+                    {
+                        objBL.SendBirthdayMail(
+                            item.ToMail,
+                            item.CcMail,
+                            item.Subject,
+                            item.MailBody);
+                    }
+
+                    ClientScript.RegisterStartupScript(
+                        this.GetType(),
+                        "BirthdayMail",
+                        "showNewsSavedMessage('Success','Birthday mail sent successfully.');",
+                        true);
+                }
+                else
+                {
+                    ClientScript.RegisterStartupScript(
+                        this.GetType(),
+                        "BirthdayMail",
+                        "showNewsSavedMessage('error','No birthdays today.');",
+                        true);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "Home",
+                    "btnsendmail_Click",
+                    ex.Message + ex.StackTrace,
+                    UserId);
+
+                ClientScript.RegisterStartupScript(
+                    this.GetType(),
+                    "BirthdayMailError",
+                    "showNewsSavedMessage('error','Failed to send birthday mail.');",
+                    true);
+            }
+        }
+
+
     }
 }

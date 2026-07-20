@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -395,6 +398,10 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("p_description", news.description));
                 mysqlParameters.Add(DataClass.GetParameter("p_inserted_by", news.inserted_by));
 
+                mysqlParameters.Add(DataClass.GetParameter("p_file_name", news.file_name));
+                mysqlParameters.Add(DataClass.GetParameter("p_file_type", news.file_type));
+                mysqlParameters.Add(DataClass.GetParameter("p_file_base64", news.file_base64));
+
                 listdata = getDrtolistParam.getdatafromreder<NewsAnnouncementDO>
                 (
                     DataClass.GetDataReaderFromSpWithParam(
@@ -444,6 +451,11 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("p_event_title", eventDO.event_title));
                 mysqlParameters.Add(DataClass.GetParameter("p_event_description", eventDO.event_description));
                 mysqlParameters.Add(DataClass.GetParameter("p_inserted_by", eventDO.inserted_by));
+
+                mysqlParameters.Add(DataClass.GetParameter("p_file_name", eventDO.file_name));
+                mysqlParameters.Add(DataClass.GetParameter("p_file_type", eventDO.file_type));
+                mysqlParameters.Add(DataClass.GetParameter("p_file_base64", eventDO.file_base64));
+
 
                 listdata = getDrtolistParam.getdatafromreder<SaveEventDO>
                 (
@@ -628,5 +640,237 @@ namespace ProcessModel
 
             return bannerList;
         }
+
+        public List<NewsAnnouncementDO> GetNewsById(int news_announcement_id)
+        {
+            List<NewsAnnouncementDO> listData = new List<NewsAnnouncementDO>();
+
+            getDrtolist getDrtolistParam = new getDrtolist();
+            List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+
+            try
+            {
+                mysqlParameters.Add(DataClass.GetParameter("@p_news_announcement_id", news_announcement_id));
+
+                listData = getDrtolistParam.getdatafromreder<NewsAnnouncementDO>
+                (
+                    DataClass.GetDataReaderFromSpWithParam
+                    (
+                        mysqlParameters,
+                        DBName,
+                        "sp_get_company_news_by_id"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HomeBL",
+                    "GetNewsById",
+                    "Exception Message : " + ex.Message +
+                    " StackTrace : " + ex.StackTrace,
+                    UserId);
+            }
+
+            return listData;
+        }
+        public List<CompanyEventDO> GetEventById(int event_mast_id)
+        {
+            List<CompanyEventDO> listData = new List<CompanyEventDO>();
+
+            getDrtolist getDrtolistParam = new getDrtolist();
+            List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+
+            try
+            {
+                mysqlParameters.Add(DataClass.GetParameter("@p_event_mast_id", event_mast_id));
+
+                listData = getDrtolistParam.getdatafromreder<CompanyEventDO>
+                (
+                    DataClass.GetDataReaderFromSpWithParam
+                    (
+                        mysqlParameters,
+                        DBName,
+                        "sp_get_event_by_id"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HomeBL",
+                    "GetEventById",
+                    "Exception : " + ex.Message,
+                    UserId);
+            }
+
+            return listData;
+        }
+
+        public List<HolidayDO> GetHolidayById(int holiday_id)
+        {
+            List<HolidayDO> listData = new List<HolidayDO>();
+
+            getDrtolist getDrtolistParam = new getDrtolist();
+            List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+
+            mysqlParameters.Add(DataClass.GetParameter("@p_holiday_id", holiday_id));
+
+            listData = getDrtolistParam.getdatafromreder<HolidayDO>
+            (
+                DataClass.GetDataReaderFromSpWithParam(
+                    mysqlParameters,
+                    DBName,
+                    "sp_get_holiday_by_id"
+                )
+            );
+
+            return listData;
+        }
+
+        public List<BirthdayMailDO> GetBirthdayMailDetails()
+        {
+            List<BirthdayMailDO> listData = new List<BirthdayMailDO>();
+
+            if (string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return listData;
+            }
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(Sqlconnection))
+                using (MySqlCommand cmd = new MySqlCommand("sp_send_birthday_mail", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    con.Open();
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            BirthdayMailDO item = new BirthdayMailDO();
+
+                            item.ToMail = dr["ToMail"].ToString();
+                            item.CcMail = dr["CcMail"].ToString();
+                            item.Subject = dr["Subject"].ToString();
+                            item.MailBody = dr["MailBody"].ToString();
+
+                            listData.Add(item);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HomeBL",
+                    "GetBirthdayMailDetails",
+                    "Exception Message: " + ex.Message +
+                    " StackTrace: " + ex.StackTrace,
+                    UserId);
+            }
+
+            return listData;
+        }
+        public void SendBirthdayMail(string toMail, string ccMail, string subject, string body)
+        {
+            try
+            {
+                string Email = ConfigurationManager.AppSettings["SenderEmail"];
+                string Password = ConfigurationManager.AppSettings["SenderPassword"];
+                int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
+                string Host = ConfigurationManager.AppSettings["SenderHost"];
+
+                using (MailMessage mail = new MailMessage())
+                {
+                    mail.From = new MailAddress(Email, "HRMS");
+
+                    // TO
+                    foreach (string email in toMail.Split(';'))
+                    {
+                        if (!string.IsNullOrWhiteSpace(email))
+                            mail.To.Add(email.Trim());
+                    }
+
+                    // CC
+                    foreach (string email in ccMail.Split(';'))
+                    {
+                        if (!string.IsNullOrWhiteSpace(email))
+                            mail.CC.Add(email.Trim());
+                    }
+
+                    mail.Subject = subject;
+                    mail.Body = body;
+                    mail.IsBodyHtml = true;
+
+                    using (SmtpClient smtp = new SmtpClient(Host, Port))
+                    {
+                        smtp.UseDefaultCredentials = false;
+                        smtp.Credentials = new NetworkCredential(Email, Password);
+                        smtp.EnableSsl = true;
+
+                        smtp.Send(mail);
+                    }
+                }
+                //using (MailMessage mail = new MailMessage())
+                //{
+                //    mail.From = new MailAddress(Email, "HRMS");
+
+                //    foreach (string email in toMail.Split(';'))
+                //    {
+                //        if (!string.IsNullOrWhiteSpace(email))
+                //            mail.To.Add(email.Trim());
+                //    }
+
+                //    foreach (string email in ccMail.Split(';'))
+                //    {
+                //        if (!string.IsNullOrWhiteSpace(email))
+                //            mail.CC.Add(email.Trim());
+                //    }
+
+                //    mail.Subject = subject;
+                //    mail.IsBodyHtml = true;
+
+                //    AlternateView htmlView = AlternateView.CreateAlternateViewFromString(
+                //        body,
+                //        null,
+                //        "text/html"
+                //    );
+
+                //    LinkedResource image = new LinkedResource(@"C:\Images\birthday.png");
+                //    image.ContentId = "BirthdayImage";
+                //    image.TransferEncoding = System.Net.Mime.TransferEncoding.Base64;
+
+                //    htmlView.LinkedResources.Add(image);
+
+                //    mail.AlternateViews.Add(htmlView);
+
+                //    using (SmtpClient smtp = new SmtpClient(Host, Port))
+                //    {
+                //        smtp.UseDefaultCredentials = false;
+                //        smtp.Credentials = new NetworkCredential(Email, Password);
+                //        smtp.EnableSsl = true;
+
+                //        smtp.Send(mail);
+                //    }
+                //}
+
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HomeBL",
+                    "SendBirthdayMail",
+                    ex.Message + ex.StackTrace,
+                    UserId);
+            }
+        }
+
     }
 }

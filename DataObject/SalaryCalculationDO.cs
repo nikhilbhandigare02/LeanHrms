@@ -14,6 +14,7 @@ namespace DataObject
         public decimal per_day_salary { get; set; }
         public int leave_deduction_days { get; set; }
         public decimal deducted_amount { get; set; }
+        public decimal other_deduction { get; set; }
         public decimal deducted_monthly_salary { get; set; }
         public int total_working_days { get; set; }
         public int present_days { get; set; }

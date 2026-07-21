@@ -21,6 +21,7 @@ namespace DataObject
         public string ReferenceNumber { get; set; }
 
         public string EmailId { get; set; }
+        public string DocumentType { get; set; }
 
     }
 

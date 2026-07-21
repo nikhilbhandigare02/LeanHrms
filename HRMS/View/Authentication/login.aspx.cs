@@ -95,7 +95,7 @@ namespace HRMS.View.Authentication
 
                 // ================= CAPTCHA CHECK =================
 
-                if (txtVerificationCode.Text != Convert.ToString(Session["CaptchaVerify"]) && usernametxt.Text!="meera123" ) //captcha temp skip
+                if (txtVerificationCode.Text != Convert.ToString(Session["CaptchaVerify"]) ) 
                 {
                     lblCaptchaError.Text = "Incorrect captcha entered.";
                     lblCaptchaError.Visible = true;

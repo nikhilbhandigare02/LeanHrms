@@ -177,11 +177,11 @@ namespace HRMS.View.Authentication
         //}
         protected void btn_verifyOtp_Click(object sender, EventArgs e)
         {
-            //string enteredOtp = txt_verifyotp.Text.Trim();
-            //string sessionOtp = Session["verificationCode"]?.ToString() ?? "";
-
             string enteredOtp = txt_verifyotp.Text.Trim();
-            string sessionOtp = "123456";     // for development purpose only , remove while hosting
+            string sessionOtp = Session["verificationCode"]?.ToString() ?? "";
+
+            //string enteredOtp = txt_verifyotp.Text.Trim();
+            //string sessionOtp = "123456";     // for development purpose only , remove while hosting
             if (enteredOtp == sessionOtp)
             {
                 string userId = Session["userId"]?.ToString() ?? "0";

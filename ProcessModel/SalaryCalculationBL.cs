@@ -60,7 +60,7 @@ namespace ProcessModel
             return data;
         }
 
-        public (int Status, string Message) SaveSalarySlip(string empCode, string username, int daysPresent, int daysAbsent, decimal basicSalary, decimal totalDeduction, int totalDeductionDays, decimal netSalary, int userId, int insertedBy)
+        public (int Status, string Message) SaveSalarySlip(string empCode, string username, int daysPresent, int daysAbsent, decimal basicSalary, decimal totalDeduction, int totalDeductionDays, decimal netSalary, int userId, int insertedBy, decimal otherDeduction)
         {
             int status = 0;
             string message = "";
@@ -79,6 +79,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("p_net_salary", netSalary));
                 mysqlParameters.Add(DataClass.GetParameter("p_user_id", userId));
                 mysqlParameters.Add(DataClass.GetParameter("p_inserted_by", insertedBy));
+                mysqlParameters.Add(DataClass.GetParameter("p_other_deduction", otherDeduction));
 
                 // Execute the stored procedure and read the result
                 using (var reader = DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_save_salary_slip"))

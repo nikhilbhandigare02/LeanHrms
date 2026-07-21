@@ -1,6 +1,7 @@
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -209,9 +210,15 @@ namespace HRMS.View.Modules
                     employeeCode = txtEmployeeCode.Text;
                 }
 
+                string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                if (documentsRoot.StartsWith("~"))
+                {
+                    documentsRoot = Server.MapPath(documentsRoot);
+                }
+
                 DateTime now = DateTime.Now;
                 string basePath = Path.Combine(
-                    @"\\103.118.17.144\Documents\",
+                    documentsRoot,
                     now.Year.ToString(),
                     now.Month.ToString("00"),
                     employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
@@ -268,11 +275,6 @@ namespace HRMS.View.Modules
 
         protected void gvEmployeeDocuments_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            if (!string.Equals(e.CommandName, "DownloadDocument", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
             int userDocId;
             if (!int.TryParse(Convert.ToString(e.CommandArgument), out userDocId) || userDocId <= 0)
             {
@@ -280,6 +282,18 @@ namespace HRMS.View.Modules
                 return;
             }
 
+            if (string.Equals(e.CommandName, "DownloadDocument", StringComparison.OrdinalIgnoreCase))
+            {
+                DownloadEmployeeDocument(userDocId);
+            }
+            else if (string.Equals(e.CommandName, "DeleteDocument", StringComparison.OrdinalIgnoreCase))
+            {
+                DeleteEmployeeDocument(userDocId);
+            }
+        }
+
+        private void DownloadEmployeeDocument(int userDocId)
+        {
             try
             {
                 userDocumentBL docBL = new userDocumentBL();
@@ -303,8 +317,26 @@ namespace HRMS.View.Modules
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("AddEmployee", "gvEmployeeDocuments_RowCommand", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("AddEmployee", "DownloadEmployeeDocument", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
                 ShowAssetMessage("Failed", "An unexpected error occurred while downloading the file.");
+            }
+        }
+
+        private void DeleteEmployeeDocument(int userDocId)
+        {
+            int employeeUserId = GetEmployeeUserIdFromQuery();
+
+            try
+            {
+                userDocumentBL docBL = new userDocumentBL();
+                docBL.DeactivateDocument(userDocId);
+                BindEmployeeDocuments(employeeUserId);
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "DeleteEmployeeDocument", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+                ShowAssetMessage("Failed", "An unexpected error occurred while deleting the document.");
             }
         }
 

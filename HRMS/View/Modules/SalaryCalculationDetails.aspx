@@ -190,10 +190,19 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
+                        <label class="form-label">Other Deduction</label>
+                        <asp:TextBox ID="txtOtherDeduction" runat="server" CssClass="form-control" AutoPostBack="true" OnTextChanged="txtOtherDeduction_TextChanged"></asp:TextBox>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
                         <label class="form-label">Deducted Amount</label>
                         <asp:TextBox ID="txtDeductedAmount" runat="server" CssClass="form-control"></asp:TextBox>
                     </div>
                 </div>
+            </div>
+
+            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Net Salary</label>

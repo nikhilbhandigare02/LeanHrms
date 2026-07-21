@@ -53,6 +53,7 @@ namespace HRMS.View.Modules
                 {
                     // In view mode, make all fields read-only
                     txtLeaveDeductionDays.ReadOnly = true;
+                    txtOtherDeduction.ReadOnly = true;
                     txtDeductedAmount.ReadOnly = true;
                     txtNetSalary.ReadOnly = true;
                 }
@@ -84,6 +85,7 @@ namespace HRMS.View.Modules
                 txtPresentDays.Text = data.present_days.ToString();
                 txtAbsentDays.Text = data.absent_days.ToString();
                 txtLeaveDeductionDays.Text = data.leave_deduction_days.ToString();
+                txtOtherDeduction.Text = data.other_deduction.ToString("0.##");
                 txtDeductedAmount.Text = "₹ " + data.deducted_amount.ToString("N2");
                 txtNetSalary.Text = "₹ " + data.deducted_monthly_salary.ToString("N2");
             }
@@ -116,7 +118,10 @@ namespace HRMS.View.Modules
                 // Get current leave deduction days
                 int totalDeductionDays = int.TryParse(txtLeaveDeductionDays.Text, out int parsedDeductionDays) ? parsedDeductionDays : 0;
 
-                // Get current deducted amount (strip ₹ sign and parse)
+                // Get current other deduction amount
+                decimal otherDeduction = decimal.TryParse(txtOtherDeduction.Text, out decimal parsedOtherDeduction) && parsedOtherDeduction >= 0 ? parsedOtherDeduction : 0;
+
+                // Get current deducted amount (strip ₹ sign and parse) - combined total (leave + other)
                 string deductedAmountText = txtDeductedAmount.Text.Replace("₹", "").Trim();
                 decimal totalDeduction = decimal.TryParse(deductedAmountText, out decimal parsedDeductedAmount) ? parsedDeductedAmount : 0;
 
@@ -126,7 +131,7 @@ namespace HRMS.View.Modules
 
                 // Call the BL method to save salary slip
                 SalaryCalculationBL bl = new SalaryCalculationBL();
-                var result = bl.SaveSalarySlip(empCode, username, daysPresent, daysAbsent, basicSalary, totalDeduction, totalDeductionDays, netSalary, userId, insertedBy);
+                var result = bl.SaveSalarySlip(empCode, username, daysPresent, daysAbsent, basicSalary, totalDeduction, totalDeductionDays, netSalary, userId, insertedBy, otherDeduction);
 
                 if (result.Status == 1)
                 {
@@ -152,24 +157,36 @@ namespace HRMS.View.Modules
 
         protected void txtLeaveDeductionDays_TextChanged(object sender, EventArgs e)
         {
+            RecalculateDeductionAndNetSalary();
+        }
+
+        protected void txtOtherDeduction_TextChanged(object sender, EventArgs e)
+        {
+            RecalculateDeductionAndNetSalary();
+        }
+
+        private void RecalculateDeductionAndNetSalary()
+        {
             // Get original values from ViewState
-            if (ViewState["OriginalMonthlySalary"] != null && ViewState["OriginalPerDaySalary"] != null)
+            if (ViewState["OriginalMonthlySalary"] == null || ViewState["OriginalPerDaySalary"] == null)
             {
-                decimal originalMonthlySalary = Convert.ToDecimal(ViewState["OriginalMonthlySalary"]);
-                decimal perDaySalary = Convert.ToDecimal(ViewState["OriginalPerDaySalary"]);
-
-                // Parse leave days
-                if (int.TryParse(txtLeaveDeductionDays.Text, out int leaveDays) && leaveDays >= 0)
-                {
-                    // Calculate new deducted amount and net salary
-                    decimal deductedAmount = Math.Round(leaveDays * perDaySalary, 2);
-                    decimal netSalary = Math.Round(originalMonthlySalary - deductedAmount, 2);
-
-                    // Update the textboxes
-                    txtDeductedAmount.Text = "₹ " + deductedAmount.ToString("N2");
-                    txtNetSalary.Text = "₹ " + netSalary.ToString("N2");
-                }
+                return;
             }
+
+            decimal originalMonthlySalary = Convert.ToDecimal(ViewState["OriginalMonthlySalary"]);
+            decimal perDaySalary = Convert.ToDecimal(ViewState["OriginalPerDaySalary"]);
+
+            int leaveDays = int.TryParse(txtLeaveDeductionDays.Text, out int parsedLeaveDays) && parsedLeaveDays >= 0 ? parsedLeaveDays : 0;
+            decimal otherDeduction = decimal.TryParse(txtOtherDeduction.Text, out decimal parsedOtherDeduction) && parsedOtherDeduction >= 0 ? parsedOtherDeduction : 0;
+
+            // Calculate new deducted amount (leave deduction + other deduction) and net salary
+            decimal leaveDeductionAmount = Math.Round(leaveDays * perDaySalary, 2);
+            decimal deductedAmount = Math.Round(leaveDeductionAmount + otherDeduction, 2);
+            decimal netSalary = Math.Round(originalMonthlySalary - deductedAmount, 2);
+
+            // Update the textboxes
+            txtDeductedAmount.Text = "₹ " + deductedAmount.ToString("N2");
+            txtNetSalary.Text = "₹ " + netSalary.ToString("N2");
         }
 
         private void ShowAlert(string message)

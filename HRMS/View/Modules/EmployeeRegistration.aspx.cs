@@ -2,6 +2,7 @@ using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -431,7 +432,11 @@ namespace HRMS.View.Modules
         private void SaveEmployeeDocuments(int userId, string employeeEmail, string employeeCode)
         {
             const int maxFileSize = 5 * 1024 * 1024;
-            const string documentsRoot = @"\\103.118.17.144\Documents\";
+            string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+            if (documentsRoot.StartsWith("~"))
+            {
+                documentsRoot = Server.MapPath(documentsRoot);
+            }
 
             DateTime now = DateTime.Now;
             string basePath = Path.Combine(

@@ -284,16 +284,43 @@ namespace HRMS.View.Modules
                 news.inserted_by = UserId;
 
                 // File Upload Base64
+                //if (fuNewsAttachment.HasFile)
+                //{
+                //    news.file_name = fuNewsAttachment.FileName;
+                //    news.file_type = Path.GetExtension(fuNewsAttachment.FileName);
+
+                //    byte[] fileBytes = fuNewsAttachment.FileBytes;
+
+                //    news.file_base64 = Convert.ToBase64String(fileBytes);
+                //}
                 if (fuNewsAttachment.HasFile)
                 {
-                    news.file_name = fuNewsAttachment.FileName;
-                    news.file_type = Path.GetExtension(fuNewsAttachment.FileName);
+                    string rootFolder = @"D:\HRMS\LeanHrms\Documents\News";
+
+                    string yearFolder = DateTime.Now.ToString("yyyy");
+                    string monthFolder = DateTime.Now.ToString("MMMM");
+
+                    string folderPath = Path.Combine(rootFolder, yearFolder, monthFolder);
+
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Original file name
+                    string fileName = Path.GetFileName(fuNewsAttachment.FileName);
+                    string extension = Path.GetExtension(fileName);
+
+                    // Save file
+                    string filePath = Path.Combine(folderPath, fileName);
+                    fuNewsAttachment.SaveAs(filePath);
+
+                    news.file_name = fileName;
+                    news.file_type = extension;
 
                     byte[] fileBytes = fuNewsAttachment.FileBytes;
-
                     news.file_base64 = Convert.ToBase64String(fileBytes);
                 }
-
                 List<NewsAnnouncementDO> result = objBL.SaveCompanyNews(news);
 
                 string status = result[0].Success;
@@ -336,7 +363,6 @@ namespace HRMS.View.Modules
         {
             try
             {
-                HomeBL objBL = new HomeBL();
 
                 SaveEventDO eventDO = new SaveEventDO();
 
@@ -355,16 +381,45 @@ namespace HRMS.View.Modules
 
 
                 // File Upload Base64
+                //if (fueventAttachment.HasFile)
+                //{
+                //    eventDO.file_name = fueventAttachment.FileName;
+                //    eventDO.file_type = Path.GetExtension(fueventAttachment.FileName);
+
+                //    byte[] fileBytes = fueventAttachment.FileBytes;
+
+                //    eventDO.file_base64 = Convert.ToBase64String(fileBytes);
+                //}
                 if (fueventAttachment.HasFile)
                 {
-                    eventDO.file_name = fueventAttachment.FileName;
-                    eventDO.file_type = Path.GetExtension(fueventAttachment.FileName);
+                    string rootFolder = @"D:\HRMS\LeanHrms\Documents\Events";
 
+                    string yearFolder = DateTime.Now.ToString("yyyy");
+                    string monthFolder = DateTime.Now.ToString("MMMM");
+
+                    string folderPath = Path.Combine(rootFolder, yearFolder, monthFolder);
+
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Original file name
+                    string fileName = Path.GetFileName(fueventAttachment.FileName);
+                    string extension = Path.GetExtension(fileName);
+
+                    // Save file
+                    string filePath = Path.Combine(folderPath, fileName);
+                    fueventAttachment.SaveAs(filePath);
+
+                    // Store file details
+                    eventDO.file_name = fileName;
+                    eventDO.file_type = extension;
+
+                    // Keep Base64 as it is
                     byte[] fileBytes = fueventAttachment.FileBytes;
-
                     eventDO.file_base64 = Convert.ToBase64String(fileBytes);
                 }
-
                 List<SaveEventDO> result = objBL.SaveCompanyEvent(eventDO);
 
                 if (result != null && result.Count > 0)

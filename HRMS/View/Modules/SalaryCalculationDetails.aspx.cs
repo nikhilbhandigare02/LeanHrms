@@ -128,7 +128,7 @@ namespace HRMS.View.Modules
                 // Get current net salary (strip ₹ sign and parse)
                 string netSalaryText = txtNetSalary.Text.Replace("₹", "").Trim();
                 decimal netSalary = decimal.TryParse(netSalaryText, out decimal parsedNetSalary) ? parsedNetSalary : 0;
-
+      
                 // Call the BL method to save salary slip
                 SalaryCalculationBL bl = new SalaryCalculationBL();
                 var result = bl.SaveSalarySlip(empCode, username, daysPresent, daysAbsent, basicSalary, totalDeduction, totalDeductionDays, netSalary, userId, insertedBy, otherDeduction);

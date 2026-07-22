@@ -34,6 +34,11 @@ namespace HRMS.View.Modules
             {
                 BindLookupDropdowns();
             }
+
+            // The Repeater's item controls (including the FileUpload rows) must be
+            // recreated on every request, not just the initial load, otherwise the
+            // control tree won't exist for the submit postback to resolve against.
+            BindDocumentUploadRows();
         }
 
         private void WriteDuplicateValidationResponse()
@@ -75,32 +80,12 @@ namespace HRMS.View.Modules
             BindLookup(ddlAssetCondition, "Asset Condition");
             // BindLookup(ddlAssetStatus, "Asset Status");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
-
-            foreach (DropDownList documentTypeDropdown in GetDocumentUploadRows().Keys)
-            {
-                BindDocumentTypeDropdown(documentTypeDropdown);
-            }
         }
 
-        private void BindDocumentTypeDropdown(DropDownList ddl)
+        private void BindDocumentUploadRows()
         {
-            ddl.DataSource = new CommonBL().dropdownDocuments();
-            ddl.DataTextField = "Text";
-            ddl.DataValueField = "Id";
-            ddl.DataBind();
-            AddDisabledSelectOption(ddl);
-        }
-
-        private Dictionary<DropDownList, FileUpload> GetDocumentUploadRows()
-        {
-            return new Dictionary<DropDownList, FileUpload>
-            {
-                { ddlDocumentType1, fuDocument1 },
-                { ddlDocumentType2, fuDocument2 },
-                { ddlDocumentType3, fuDocument3 },
-                { ddlDocumentType4, fuDocument4 },
-                { ddlDocumentType5, fuDocument5 }
-            };
+            rptDocumentUpload.DataSource = new CommonBL().dropdownDocuments();
+            rptDocumentUpload.DataBind();
         }
 
 
@@ -447,12 +432,13 @@ namespace HRMS.View.Modules
 
             userDocumentBL userDocBL = new userDocumentBL();
 
-            foreach (KeyValuePair<DropDownList, FileUpload> row in GetDocumentUploadRows())
+            foreach (RepeaterItem item in rptDocumentUpload.Items)
             {
-                DropDownList documentTypeDropdown = row.Key;
-                FileUpload fileUpload = row.Value;
+                FileUpload fileUpload = item.FindControl("fuDocument") as FileUpload;
+                HiddenField documentTypeIdField = item.FindControl("hdnDocumentTypeId") as HiddenField;
+                int documentMasterId = documentTypeIdField != null ? ParseInt(documentTypeIdField.Value) : 0;
 
-                if (!fileUpload.HasFile || documentTypeDropdown.SelectedIndex <= 0)
+                if (fileUpload == null || !fileUpload.HasFile || documentMasterId <= 0)
                 {
                     continue;
                 }
@@ -480,7 +466,7 @@ namespace HRMS.View.Modules
                     {
                         FileName = fileNameWithoutExt,
                         FilePath = filePath,
-                        DocumentMasterId = ParseInt(documentTypeDropdown.SelectedValue),
+                        DocumentMasterId = documentMasterId,
                         ReferenceNumber = string.Empty,
                         EmailId = employeeEmail
                     };

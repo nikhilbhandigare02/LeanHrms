@@ -81,6 +81,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("p_inserted_by", insertedBy));
                 mysqlParameters.Add(DataClass.GetParameter("p_other_deduction", otherDeduction));
 
+
                 // Execute the stored procedure and read the result
                 using (var reader = DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_save_salary_slip"))
                 {

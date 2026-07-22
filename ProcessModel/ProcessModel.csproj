@@ -94,6 +94,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountDashboardBL.cs" />
     <Compile Include="AppraisalBL.cs" />
     <Compile Include="assignRightsBL.cs" />
     <Compile Include="AssignRoleBL.cs" />

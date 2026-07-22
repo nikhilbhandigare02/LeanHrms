@@ -51,7 +51,7 @@
                                     <%-- <div class="text-primary p-4">
                                             <h4 class="text-primary d-inline-block">ALPHONSOL LOGIN</h4>
                                         </div>--%>
-                                    <h6 class="d-inline-block">Please enter your credentials to sign in!</h6>
+                                    <h6 class="d-inline-block">Please enter your HRMS credentials to sign in!</h6>
                                 </div>
                             </div>
 

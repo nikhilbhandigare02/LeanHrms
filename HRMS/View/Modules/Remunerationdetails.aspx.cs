@@ -39,6 +39,8 @@ namespace HRMS.View.Modules
             {
                 ddlYear.Items.Add(new ListItem(year.ToString(), year.ToString()));
             }
+
+            BindGrid(currentYear);
         }
 
         protected void BindGrid(int? year)

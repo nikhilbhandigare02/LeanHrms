@@ -188,6 +188,15 @@
             margin: 7px 0 0;
         }
 
+        .upload-note {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--onboarding-muted);
+            font-size: 12px;
+            margin: 0;
+        }
+
         .step-pill {
             color: var(--onboarding-blue);
             background: #EFF6FF;
@@ -343,12 +352,6 @@
             padding: 18px;
         }
 
-        .asset-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 14px;
-        }
-
         .table-responsive {
             overflow-x: auto;
             padding-bottom: 2px;
@@ -415,25 +418,6 @@
         .asset-table .form-select-modern {
             min-width: 0;
             width: 100%;
-        }
-
-        .asset-delete-btn {
-            align-items: center;
-            background: #FFF1F2;
-            border: 1px solid #FFE4E6;
-            border-radius: 8px;
-            color: #E11D48;
-            display: inline-flex;
-            height: 36px;
-            justify-content: center;
-            transition: background .18s ease, border-color .18s ease, transform .18s ease;
-            width: 36px;
-        }
-
-        .asset-delete-btn:hover {
-            background: #FFE4E6;
-            border-color: #FDA4AF;
-            transform: translateY(-1px);
         }
 
         .asset-table tr:last-child td {
@@ -706,9 +690,9 @@
         .wizard-step.collapsed > .form-grid,
         .wizard-step.collapsed > .premium-grid,
         .wizard-step.collapsed > .setup-band,
-        .wizard-step.collapsed > .asset-toolbar,
         .wizard-step.collapsed > .table-responsive,
         .wizard-step.collapsed > .review-grid,
+        .wizard-step.collapsed > .upload-note,
         .wizard-step.collapsed > .section-save-row {
             display: none;
         }
@@ -802,12 +786,12 @@
             padding: 22px 28px 20px;
         }
 
-        .wizard-step > .asset-toolbar {
-            padding: 18px 28px 0;
-        }
-
         .wizard-step > .table-responsive {
             padding: 14px 28px 22px;
+        }
+
+        .wizard-step > .upload-note {
+            padding: 14px 28px 0;
         }
 
         .setup-band {
@@ -1063,7 +1047,8 @@
             .wizard-step > .premium-grid,
             .wizard-step > .setup-band,
             .wizard-step > .review-grid,
-            .wizard-step > .table-responsive {
+            .wizard-step > .table-responsive,
+            .wizard-step > .upload-note {
                 padding-left: 16px;
                 padding-right: 16px;
             }
@@ -1096,18 +1081,16 @@
                 <div class="step-item" data-step-link="2"><span class="step-number">2</span><span class="step-title">Employment Information</span></div>
                 <div class="step-item" data-step-link="3"><span class="step-number">3</span><span class="step-title">Organization Details</span></div>
                 <div class="step-item" data-step-link="4"><span class="step-number">4</span><span class="step-title">Attendance &amp; Shift Information</span></div>
-                <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Assets Assignment</span></div>
-                <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Review &amp; Submit</span></div>
+                <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Review &amp; Submit</span></div>
             </aside>
 
             <main class="onboarding-card">
-                <asp:HiddenField ID="hdnAssetsJson" runat="server" ClientIDMode="Static" />
                 <section class="wizard-step active pending" data-step="1">
                     <div class="card-heading">
                         <div><span class="accordion-number">1</span><h2>Basic Information</h2><p>Capture the employee identity and primary contact details.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 1 of 6</span>
+                        <span class="step-pill">Step 1 of 5</span>
                     </div>
                     <div class="form-grid">
                         <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" readonly="readonly" disabled="disabled" /><span id="employeeCodeDuplicateMessage" class="validation-message" aria-readonly="true" ></span></div>
@@ -1131,7 +1114,7 @@
                         <div><span class="accordion-number">2</span><h2>Employment Information</h2><p>Set the employee lifecycle, joining, probation, and separation attributes.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 2 of 6</span>
+                        <span class="step-pill">Step 2 of 5</span>
                     </div>
                     <div class="form-grid">
                         <div class="form-group"><label class="is-required">Employment Type</label><asp:DropDownList ID="ddlEmploymentType" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
@@ -1164,7 +1147,7 @@
                         <div><span class="accordion-number">3</span><h2>Organization Details</h2><p>Map the employee into company structure, reporting hierarchy, and level.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 3 of 6</span>
+                        <span class="step-pill">Step 3 of 5</span>
                     </div>
                     <div class="premium-grid">
                         <%--<div class="premium-field"><label class="is-required">Company</label><asp:DropDownList ID="ddlCompany" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
@@ -1186,7 +1169,7 @@
                         <div><span class="accordion-number">4</span><h2>Attendance Information</h2><p>Configure work schedule, attendance rules, device mapping, and location policy.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 4 of 6</span>
+                        <span class="step-pill">Step 4 of 5</span>
                     </div>
                     <div class="setup-band">
                         <div class="form-grid">
@@ -1214,49 +1197,14 @@
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="4">Save</button></div>
                 </section>
 
-                <section class="wizard-step collapsed pending" data-step="5">
-                    <div class="card-heading">
-                        <div><span class="accordion-number">5</span><h2>Assets Assignment</h2><p>Allocate company assets and track return status from day one.</p></div>
-                        <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
-                        <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 5 of 6</span>
-                    </div>
-                    <div class="asset-toolbar">
-                        <button type="button" id="assignAssetButton" class="btn-modern btn-primary-modern">Assign Asset</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="asset-table">
-                            <thead><tr><th class="is-required">Asset Type</th><th class="is-required">Asset Number</th>
-                                <th class="is-required">Asset Name</th>
-                                <th class="is-required">Assigned Date</th>
-                               <%-- <th>Return Date</th>--%>
-                                <th class="is-required">Asset assigned Condition</th>
-                              <%--  <th class="is-required">Asset Status</th>--%>
-                                <th>Action</th></tr></thead>
-                            <tbody id="assetRows">
-                                <tr class="asset-row">
-                                    <td><input id="txtAssetType" runat="server" class="form-control-modern" placeholder="Enter asset type" /></td>
-                                    <td><input id="txtAssetNumber" runat="server" class="form-control-modern" /></td>
-                                    <td><input id="txtAssetName" runat="server" class="form-control-modern" /></td>
-                                    <td><input id="txtAssignedDate" runat="server" class="form-control-modern" type="date" /></td>
-                                   <%-- <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>--%>
-                                    <td><asp:DropDownList ID="ddlAssetCondition" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                   <%-- <td><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>--%>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="5">Save</button></div>
-                </section>
-
                 <section class="wizard-step collapsed pending" data-step="6">
                     <div class="card-heading">
-                        <div><span class="accordion-number">6</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
+                        <div><span class="accordion-number">5</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 6 of 6</span>
+                        <span class="step-pill">Step 5 of 5</span>
                     </div>
+                    <p class="upload-note"><i class="fas fa-info-circle"></i> Only image and PDF files are allowed, up to 3 MB.</p>
                     <div class="table-responsive">
                         <table class="asset-table">
                             <thead><tr><th>Document Type</th><th>File</th></tr></thead>
@@ -1268,7 +1216,7 @@
                                                 <%# Eval("Text") %>
                                                 <asp:HiddenField ID="hdnDocumentTypeId" runat="server" Value='<%# Eval("Id") %>' />
                                             </td>
-                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern" /></td>
+                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern document-upload-input" Accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,image/*,application/pdf" /></td>
                                         </tr>
                                     </ItemTemplate>
                                 </asp:Repeater>
@@ -1358,13 +1306,7 @@
                 { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy' },
                 { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID' },
                 { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID' },
-                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location' },
-                { id: '<%= txtAssetType.ClientID %>', name: 'Asset Type' },
-                { id: '<%= txtAssetNumber.ClientID %>', name: 'Asset Number' },
-                { id: '<%= txtAssetName.ClientID %>', name: 'Asset Name' },
-                { id: '<%= txtAssignedDate.ClientID %>', name: 'Assigned Date' },
-                { id: '<%= ddlAssetCondition.ClientID %>', name: 'Asset Condition' }
-               <%-- { id: '<%= ddlAssetStatus.ClientID %>', name: 'Asset Status' }--%>
+                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location' }
             ];
         }
 
@@ -1379,6 +1321,45 @@
             } else {
                 alert(fieldName + ' is required.');
             }
+        }
+
+        var ALLOWED_DOCUMENT_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.pdf'];
+        var MAX_DOCUMENT_UPLOAD_SIZE = 3 * 1024 * 1024;
+
+        function showDocumentUploadError(message) {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid file',
+                    text: message,
+                    confirmButtonColor: '#2563EB'
+                });
+            } else {
+                alert(message);
+            }
+        }
+
+        function bindDocumentUploadValidation() {
+            document.querySelectorAll('.document-upload-input').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    var file = input.files && input.files[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    var extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+                    if (ALLOWED_DOCUMENT_EXTENSIONS.indexOf(extension) === -1) {
+                        input.value = '';
+                        showDocumentUploadError('Only image and PDF files are allowed.');
+                        return;
+                    }
+
+                    if (file.size > MAX_DOCUMENT_UPLOAD_SIZE) {
+                        input.value = '';
+                        showDocumentUploadError('File size must be 3 MB or less.');
+                    }
+                });
+            });
         }
 
         function isOvertimeEligibleChecked() {
@@ -1461,78 +1442,12 @@
                 }
             }
 
-            return validateEmployeeAssets(section);
+            return true;
         }
 
         function validateEmployeeRegistration() {
             return validateEmployeeFields() && validateEmployeeDuplicatesBeforeSubmit();
         }
-
-        function validateEmployeeAssets(section) {
-            var assetSection = document.querySelector('.wizard-step[data-step="5"]');
-            if (section && section !== assetSection) {
-                return true;
-            }
-
-            var hiddenAssets = document.getElementById('hdnAssetsJson');
-            var rows = document.querySelectorAll('#assetRows tr.asset-row');
-            var assets = [];
-            var firstInvalid = null;
-            var missingName = '';
-
-            rows.forEach(function (row, index) {
-                var inputs = row.querySelectorAll('input');
-                var selects = row.querySelectorAll('select');
-                var asset = {
-                    asset_type: inputs[0] ? inputs[0].value.trim() : '',
-                    asset_number: inputs[1] ? inputs[1].value.trim() : '',
-                    asset_name: inputs[2] ? inputs[2].value.trim() : '',
-                    assigned_date: inputs[3] ? inputs[3].value.trim() : '',
-                    return_date: inputs[4] ? inputs[4].value.trim() : '',
-                    asset_condition: selects[0] ? selects[0].value : '',
-                    asset_status: selects[1] ? selects[1].value : ''
-                };
-
-                [
-                    { element: inputs[0], value: asset.asset_type, name: 'Asset Type' },
-                    { element: inputs[1], value: asset.asset_number, name: 'Asset Number' },
-                    { element: inputs[2], value: asset.asset_name, name: 'Asset Name' },
-                    { element: inputs[3], value: asset.assigned_date, name: 'Assigned Date' },
-                    { element: selects[0], value: asset.asset_condition, name: 'Asset Condition' },
-                    { element: selects[1], value: asset.asset_status, name: 'Asset Status' }
-                ].forEach(function (field) {
-                    var isMissing = !field.value;
-                    if (field.element) {
-                        field.element.classList.toggle('validation-error', isMissing);
-                    }
-
-                    if (isMissing && !firstInvalid) {
-                        firstInvalid = field.element;
-                        missingName = rows.length > 1 ? field.name + ' is required for asset row ' + (index + 1) : field.name;
-                    }
-                });
-
-                assets.push(asset);
-            });
-
-            if (firstInvalid) {
-                if (assetSection) {
-                    document.querySelectorAll('.wizard-step').forEach(function (panel) {
-                        panel.classList.toggle('collapsed', panel !== assetSection);
-                    });
-                }
-                firstInvalid.focus();
-                showMandatoryFieldMessage(missingName);
-                return false;
-            }
-
-            if (hiddenAssets) {
-                hiddenAssets.value = JSON.stringify(assets);
-            }
-
-            return true;
-        }
-
 
         var employeeDuplicateState = {};
         var employeeDuplicateLastShown = {};
@@ -1683,8 +1598,6 @@
             var statusText = document.getElementById('statusText');
             var backButton = document.getElementById('backButton');
             var createAnotherButton = document.getElementById('createAnotherButton');
-            var assignAssetButton = document.getElementById('assignAssetButton');
-            var assetRows = document.getElementById('assetRows');
             var overtimeEligible = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             var overtimeRate = document.getElementById('<%= txtOvertimeRate.ClientID %>');
             var overtimeRateLabel = document.getElementById('overtimeRateLabel');
@@ -2102,62 +2015,13 @@
 
             initMobileSelects(document);
             bindRealtimeRequiredFieldCleanup();
-
-            function clearAssetRow(row) {
-                row.querySelectorAll('input').forEach(function (input) {
-                    input.value = '';
-                });
-                row.querySelectorAll('select').forEach(function (select) {
-                    select.selectedIndex = 0;
-                    updateMobileSelect(select);
-                });
-            }
-
-            function bindAssetDelete(button) {
-                button.addEventListener('click', function () {
-                    var row = button.closest('tr');
-                    if (!row || !assetRows) {
-                        return;
-                    }
-
-                    row.remove();
-                });
-            }
+            bindDocumentUploadValidation();
 
             function applyNoFutureDates(scope) {
                 var root = scope || document;
                 var today = new Date().toISOString().split('T')[0];
                 root.querySelectorAll('input[type="date"]').forEach(function (input) {
                     input.setAttribute('max', today);
-                });
-            }
-
-            function createAssetRow() {
-                var conditionSelect = document.getElementById('<%= ddlAssetCondition.ClientID %>');
-                <%--var statusSelect = document.getElementById('<%= ddlAssetStatus.ClientID %>');--%>
-
-                var row = document.createElement('tr');
-                row.className = 'asset-row';
-                row.innerHTML =
-                    '<td><input class="form-control-modern" placeholder="Enter asset type" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" type="date" /></td>' +
-                    //'<td><input class="form-control-modern" type="date" /></td>' +
-                    '<td><select class="form-select-modern">' + (conditionSelect ? conditionSelect.innerHTML : '') + '</select></td>' +
-                    //'<td><select class="form-select-modern">' + (statusSelect ? statusSelect.innerHTML : '') + '</select></td>' +
-                    '<td><button type="button" class="asset-delete-btn" data-delete-asset title="Delete asset"><i class="fas fa-trash-alt"></i></button></td>';
-                return row;
-            }
-
-
-            if (assignAssetButton && assetRows) {
-                assignAssetButton.addEventListener('click', function () {
-                    var row = createAssetRow();
-                    assetRows.appendChild(row);
-                    initMobileSelects(row);
-                    bindAssetDelete(row.querySelector('[data-delete-asset]'));
-                    applyNoFutureDates(row);
                 });
             }
 

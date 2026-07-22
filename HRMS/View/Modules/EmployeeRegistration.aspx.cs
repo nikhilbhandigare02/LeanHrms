@@ -7,7 +7,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Script.Services;
-using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -77,8 +76,6 @@ namespace HRMS.View.Modules
             BindLookup(ddlWeeklyOff, "Weekly Off");
             BindLookup(ddlAttendancePolicy, "Attendance Policy");
             BindLookup(ddlWorkLocation, "Work Location");
-            BindLookup(ddlAssetCondition, "Asset Condition");
-            // BindLookup(ddlAssetStatus, "Asset Status");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
         }
 
@@ -151,25 +148,6 @@ namespace HRMS.View.Modules
 
                 if (string.Equals(response.Status, "Success", StringComparison.OrdinalIgnoreCase))
                 {
-                    List<EmployeeAssetDO> assets = GetSubmittedAssets();
-                foreach (EmployeeAssetDO asset in assets)
-                {
-                    EmployeeOnboardingResponseDO assetResponse = onboardingBL.SaveEmployeeAsset(response.UserId, asset, employee.InsertedBy);
-                    if (!string.Equals(assetResponse.Status, "Success", StringComparison.OrdinalIgnoreCase))
-                    {
-                        string assetMessage = HttpUtility.JavaScriptStringEncode(string.IsNullOrWhiteSpace(assetResponse.Message)
-                            ? "Employee asset save failed."
-                            : assetResponse.Message);
-
-                        ClientScript.RegisterStartupScript(
-                            GetType(),
-                            "EmployeeAssetSaveFailed",
-                            "if(window.Swal){Swal.fire({icon:'error',title:'Employee onboarding save failed',text:'" + assetMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + assetMessage + "');}",
-                            true);
-                        return;
-                    }
-                }
-
                     SaveEmployeeDocuments(response.UserId, employee.Email, employee.EmployeeCode);
 
                     string generatedPassword = DefaultEmployeePassword;
@@ -321,102 +299,15 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return "Biometric ID is required.";
             if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return "Overtime Rate is required.";
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return "Work Location is required.";
-            string assetValidationMessage = ValidateSubmittedAssets();
-            if (!string.IsNullOrWhiteSpace(assetValidationMessage)) return assetValidationMessage;
 
             return string.Empty;
         }
 
-        private string ValidateSubmittedAssets()
-        {
-            List<EmployeeAssetDO> assets = GetSubmittedAssets();
-            if (assets.Count == 0)
-            {
-                return "Asset Type is required.";
-            }
-
-            for (int i = 0; i < assets.Count; i++)
-            {
-                EmployeeAssetDO asset = assets[i];
-                string suffix = assets.Count > 1 ? " for asset row " + (i + 1) : string.Empty;
-
-                if (string.IsNullOrWhiteSpace(asset.AssetType)) return "Asset Type is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetNumber)) return "Asset Number is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetName)) return "Asset Name is required" + suffix + ".";
-                if (!asset.AssignedDate.HasValue) return "Assigned Date is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetCondition)) return "Asset Condition is required" + suffix + ".";
-                //if (string.IsNullOrWhiteSpace(asset.AssetStatus)) return "Asset Status is required" + suffix + ".";
-            }
-
-            return string.Empty;
-        }
-
-        private List<EmployeeAssetDO> GetSubmittedAssets()
-        {
-            List<EmployeeAssetDO> assets = new List<EmployeeAssetDO>();
-            string assetsJson = hdnAssetsJson == null ? string.Empty : Convert.ToString(hdnAssetsJson.Value ?? string.Empty);
-
-            if (!string.IsNullOrWhiteSpace(assetsJson))
-            {
-                try
-                {
-                    JavaScriptSerializer serializer = new JavaScriptSerializer();
-                    List<SubmittedAssetRow> submittedAssets = serializer.Deserialize<List<SubmittedAssetRow>>(assetsJson);
-                    if (submittedAssets != null)
-                    {
-                        foreach (SubmittedAssetRow submittedAsset in submittedAssets)
-                        {
-                            assets.Add(new EmployeeAssetDO
-                            {
-                                AssetType = Convert.ToString(submittedAsset.asset_type ?? string.Empty).Trim(),
-                                AssetNumber = Convert.ToString(submittedAsset.asset_number ?? string.Empty).Trim(),
-                                AssetName = Convert.ToString(submittedAsset.asset_name ?? string.Empty).Trim(),
-                                AssignedDate = ParseDate(submittedAsset.assigned_date),
-                                ReturnDate = ParseDate(submittedAsset.return_date),
-                                AssetCondition = Convert.ToString(submittedAsset.asset_condition ?? string.Empty).Trim(),
-                                AssetStatus = Convert.ToString(submittedAsset.asset_status ?? string.Empty).Trim()
-                            });
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CommonBL errorlog = new CommonBL();
-                    errorlog.fnStoreErrorLog("EmployeeRegistration", "GetSubmittedAssets", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
-                }
-            }
-
-            if (assets.Count == 0)
-            {
-                assets.Add(new EmployeeAssetDO
-                {
-                    AssetType = ValueOf(txtAssetType),
-                    AssetNumber = ValueOf(txtAssetNumber),
-                    AssetName = ValueOf(txtAssetName),
-                    AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-                    //ReturnDate = ParseDate(ValueOf(txtReturnDate)),
-                    AssetCondition = SelectedValueOf(ddlAssetCondition),
-                    //AssetStatus = SelectedValueOf(ddlAssetStatus)
-                });
-            }
-
-            return assets;
-        }
-
-        private class SubmittedAssetRow
-        {
-            public string asset_type { get; set; }
-            public string asset_number { get; set; }
-            public string asset_name { get; set; }
-            public string assigned_date { get; set; }
-            public string return_date { get; set; }
-            public string asset_condition { get; set; }
-            public string asset_status { get; set; }
-        }
+        private static readonly string[] AllowedDocumentExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf" };
 
         private void SaveEmployeeDocuments(int userId, string employeeEmail, string employeeCode)
         {
-            const int maxFileSize = 5 * 1024 * 1024;
+            const int maxFileSize = 3 * 1024 * 1024;
             string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
             if (documentsRoot.StartsWith("~"))
             {
@@ -450,14 +341,20 @@ namespace HRMS.View.Modules
                         continue;
                     }
 
+                    string originalFileName = Path.GetFileName(fileUpload.FileName);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+                    string fileExt = Path.GetExtension(originalFileName);
+
+                    if (string.IsNullOrWhiteSpace(fileExt) || Array.IndexOf(AllowedDocumentExtensions, fileExt.ToLowerInvariant()) < 0)
+                    {
+                        continue;
+                    }
+
                     if (!Directory.Exists(basePath))
                     {
                         Directory.CreateDirectory(basePath);
                     }
 
-                    string originalFileName = Path.GetFileName(fileUpload.FileName);
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
-                    string fileExt = Path.GetExtension(originalFileName);
                     string filePath = Path.Combine(basePath, originalFileName);
 
                     fileUpload.SaveAs(filePath);
@@ -549,13 +446,6 @@ namespace HRMS.View.Modules
                 // LabourWelfareFundNumber = string.Empty,
                 // TaxRegime = string.Empty,
                 // TdsApplicable = string.Empty,
-                AssetType = ValueOf(txtAssetType),
-                AssetNumber = ValueOf(txtAssetNumber),
-                AssetName = ValueOf(txtAssetName),
-                AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-               // ReturnDate = ParseDate(ValueOf(txtReturnDate)),
-                AssetCondition = SelectedValueOf(ddlAssetCondition),
-              //  AssetStatus = SelectedValueOf(ddlAssetStatus),
                 InsertedBy = ParseInt(Convert.ToString(Session["userId"]))
             };
         }

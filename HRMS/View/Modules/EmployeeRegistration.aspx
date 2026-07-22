@@ -1261,26 +1261,17 @@
                         <table class="asset-table">
                             <thead><tr><th>Document Type</th><th>File</th></tr></thead>
                             <tbody>
-                                <tr>
-                                    <td><asp:DropDownList ID="ddlDocumentType1" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:FileUpload ID="fuDocument1" runat="server" CssClass="form-control-modern" /></td>
-                                </tr>
-                                <tr>
-                                    <td><asp:DropDownList ID="ddlDocumentType2" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:FileUpload ID="fuDocument2" runat="server" CssClass="form-control-modern" /></td>
-                                </tr>
-                                <tr>
-                                    <td><asp:DropDownList ID="ddlDocumentType3" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:FileUpload ID="fuDocument3" runat="server" CssClass="form-control-modern" /></td>
-                                </tr>
-                                <tr>
-                                    <td><asp:DropDownList ID="ddlDocumentType4" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:FileUpload ID="fuDocument4" runat="server" CssClass="form-control-modern" /></td>
-                                </tr>
-                                <tr>
-                                    <td><asp:DropDownList ID="ddlDocumentType5" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                    <td><asp:FileUpload ID="fuDocument5" runat="server" CssClass="form-control-modern" /></td>
-                                </tr>
+                                <asp:Repeater ID="rptDocumentUpload" runat="server">
+                                    <ItemTemplate>
+                                        <tr>
+                                            <td>
+                                                <%# Eval("Text") %>
+                                                <asp:HiddenField ID="hdnDocumentTypeId" runat="server" Value='<%# Eval("Id") %>' />
+                                            </td>
+                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern" /></td>
+                                        </tr>
+                                    </ItemTemplate>
+                                </asp:Repeater>
                             </tbody>
                         </table>
                     </div>

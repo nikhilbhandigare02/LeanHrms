@@ -2047,7 +2047,7 @@
                 isValid = false;
             }
             if (newsTag.value.trim() == "") {
-                document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "Please select News Tag.";
+                document.getElementById('<%= lblnewtagError.ClientID %>').innerHTML = "Please select Category.";
                 isValid = false;
             }
             return isValid;

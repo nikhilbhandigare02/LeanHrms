@@ -1,18 +1,76 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="AssignRights.aspx.cs" Inherits="HRMS.View.Modules.AssignRights" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="AssignRights.aspx.cs" Inherits="HRMS.View.Modules.AssignRights" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
     <style>
-        .custom-dropdown-container {
-            position: relative;
+        .rights-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            background-color: #f8fafc;
         }
+        
+        .checkbox-list-container {
+            padding: 8px;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
+        
+        .select-all-container {
+            margin-bottom: 12px;
+            padding: 10px;
+            background-color: #f1f5f9;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+       .checkbox-list-container label {
+    display: inline-block;
+    font-weight: normal;
+    margin-bottom: 4px;
+    vertical-align: middle;
+        margin-left: 4px;
 
-        .custom-dropdown {
-            padding-right: 25px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"%3E%3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /%3E%3C/svg%3E') no-repeat right center;
-            background-size: 16px;
+}
+
+       .checkbox-list-container table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 50px 12px;
+}
+
+.checkbox-list-container td {
+    padding-right: 50px;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.checkbox-list-container input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+       .checkbox-list-container input[type="checkbox"] {
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+        
+        .checkbox-list-container label:hover {
+            background-color: #f1f5f9;
+        }
+        
+       .form-group > label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
         }
     </style>
 </asp:Content>
@@ -29,8 +87,8 @@
                         <div class="col-lg-12">
                             <div class="form-group mb-4">
                                 <label for="input-roles">User Role</label>
-                                <div class="mb-3 position-relative custom-dropdown-container">
-                                    <asp:DropDownList ID="ddlrole" runat="server" CssClass="form-control custom-dropdown" AutoPostBack="true">
+                                <div class="mb-3 position-relative">
+                                    <asp:DropDownList ID="ddlrole" runat="server" CssClass="form-control" AutoPostBack="true">
                                         <asp:ListItem Text="Please select" Value=""></asp:ListItem>
                                     </asp:DropDownList>
                                     <asp:RequiredFieldValidator ID="rfv_ddlrole" runat="server" ControlToValidate="ddlrole" InitialValue="0" ErrorMessage="User Role is required" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
@@ -38,34 +96,43 @@
                             </div>
                         </div>
                     </div>
-                   <%-- <div class="row">--%>
-                        <div class="col-lg-12">
-                            <div class="form-group mb-4">
-                                <label for="input-menu">Select Menu</label>
-                                <div class="mb-3 position-relative custom-dropdown-container">
-                                    <asp:DropDownList runat="server" CssClass="form-control custom-dropdown m-b" ID="ddlMenu" AutoPostBack="true" OnSelectedIndexChanged="ddlMenu_SelectedIndexChanged">
-                                    </asp:DropDownList>
-                                    <asp:RequiredFieldValidator ID="rfv_ddlMenu" runat="server" ControlToValidate="ddlMenu" InitialValue="" InitialValueText="" ErrorMessage="Select Menu" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
+                    
+                    <div class="col-lg-12">
+                        <div class="rights-section">
+                            <div class="form-group mb-0">
+                                <label>Select Menu</label>
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="selectAllMenus" onclick="toggleSelectAll('<%= cbxMenu.ClientID %>', this.checked)" />
+                                    <label for="selectAllMenus" style="display: inline; margin-left: 6px; cursor: pointer;">Select All</label>
+                                </div>
+                                <div class="checkbox-list-container">
+                                    <asp:CheckBoxList runat="server" CssClass="" ID="cbxMenu" AutoPostBack="true" OnSelectedIndexChanged="cbxMenu_SelectedIndexChanged" RepeatColumns="3" RepeatLayout="Table">
+                                    </asp:CheckBoxList>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-12">
-                            <div class="form-group mb-4">
-                                <div id="lbl_submenu" runat="server" visible="false">
-                                    <label for="input-submenu">Submenu</label>
-                                    <div class="mb-3 position-relative custom-dropdown-container">
-                                        <asp:DropDownList ID="ddl_submenu" runat="server" AutoPostBack="true" CssClass="form-control custom-dropdown">
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfv_ddlSubMenu" runat="server" ControlToValidate="ddl_submenu" InitialValue="" InitialValueText="" ErrorMessage="Select SubMenu" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
-                                    </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <div id="lbl_submenu" runat="server" visible="false" class="rights-section">
+                            <div class="form-group mb-0">
+                                <label>Submenu</label>
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="selectAllSubmenus" onclick="toggleSelectAll('<%= cbx_submenu.ClientID %>', this.checked)" />
+                                    <label for="selectAllSubmenus" style="display: inline; margin-left: 6px; cursor: pointer;">Select All</label>
+                                </div>
+                                <div class="checkbox-list-container">
+                                    <asp:CheckBoxList ID="cbx_submenu" runat="server" CssClass="" RepeatColumns="3" RepeatLayout="Table">
+                                    </asp:CheckBoxList>
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <asp:Button ID="btn_submit" runat="server" CssClass="btn btn-success" Text="Submit" CommandArgument="Submit" OnClick="btn_submit_Click" ValidationGroup="SaveValidationGroup" />
-                            <asp:Button ID="btn_reset" runat="server" CssClass="btn btn-primary custom-clear-button" Text="Reset"  OnClick="btn_reset_Click" Style="margin-right: 10px;" />
-                        </div>
-                    <%--</div>--%>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <asp:Button ID="btn_submit" runat="server" CssClass="btn btn-success" Text="Submit" CommandArgument="Submit" OnClick="btn_submit_Click" ValidationGroup="SaveValidationGroup" />
+                        <asp:Button ID="btn_reset" runat="server" CssClass="btn btn-primary" Text="Reset"  OnClick="btn_reset_Click" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,29 +142,31 @@
     <script>
         function showRightSavedMessage(status, remark) {
             Swal.fire({
-
                 icon: status === "Success" ? "success" : "error",
                 text: remark,
                 timer: 4000,
                 showConfirmButton: false
             });
         }
+        
+        function toggleSelectAll(checkBoxListId, isChecked) {
+            var checkBoxList = document.getElementById(checkBoxListId);
+            if (checkBoxList) {
+                var checkboxes = checkBoxList.getElementsByTagName('input');
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = isChecked;
+                }
+            }
+        }
     </script>
     <script type="text/javascript">
         window.onload = function () {
-            var dropdownIds = [
-    '<%= ddlrole.ClientID %>',
-    '<%= ddlMenu.ClientID %>',
-    '<%= ddl_submenu.ClientID %>'
-            ];
-
-            dropdownIds.forEach(function (id) {
-                var ddl = document.getElementById(id);
-                if (ddl && ddl.options.length > 0) {
-                    ddl.options[0].disabled = true;
-                    ddl.options[0].style.color = 'gray';
-                }
-            });
+            var dropdownId = '<%= ddlrole.ClientID %>';
+            var ddl = document.getElementById(dropdownId);
+            if (ddl && ddl.options.length > 0) {
+                ddl.options[0].disabled = true;
+                ddl.options[0].style.color = 'gray';
+            }
         };
 </script>
 </asp:Content>

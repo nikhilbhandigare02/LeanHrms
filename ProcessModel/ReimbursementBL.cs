@@ -73,7 +73,8 @@ namespace ProcessModel
         public List<StatusOptionItem> GetStatusOptions()
         {
             var options = new List<StatusOptionItem>();
-            var lookupData = BindLookupData("LeaveStatus");
+            //var lookupData = BindLookupData("LeaveStatus");
+            var lookupData = BindLookupData("Reimburesementstatus");
 
             if (lookupData != null && lookupData.Count > 0)
             {
@@ -93,7 +94,7 @@ namespace ProcessModel
                 options = new List<StatusOptionItem>
                 {
                     new StatusOptionItem { Id = 1, Value = "Pending", Text = "Pending" },
-                    new StatusOptionItem { Id = 2, Value = "Accepted", Text = "Accepted" },
+                    new StatusOptionItem { Id = 2, Value = "Accepted", Text = "approved" },
                     new StatusOptionItem { Id = 3, Value = "Rejected", Text = "Rejected" }
                 };
             }

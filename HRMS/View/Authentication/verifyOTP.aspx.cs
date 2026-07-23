@@ -34,7 +34,7 @@ namespace HRMS.View.Authentication
                         Session["verificationCode"] = listdata[0].generated_otp;
                         Session["isPasswordReset"] = listdata[0].passresetflag;
 
-                        loginBAL.SendVerificationCodeEmail(listdata[0].user_mail_id, listdata[0].generated_otp);
+                        loginBAL.SendVerificationCodeEmail(listdata[0].user_mail_id, listdata[0].generated_otp, listdata[0].body, listdata[0].subject);
 
                         div_otp.Visible = true;
                         string status = "Success";

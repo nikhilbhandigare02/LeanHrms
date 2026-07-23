@@ -15,6 +15,8 @@ namespace DataObject
         public string VerifyOTP { get; set; }
         public string user_fullname { get; set; }
         public string generated_otp { get; set; }
+        public string body { get; set; }
+        public string subject { get; set; }
 
         public int? passresetflag { get; set; }
     }

@@ -2,6 +2,7 @@
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -114,15 +115,6 @@ namespace HRMS.View.Modules
 
                 if (fileUpload.HasFiles)
                 {
-                    int maxFileSize = 5 * 1024 * 1024; 
-                    string basepath = @"D:\documents\";
-
-                    if (!Directory.Exists(basepath))
-                        Directory.CreateDirectory(basepath);
-
-                    List<FileAttachment> uploadedFiles = Session["UploadedFiles"] as List<FileAttachment> ?? new List<FileAttachment>();
-                    List<FileAttachment> ViewFiles = Session["ViewUploadedFiles"] as List<FileAttachment> ?? new List<FileAttachment>();
-
                     string userIdStr = Request.QueryString["user_id"];
                     if (string.IsNullOrEmpty(userIdStr))
                     {
@@ -131,6 +123,30 @@ namespace HRMS.View.Modules
                         return;
                     }
                     int userId = Convert.ToInt32(userIdStr);
+
+                    int maxFileSize = 5 * 1024 * 1024;
+                    string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                    string webPathRoot = ConfigurationManager.AppSettings["WebPath"];
+                    if (documentsRoot.StartsWith("~"))
+                    {
+                        documentsRoot = Server.MapPath(documentsRoot);
+                    }
+
+                    DateTime now = DateTime.Now;
+                    string basePath1 = Path.Combine(
+                        now.Year.ToString(),
+                        now.Month.ToString("00"),
+                        userIdStr) + Path.DirectorySeparatorChar;
+
+                    string basepath = Path.Combine(documentsRoot, basePath1);
+
+                    if (!Directory.Exists(basepath))
+                    {
+                        Directory.CreateDirectory(basepath);
+                    }
+
+                    List<FileAttachment> uploadedFiles = Session["UploadedFiles"] as List<FileAttachment> ?? new List<FileAttachment>();
+                    List<FileAttachment> ViewFiles = Session["ViewUploadedFiles"] as List<FileAttachment> ?? new List<FileAttachment>();
 
                     userDocumentBL userDocBL = new userDocumentBL();
 
@@ -152,29 +168,26 @@ namespace HRMS.View.Modules
 
                             if (!uploadedFiles.Any(f => f.FileName.Equals(fileNameWithoutExt, StringComparison.OrdinalIgnoreCase)))
                             {
-                                
                                 uploadedFile.SaveAs(filePath);
 
-                              
+                                string fileWebPath = Path.Combine(webPathRoot, basePath1, originalFileName).Replace('\\', '/');
+
                                 FileAttachment file = new FileAttachment
                                 {
                                     FileName = fileNameWithoutExt,
-                                    FilePath = filePath,           
+                                    FilePath = filePath,
                                     DocumentMasterId = Convert.ToInt32(selectedId),
-                                    ReferenceNumber=referencenumber,
-                                    EmailId=emailID
-
+                                    ReferenceNumber = referencenumber,
+                                    EmailId = emailID
                                 };
 
-                               
-                                userDocBL.SaveUserDocument(userId, file, fileExt, basepath);
+                                userDocBL.SaveUserDocument(userId, file, fileExt, basePath1, fileWebPath);
 
-                            
                                 uploadedFiles.Add(file);
                                 ViewFiles.Add(new FileAttachment
                                 {
-                                    FileName = originalFileName, 
-                                    FilePath = "/documents/" + originalFileName
+                                    FileName = originalFileName,
+                                    FilePath = filePath
                                 });
                             }
                         }

@@ -326,17 +326,19 @@ namespace HRMS.View.Modules
         {
             const int maxFileSize = 3 * 1024 * 1024;
             string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+            string webPathRoot = ConfigurationManager.AppSettings["WebPath"];
             if (documentsRoot.StartsWith("~"))
             {
                 documentsRoot = Server.MapPath(documentsRoot);
             }
 
             DateTime now = DateTime.Now;
-            string basePath = Path.Combine(
-                documentsRoot,
+            string basePath1 = Path.Combine(
                 now.Year.ToString(),
                 now.Month.ToString("00"),
                 employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
+
+            string basePath = Path.Combine(documentsRoot, basePath1);
 
             userDocumentBL userDocBL = new userDocumentBL();
 
@@ -376,6 +378,8 @@ namespace HRMS.View.Modules
 
                     fileUpload.SaveAs(filePath);
 
+                    string fileWebPath = Path.Combine(webPathRoot, basePath1, originalFileName).Replace('\\', '/');
+
                     FileAttachment file = new FileAttachment
                     {
                         FileName = fileNameWithoutExt,
@@ -385,7 +389,7 @@ namespace HRMS.View.Modules
                         EmailId = employeeEmail
                     };
 
-                    userDocBL.SaveUserDocument(userId, file, fileExt, basePath);
+                    userDocBL.SaveUserDocument(userId, file, fileExt, basePath1, fileWebPath);
                 }
                 catch (Exception ex)
                 {

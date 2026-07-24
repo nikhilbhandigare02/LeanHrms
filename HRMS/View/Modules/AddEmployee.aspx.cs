@@ -211,12 +211,16 @@ namespace HRMS.View.Modules
                 }
 
                 string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                string webPath = ConfigurationManager.AppSettings["WebPath"];
                 if (documentsRoot.StartsWith("~"))
                 {
                     documentsRoot = Server.MapPath(documentsRoot);
                 }
 
                 DateTime now = DateTime.Now;
+                string basePath1 = Path.Combine(now.Year.ToString(),
+                    now.Month.ToString("00"),
+                    employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
 
                 string basePath = Path.Combine(
                     documentsRoot,
@@ -234,6 +238,7 @@ namespace HRMS.View.Modules
                 string fileExt = Path.GetExtension(originalFileName);
                 string filePath = Path.Combine(basePath, originalFileName);
 
+                webPath = Path.Combine(webPath, basePath1, originalFileName).Replace('\\', '/');
                 fuUploadDocument.SaveAs(filePath);
 
                 FileAttachment file = new FileAttachment
@@ -245,10 +250,14 @@ namespace HRMS.View.Modules
                     EmailId = txt_email.Text
                 };
 
-                docBL.SaveUserDocument(employeeUserId, file, fileExt, basePath);
+                docBL.SaveUserDocument(employeeUserId, file, fileExt, basePath1, webPath);
 
                 ddlUploadDocumentType.ClearSelection();
                 BindEmployeeDocuments(employeeUserId);
+
+                string safeFileName = HttpUtility.JavaScriptStringEncode(originalFileName);
+                ScriptManager.RegisterStartupScript(this, GetType(), Guid.NewGuid().ToString("N"),
+                    "showUserSavedMessage('Success', 'Document \"" + safeFileName + "\" uploaded successfully.');", true);
             }
             catch (Exception ex)
             {
@@ -297,21 +306,23 @@ namespace HRMS.View.Modules
         {
             try
             {
+                string path = "";
+                string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
                 userDocumentBL docBL = new userDocumentBL();
                 userDocumentsDO doc = docBL.GetUserDocumentById(userDocId);
-
-                if (doc == null || !File.Exists(doc.filepath))
+                path = Path.Combine(documentsRoot, doc.filepath);
+                if (doc == null || !File.Exists(path))
                 {
                     ShowAssetMessage("Failed", "File not found.");
                     return;
                 }
 
-                FileInfo fileInfo = new FileInfo(doc.filepath);
+                FileInfo fileInfo = new FileInfo(path);
                 Response.Clear();
                 Response.ContentType = "application/octet-stream";
                 Response.AddHeader("Content-Disposition", "attachment; filename=" + fileInfo.Name);
                 Response.AddHeader("Content-Length", fileInfo.Length.ToString());
-                Response.TransmitFile(doc.filepath);
+                Response.TransmitFile(path);
                 Response.Flush();
                 Response.End();
             }

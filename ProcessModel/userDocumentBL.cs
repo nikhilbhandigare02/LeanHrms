@@ -20,7 +20,7 @@ namespace ProcessModel
         string UserId = Convert.ToString(HttpContext.Current.Session["userId"]);
         private string DBName = ConfigurationManager.AppSettings["DBName"];
         private static string MySqlconnection = ConfigurationManager.ConnectionStrings["MysqlConnection"].ConnectionString;
-        public List<userDocumentsDO> SaveUserDocument(int userId, FileAttachment file, string fileExt, string basePath)
+        public List<userDocumentsDO> SaveUserDocument(int userId, FileAttachment file, string fileExt, string basePath, string webPath)
         {
             List<userDocumentsDO> listdata = new List<userDocumentsDO>();
             getDrtolist getDrtolistParam = new getDrtolist();
@@ -36,6 +36,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("@p_reference_number", file.ReferenceNumber));
                 mysqlParameters.Add(DataClass.GetParameter("@p_email_id", file.EmailId));
                 mysqlParameters.Add(DataClass.GetParameter("@p_inserted_by", UserId));
+                mysqlParameters.Add(DataClass.GetParameter("@p_webPath", webPath));
 
                 listdata = getDrtolistParam.getdatafromreder<userDocumentsDO>(
                     DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_saveUserDocument")

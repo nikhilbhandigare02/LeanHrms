@@ -185,10 +185,10 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            const int maxFileSize = 5 * 1024 * 1024;
+            const int maxFileSize = 3 * 1024 * 1024;
             if (fuUploadDocument.PostedFile.ContentLength > maxFileSize)
             {
-                ShowAssetMessage("Failed", "File must be less than 5MB.");
+                ShowAssetMessage("Failed", "File must be less than 3MB.");
                 return;
             }
 
@@ -217,6 +217,7 @@ namespace HRMS.View.Modules
                 }
 
                 DateTime now = DateTime.Now;
+
                 string basePath = Path.Combine(
                     documentsRoot,
                     now.Year.ToString(),

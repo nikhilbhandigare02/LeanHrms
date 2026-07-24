@@ -94,7 +94,7 @@ namespace ProcessModel
                 options = new List<StatusOptionItem>
                 {
                     new StatusOptionItem { Id = 1, Value = "Pending", Text = "Pending" },
-                    new StatusOptionItem { Id = 2, Value = "Accepted", Text = "approved" },
+                    new StatusOptionItem { Id = 2, Value = "Accepted", Text = "Approved" },
                     new StatusOptionItem { Id = 3, Value = "Rejected", Text = "Rejected" }
                 };
             }

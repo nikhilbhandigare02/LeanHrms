@@ -37,6 +37,8 @@ namespace DataObject
 
         public class EmployeeReimbursementDO
         {
+            public int reimbursement_id { get; set; }
+
             public string employee_name { get; set; }
 
             public string employee_code { get; set; }
@@ -48,6 +50,36 @@ namespace DataObject
             public DateTime claim_date { get; set; }
 
             public string status { get; set; }
+        }
+
+        public class UpdateSalaryStatusDO
+        {
+            public int salary_slip_details_id { get; set; }
+
+            public string status { get; set; }
+
+            public int updated_by { get; set; }
+
+            public string Success { get; set; }
+
+            public string Result { get; set; }
+        }
+
+        public class SalaryPaidMailDO
+        {
+            public string ToEmail { get; set; }
+            public string CcEmail { get; set; }
+            public string Subject { get; set; }
+            public string Body { get; set; }
+        }
+
+        public class UpdateReimbursementStatusDO
+        {
+            public int reimbursement_id { get; set; }
+            public string status { get; set; }
+            public int updated_by { get; set; }
+            public string Success { get; set; }
+            public string Result { get; set; }
         }
     }
 }

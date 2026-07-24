@@ -47,6 +47,27 @@ namespace HRMS.View.Modules
             gvReimbursement.DataBind();
         }
 
+        protected void gvReimbursement_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType != DataControlRowType.DataRow)
+            {
+                return;
+            }
+
+            ReimbursementDetailsDO reimbursement = e.Row.DataItem as ReimbursementDetailsDO;
+            if (reimbursement == null)
+            {
+                return;
+            }
+
+            bool isPaid = string.Equals(reimbursement.status, "Paid", StringComparison.OrdinalIgnoreCase);
+            LinkButton btnEdit = e.Row.FindControl("btnEdit") as LinkButton;
+            if (btnEdit != null)
+            {
+                btnEdit.Visible = !isPaid;
+            }
+        }
+
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
             // Clear session variables to ensure add mode

@@ -44,7 +44,7 @@ namespace HRMS.View.Authentication
                             string otp = listdata[0].generated_otp;
                             Session["verificationCode"] = otp; // Store backend OTP in session
 
-                            loginBAL.SendVerificationCodeEmail(emailId, otp);
+                            loginBAL.SendVerificationCodeEmail(emailId, otp, listdata[0].body, listdata[0].subject);
 
                             string status = "Success";
                             string remark = "OTP Generated Successfully.";

@@ -97,4 +97,10 @@ namespace DataObject
         public string Status { get; set; }
         public string Remarks { get; set; }
     }
+
+    public class DropDownData_account
+    {
+        public string Id { get; set; }
+        public string Text { get; set; }
+    }
 }

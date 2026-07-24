@@ -864,5 +864,40 @@ namespace ProcessModel
             }
             return string.Empty;
         }
+
+
+
+       public List<DropDownData_account> dropdownusername_accountdashboard()
+  {
+      List<DropDownData_account> dropDownData = new List<DropDownData_account>();
+      try
+      {
+          getDrtolist getDrtolistParam = new getDrtolist();
+          List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+          dropDownData = getDrtolistParam.getdatafromreder<DropDownData_account>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_bindusername_Accountdashboard"));
+      }
+      catch (Exception ex)
+      {
+          CommonBL errorlog = new CommonBL();
+          errorlog.fnStoreErrorLog("CommonBL", "dropdownusername", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+      }
+      return dropDownData;
+  }
+  public List<DropDownData_account> dropdownempcode_accountdashboard()
+  {
+      List<DropDownData_account> dropDownData = new List<DropDownData_account>();
+      try
+      {
+          getDrtolist getDrtolistParam = new getDrtolist();
+          List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+          dropDownData = getDrtolistParam.getdatafromreder<DropDownData_account>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_bindempcode_Accountdashboard"));
+      }
+      catch (Exception ex)
+      {
+          CommonBL errorlog = new CommonBL();
+          errorlog.fnStoreErrorLog("CommonBL", "dropdownusername", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+      }
+      return dropDownData;
+  }
     }
 }

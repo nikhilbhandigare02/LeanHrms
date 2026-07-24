@@ -206,7 +206,8 @@
                 AutoGenerateColumns="False"
                 GridLines="None"
                 DataKeyNames="reimbursementNumber"
-                EmptyDataText="No reimbursement records found">
+                EmptyDataText="No reimbursement records found"
+                OnRowDataBound="gvReimbursement_RowDataBound">
 
                 <Columns>
                     

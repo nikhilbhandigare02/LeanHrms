@@ -32,23 +32,31 @@ namespace HRMS.View.Modules
 
             if (!fileUpload.HasFile)
             {
-                ShowError("Please select an Excel file.");
+                ShowError("Please select a file.");
                 return;
             }
 
             string fileExt = System.IO.Path.GetExtension(fileUpload.FileName).ToLower();
-            if (fileExt != ".xlsx" && fileExt != ".xls")
+            if (fileExt != ".xlsx" && fileExt != ".xls" && fileExt != ".csv")
             {
-                ShowError("Only Excel File Allowed (.xlsx, .xls)");
+                ShowError("Only Excel or CSV files allowed (.xlsx, .xls, .csv)");
                 return;
             }
 
             try
             {
-                List<HolidayListDO> holidays = ReadHolidayExcel();
+                List<HolidayListDO> holidays;
+                if (fileExt == ".csv")
+                {
+                    holidays = ReadHolidayCSV();
+                }
+                else
+                {
+                    holidays = ReadHolidayExcel();
+                }
                 if (holidays.Count == 0)
                 {
-                    ShowError("No holiday records found in uploaded Excel.");
+                    ShowError("No holiday records found in uploaded file.");
                     return;
                 }
 
@@ -176,9 +184,9 @@ namespace HRMS.View.Modules
                 }
 
                 DataTable dt = dataSet.Tables[0];
-                if (dt.Columns.Count < 4)
+                if (dt.Columns.Count < 3)
                 {
-                    throw new Exception("Excel must contain Sr No, Date, Day, and Holiday columns.");
+                    throw new Exception("Excel must contain at least 3 columns: Sr No, Date, and Day.");
                 }
 
                 foreach (DataRow row in dt.Rows)
@@ -190,8 +198,17 @@ namespace HRMS.View.Modules
 
                     int srNo;
                     DateTime holidayDate;
-                    string holidayDay = Convert.ToString(row[2]).Trim();
-                    if (!int.TryParse(Convert.ToString(row[0]).Trim(), out srNo) || !TryParseExcelDate(row[1], out holidayDate))
+                    string holidayDay = dt.Columns.Count > 2 ? Convert.ToString(row[2]).Trim() : "";
+                    string holidayName = dt.Columns.Count > 3 ? Convert.ToString(row[3]).Trim() : "";
+
+                    // Try to parse Sr No - if it fails, skip this row
+                    if (!int.TryParse(Convert.ToString(row[0]).Trim(), out srNo))
+                    {
+                        continue;
+                    }
+
+                    // Try to parse date - if it fails, skip this row
+                    if (!TryParseExcelDate(row[1], out holidayDate))
                     {
                         continue;
                     }
@@ -203,7 +220,7 @@ namespace HRMS.View.Modules
                         sr_no = srNo,
                         holiday_date = holidayDate,
                         holiday_day = holidayDay,
-                        holiday_name = Convert.ToString(row[3]).Trim()
+                        holiday_name = holidayName
                     });
                 }
             }
@@ -211,10 +228,107 @@ namespace HRMS.View.Modules
             return holidays;
         }
 
+        private List<HolidayListDO> ReadHolidayCSV()
+        {
+            List<HolidayListDO> holidays = new List<HolidayListDO>();
+
+            using (var stream = fileUpload.FileContent)
+            using (var reader = new System.IO.StreamReader(stream))
+            {
+                bool isHeader = true;
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+
+                    string[] columns = line.Split(',');
+                    if (columns.Length < 2)
+                    {
+                        continue;
+                    }
+
+                    // Skip header row
+                    if (isHeader)
+                    {
+                        isHeader = false;
+                        continue;
+                    }
+
+                    int srNo;
+                    DateTime holidayDate;
+                    string holidayDay = columns.Length > 2 ? columns[2].Trim() : "";
+                    string holidayName = columns.Length > 3 ? columns[3].Trim() : "";
+
+                    // Try to parse Sr No - if it fails, skip this row
+                    if (!int.TryParse(columns[0].Trim(), out srNo))
+                    {
+                        continue;
+                    }
+
+                    // Try to parse date - if it fails, skip this row
+                    if (!TryParseCSVDate(columns[1].Trim(), out holidayDate))
+                    {
+                        continue;
+                    }
+
+                    holidayDate = CorrectDateByDayName(holidayDate, holidayDay);
+
+                    holidays.Add(new HolidayListDO
+                    {
+                        sr_no = srNo,
+                        holiday_date = holidayDate,
+                        holiday_day = holidayDay,
+                        holiday_name = holidayName
+                    });
+                }
+            }
+
+            return holidays;
+        }
+
+        private bool TryParseCSVDate(string text, out DateTime date)
+        {
+            date = DateTime.MinValue;
+            text = text.Trim();
+
+            string[] formats =
+            {
+                "dd-MM-yyyy",
+                "dd/MM/yyyy",
+                "dd.MM.yyyy",
+                "yyyy-MM-dd",
+                "yyyy/MM/dd",
+                "yyyy.MM.dd",
+                "MM-dd-yyyy",
+                "MM/dd/yyyy",
+                "MM.dd.yyyy"
+            };
+
+            return DateTime.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+        }
+
         private bool IsHeaderOrEmptyRow(DataRow row)
         {
             string firstColumn = Convert.ToString(row[0]).Trim();
-            return string.IsNullOrEmpty(firstColumn) || firstColumn.Equals("Sr No", StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(firstColumn))
+            {
+                return true;
+            }
+
+            // Check for common header variations
+            string[] headerVariations = { "Sr No", "Sr.No", "SrNo", "S.No", "S.No.", "Serial No", "Serial Number", "No", "#" };
+            foreach (var header in headerVariations)
+            {
+                if (firstColumn.Equals(header, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool TryParseExcelDate(object value, out DateTime date)

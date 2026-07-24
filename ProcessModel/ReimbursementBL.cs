@@ -430,45 +430,50 @@ namespace ProcessModel
             return response;
         }
 
-        public ResponseDO UpdateReimbursementStatus(string reimbursementNumber, int status, string remarks, string paymentMonth)
+
+public ResponseDO UpdateReimbursementStatus(string reimbursementNumber, int status, string remarks, string paymentMonth)
+    {
+        ResponseDO response = new ResponseDO();
+
+        try
         {
-            ResponseDO response = new ResponseDO();
-            try
+            int userId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
+
+            string connStr = ConfigurationManager.ConnectionStrings["Sqlconnection"].ConnectionString;
+
+            using (MySqlConnection con = new MySqlConnection(connStr))
             {
-                int userId = Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? HttpContext.Current.Session["userId"] ?? 0);
-                
-                List<MySqlParameter> parameters = new List<MySqlParameter>
+                using (MySqlCommand cmd = new MySqlCommand("sp_update_reimbursement_status", con))
                 {
-                    DataClass.GetParameter("p_reimbursement_number", reimbursementNumber),
-                    DataClass.GetParameter("p_status", status),
-                    DataClass.GetParameter("p_remarks", remarks ?? (object)DBNull.Value),
-                    DataClass.GetParameter("p_payment_month", paymentMonth ?? (object)DBNull.Value),
-                    DataClass.GetParameter("p_updated_by", userId)
-                };
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                MySqlDataReader dr =
-                    DataClass.GetDataReaderFromSpWithParam(
-                        parameters,
-                        "",
-                        "sp_update_reimbursement_status");
+                    cmd.Parameters.AddWithValue("p_reimbursement_number", reimbursementNumber);
+                    cmd.Parameters.AddWithValue("p_status", status);
+                    cmd.Parameters.AddWithValue("p_remarks", string.IsNullOrEmpty(remarks) ? (object)DBNull.Value : remarks);
+                    cmd.Parameters.AddWithValue("p_payment_month", string.IsNullOrEmpty(paymentMonth) ? (object)DBNull.Value : paymentMonth);
+                    cmd.Parameters.AddWithValue("p_updated_by", userId);
 
-                if (dr != null && dr.Read())
-                {
-                    string statusValue = dr["Status"].ToString();
-                    response.Status = statusValue == "Success" ? 1 : 0;
-                    response.message = dr["Remarks"].ToString();
+                    con.Open();
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            string statusValue = dr["Status"].ToString();
+                            response.Status = statusValue.Equals("Success", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                            response.message = dr["Remarks"].ToString();
+                        }
+                    }
                 }
-
-                if (dr != null)
-                    dr.Close();
             }
-            catch (System.Exception ex)
-            {
-                response.Status = -1;
-                response.message = ex.Message;
-            }
-
-            return response;
         }
+        catch (Exception ex)
+        {
+            response.Status = -1;
+            response.message = ex.Message;
+        }
+
+        return response;
     }
+}
 }

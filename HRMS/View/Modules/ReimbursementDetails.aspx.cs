@@ -60,11 +60,11 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            bool isPaid = string.Equals(reimbursement.status, "Paid", StringComparison.OrdinalIgnoreCase);
+            bool isPending = string.Equals(reimbursement.status, "Pending", StringComparison.OrdinalIgnoreCase);
             LinkButton btnEdit = e.Row.FindControl("btnEdit") as LinkButton;
             if (btnEdit != null)
             {
-                btnEdit.Visible = !isPaid;
+                btnEdit.Visible = isPending;
             }
         }
 

@@ -551,14 +551,14 @@
                 </div>
             </div>
             <div class="holiday-actions">
-                <asp:FileUpload ID="fileUpload" runat="server" CssClass="holiday-file" />
+                <asp:FileUpload ID="fileUpload" runat="server" CssClass="holiday-file" accept=".xlsx,.xls,.csv" />
                 <label class="holiday-btn holiday-btn-light holiday-choose-file" for="<%= fileUpload.ClientID %>">
                     <i class="bx bx-upload"></i>
                     <span>Choose File</span>
                 </label>
                 <span class="holiday-upload-wrap">
                     <i class="bx bx-upload"></i>
-                    <asp:Button ID="btnUpload" runat="server" Text="Upload Excel" CssClass="holiday-btn holiday-btn-primary" OnClick="btnUpload_Click" />
+                    <asp:Button ID="btnUpload" runat="server" Text="Upload File" CssClass="holiday-btn holiday-btn-primary" OnClick="btnUpload_Click" />
                 </span>
             </div>
         </div>

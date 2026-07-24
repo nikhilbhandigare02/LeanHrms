@@ -1100,11 +1100,11 @@
                         <div class="form-group"><label class="is-required">Last Name</label><input id="txtLastName" runat="server" class="form-control-modern" placeholder="Enter last name" /><span id="lastNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Email ID</label><input id="txtEmail" runat="server" class="form-control-modern" type="email" placeholder="name@company.com" /><span id="emailDuplicateMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Mobile Number</label><input id="txtMobileNumber" runat="server" class="form-control-modern" placeholder="Enter mobile number" inputmode="numeric" maxlength="10" /><span id="mobileDuplicateMessage" class="validation-message"></span></div>
-                        <div class="form-group"><label class="is-required">Gender</label><asp:DropDownList ID="ddlGender" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Date of Birth</label><input id="txtDateOfBirth" runat="server" class="form-control-modern" type="date" /></div>
-                        <div class="form-group"><label class="is-required">Nationality</label><asp:DropDownList ID="ddlNationality" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Marital Status</label><asp:DropDownList ID="ddlMaritalStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Blood Group</label><asp:DropDownList ID="ddlBloodGroup" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="form-group"><label class="is-required">Gender</label><asp:DropDownList ID="ddlGender" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="genderRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Date of Birth</label><input id="txtDateOfBirth" runat="server" class="form-control-modern" type="date" /><span id="dobRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Nationality</label><asp:DropDownList ID="ddlNationality" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="nationalityRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Marital Status</label><asp:DropDownList ID="ddlMaritalStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="maritalStatusRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Blood Group</label><asp:DropDownList ID="ddlBloodGroup" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="bloodGroupRequiredMessage" class="validation-message"></span></div>
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="1">Save</button></div>
                 </section>
@@ -1117,14 +1117,14 @@
                         <span class="step-pill">Step 2 of 5</span>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label class="is-required">Employment Type</label><asp:DropDownList ID="ddlEmploymentType" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /></div>
-                        <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="form-group"><label class="is-required">Employment Type</label><asp:DropDownList ID="ddlEmploymentType" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employmentTypeRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeCategoryRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /><span id="joiningDateRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="probationPeriodRequiredMessage" class="validation-message"></span></div>
 <%--                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>--%>
-                        <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeStatusRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeSubStatusRequiredMessage" class="validation-message"></span></div>
 
        <%--                 <div class="form-group"><label>Notice Period </label>--%>
                             <input id="txtNoticePeriod" runat="server" class="form-control-modern" placeholder="Enter notice period days" visible="false" />
@@ -1151,13 +1151,13 @@
                     </div>
                     <div class="premium-grid">
                         <%--<div class="premium-field"><label class="is-required">Company</label><asp:DropDownList ID="ddlCompany" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
-                        <div class="premium-field"><label class="is-required">Department</label><asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label class="is-required">Branch Office</label><input id="txtBranchOffice" runat="server" class="form-control-modern" placeholder="Enter branch office" /></div>
-                        <div class="premium-field"><label class="is-required">Location</label><input id="txtLocation" runat="server" class="form-control-modern" placeholder="Enter location" /></div>
-                        <div class="premium-field"><label class="is-required">Designation</label><asp:DropDownList ID="ddlDesignation" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label class="is-required">Reporting Manager</label><asp:DropDownList ID="ddlReportingManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="premium-field"><label class="is-required">Department</label><asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="departmentRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Branch Office</label><input id="txtBranchOffice" runat="server" class="form-control-modern" placeholder="Enter branch office" /><span id="branchOfficeRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Location</label><input id="txtLocation" runat="server" class="form-control-modern" placeholder="Enter location" /><span id="locationRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Designation</label><asp:DropDownList ID="ddlDesignation" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="designationRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Reporting Manager</label><asp:DropDownList ID="ddlReportingManager" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="reportingManagerRequiredMessage" class="validation-message"></span></div>
                        <%-- <div class="premium-field"><label class="is-required">Functional Manager</label><asp:DropDownList ID="ddlFunctionalManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
-                        <div class="premium-field"><label class="is-required">HOD</label><asp:DropDownList ID="ddlHod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="premium-field"><label class="is-required">HOD</label><asp:DropDownList ID="ddlHod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="hodRequiredMessage" class="validation-message"></span></div>
                        
                        <%-- <div class="premium-field"><label>Employee Level</label><asp:DropDownList ID="ddlEmployeeLevel" runat="server" CssClass="form-select-modern"></asp:DropDownList--%><%--</div>--%>
                     </div>
@@ -1173,12 +1173,12 @@
                     </div>
                     <div class="setup-band">
                         <div class="form-grid">
-                            <div class="form-group"><label class="is-required">Attendance Type</label><asp:DropDownList ID="ddlAttendanceType" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                            <div class="form-group"><label class="is-required">Weekly Off</label><asp:DropDownList ID="ddlWeeklyOff" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                            <div class="form-group"><label class="is-required">Attendance Type</label><asp:DropDownList ID="ddlAttendanceType" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="attendanceTypeRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Weekly Off</label><asp:DropDownList ID="ddlWeeklyOff" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="weeklyOffRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group"><label class="is-required">Working Hours</label><input id="txtWorkingHours" runat="server" class="form-control-modern" placeholder="HH:mm" inputmode="numeric" /><span id="workingHoursValidationMessage" class="validation-message"></span></div>
-                            <div class="form-group"><label class="is-required">Attendance Policy</label><asp:DropDownList ID="ddlAttendancePolicy" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                            <div class="form-group"><label class="is-required">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /></div>
-                            <div class="form-group"><label class="is-required">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /></div>
+                            <div class="form-group"><label class="is-required">Attendance Policy</label><asp:DropDownList ID="ddlAttendancePolicy" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="attendancePolicyRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /><span id="punchingDeviceIdRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /><span id="biometricIdRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group">
                                 <label class="is-required">Overtime Eligible</label>
                                 <div class="toggle-field">
@@ -1190,8 +1190,8 @@
                                     <span class="switch-option">Yes</span>
                                 </div>
                             </div>
-                            <div class="form-group"><label id="overtimeRateLabel">Overtime Rate</label><input id="txtOvertimeRate" runat="server" class="form-control-modern" placeholder="Per hour rate" disabled /></div>
-                            <div class="form-group"><label class="is-required">Work Location</label><asp:DropDownList ID="ddlWorkLocation" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                            <div class="form-group"><label id="overtimeRateLabel">Overtime Rate</label><input id="txtOvertimeRate" runat="server" class="form-control-modern" placeholder="Per hour rate" disabled /><span id="overtimeRateRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Work Location</label><asp:DropDownList ID="ddlWorkLocation" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="workLocationRequiredMessage" class="validation-message"></span></div>
                         </div>
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="4">Save</button></div>
@@ -1275,40 +1275,51 @@
     <script>
         function getEmployeeRegistrationRequiredFields() {
             return [
-                { id: '<%= txtEmployeeCode.ClientID %>', name: 'Employee Code' },
-                { id: '<%= txtUsername.ClientID %>', name: 'Username' },
-                { id: '<%= txtFirstName.ClientID %>', name: 'First Name' },
-                { id: '<%= txtLastName.ClientID %>', name: 'Last Name' },
-                { id: '<%= txtEmail.ClientID %>', name: 'Email ID' },
-                { id: '<%= txtMobileNumber.ClientID %>', name: 'Mobile Number' },
-                { id: '<%= ddlGender.ClientID %>', name: 'Gender' },
-                { id: '<%= txtDateOfBirth.ClientID %>', name: 'Date of Birth' },
-                { id: '<%= ddlNationality.ClientID %>', name: 'Nationality' },
-                { id: '<%= ddlMaritalStatus.ClientID %>', name: 'Marital Status' },
-                { id: '<%= ddlBloodGroup.ClientID %>', name: 'Blood Group' },
-                { id: '<%= ddlEmploymentType.ClientID %>', name: 'Employment Type' },
-                { id: '<%= ddlEmployeeCategory.ClientID %>', name: 'Employee Category' },
-                { id: '<%= txtJoiningDate.ClientID %>', name: 'Joining Date' },
-                { id: '<%= ddlProbationPeriod.ClientID %>', name: 'Probation Period' },
-                { id: '<%= ddlEmployeeStatus.ClientID %>', name: 'Employee Status' },
-                { id: '<%= ddlEmployeeSubStatus.ClientID %>', name: 'Employee Sub Status' },
+                { id: '<%= txtEmployeeCode.ClientID %>', name: 'Employee Code', msgId: 'employeeCodeDuplicateMessage' },
+                { id: '<%= txtUsername.ClientID %>', name: 'Username', msgId: 'usernameDuplicateMessage' },
+                { id: '<%= txtFirstName.ClientID %>', name: 'First Name', msgId: 'firstNameValidationMessage' },
+                { id: '<%= txtLastName.ClientID %>', name: 'Last Name', msgId: 'lastNameValidationMessage' },
+                { id: '<%= txtEmail.ClientID %>', name: 'Email ID', msgId: 'emailDuplicateMessage' },
+                { id: '<%= txtMobileNumber.ClientID %>', name: 'Mobile Number', msgId: 'mobileDuplicateMessage' },
+                { id: '<%= ddlGender.ClientID %>', name: 'Gender', msgId: 'genderRequiredMessage' },
+                { id: '<%= txtDateOfBirth.ClientID %>', name: 'Date of Birth', msgId: 'dobRequiredMessage' },
+                { id: '<%= ddlNationality.ClientID %>', name: 'Nationality', msgId: 'nationalityRequiredMessage' },
+                { id: '<%= ddlMaritalStatus.ClientID %>', name: 'Marital Status', msgId: 'maritalStatusRequiredMessage' },
+                { id: '<%= ddlBloodGroup.ClientID %>', name: 'Blood Group', msgId: 'bloodGroupRequiredMessage' },
+                { id: '<%= ddlEmploymentType.ClientID %>', name: 'Employment Type', msgId: 'employmentTypeRequiredMessage' },
+                { id: '<%= ddlEmployeeCategory.ClientID %>', name: 'Employee Category', msgId: 'employeeCategoryRequiredMessage' },
+                { id: '<%= txtJoiningDate.ClientID %>', name: 'Joining Date', msgId: 'joiningDateRequiredMessage' },
+                { id: '<%= ddlProbationPeriod.ClientID %>', name: 'Probation Period', msgId: 'probationPeriodRequiredMessage' },
+                { id: '<%= ddlEmployeeStatus.ClientID %>', name: 'Employee Status', msgId: 'employeeStatusRequiredMessage' },
+                { id: '<%= ddlEmployeeSubStatus.ClientID %>', name: 'Employee Sub Status', msgId: 'employeeSubStatusRequiredMessage' },
                 <%--{ id: '<%= ddlCompany.ClientID %>', name: 'Company' },--%>
-                { id: '<%= ddlDepartment.ClientID %>', name: 'Department' },
-                { id: '<%= txtBranchOffice.ClientID %>', name: 'Branch Office' },
-                { id: '<%= txtLocation.ClientID %>', name: 'Location' },
-                { id: '<%= ddlDesignation.ClientID %>', name: 'Designation' },
-                { id: '<%= ddlReportingManager.ClientID %>', name: 'Reporting Manager' },
+                { id: '<%= ddlDepartment.ClientID %>', name: 'Department', msgId: 'departmentRequiredMessage' },
+                { id: '<%= txtBranchOffice.ClientID %>', name: 'Branch Office', msgId: 'branchOfficeRequiredMessage' },
+                { id: '<%= txtLocation.ClientID %>', name: 'Location', msgId: 'locationRequiredMessage' },
+                { id: '<%= ddlDesignation.ClientID %>', name: 'Designation', msgId: 'designationRequiredMessage' },
+                { id: '<%= ddlReportingManager.ClientID %>', name: 'Reporting Manager', msgId: 'reportingManagerRequiredMessage' },
              <%--   { id: '<%= ddlFunctionalManager.ClientID %>', name: 'Functional Manager' },--%>
-                { id: '<%= ddlHod.ClientID %>', name: 'HOD' },
-                { id: '<%= ddlAttendanceType.ClientID %>', name: 'Attendance Type' },
-                { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off' },
-                { id: '<%= txtWorkingHours.ClientID %>', name: 'Working Hours' },
-                { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy' },
-                { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID' },
-                { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID' },
-                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location' }
+                { id: '<%= ddlHod.ClientID %>', name: 'HOD', msgId: 'hodRequiredMessage' },
+                { id: '<%= ddlAttendanceType.ClientID %>', name: 'Attendance Type', msgId: 'attendanceTypeRequiredMessage' },
+                { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off', msgId: 'weeklyOffRequiredMessage' },
+                { id: '<%= txtWorkingHours.ClientID %>', name: 'Working Hours', msgId: 'workingHoursValidationMessage' },
+                { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy', msgId: 'attendancePolicyRequiredMessage' },
+                { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID', msgId: 'punchingDeviceIdRequiredMessage' },
+                { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID', msgId: 'biometricIdRequiredMessage' },
+                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location', msgId: 'workLocationRequiredMessage' }
             ];
         }
+
+        var EMPLOYEE_MANAGED_MESSAGE_IDS = [
+            'employeeCodeDuplicateMessage',
+            'usernameDuplicateMessage',
+            'firstNameValidationMessage',
+            'middleNameValidationMessage',
+            'lastNameValidationMessage',
+            'emailDuplicateMessage',
+            'mobileDuplicateMessage',
+            'workingHoursValidationMessage'
+        ];
 
         function showMandatoryFieldMessage(fieldName) {
             if (window.Swal) {
@@ -1320,6 +1331,29 @@
                 });
             } else {
                 alert(fieldName + ' is required.');
+            }
+        }
+
+        function applyServerFieldValidationError(elementId, msgId, message) {
+            var element = document.getElementById(elementId);
+            var msgElement = msgId ? document.getElementById(msgId) : null;
+
+            if (element) {
+                element.classList.add('validation-error');
+
+                var section = element.closest('.wizard-step');
+                if (section) {
+                    document.querySelectorAll('.wizard-step').forEach(function (panel) {
+                        panel.classList.toggle('collapsed', panel !== section);
+                    });
+                }
+
+                element.focus();
+            }
+
+            if (msgElement) {
+                msgElement.textContent = message || '';
+                msgElement.style.display = message ? 'block' : '';
             }
         }
 
@@ -1370,7 +1404,7 @@
         function validateEmployeeFields(section) {
             var requiredFields = getEmployeeRegistrationRequiredFields();
             if (isOvertimeEligibleChecked()) {
-                requiredFields.push({ id: '<%= txtOvertimeRate.ClientID %>', name: 'Overtime Rate' });
+                requiredFields.push({ id: '<%= txtOvertimeRate.ClientID %>', name: 'Overtime Rate', msgId: 'overtimeRateRequiredMessage' });
             }
             var missing = [];
             var firstInvalid = null;
@@ -1388,6 +1422,18 @@
                 var value = (element.value || '').trim();
                 var isMissing = value === '';
                 element.classList.toggle('validation-error', isMissing);
+
+                var msgElement = field.msgId ? document.getElementById(field.msgId) : null;
+                if (msgElement) {
+                    var isManagedElsewhere = EMPLOYEE_MANAGED_MESSAGE_IDS.indexOf(field.msgId) !== -1;
+                    if (isMissing) {
+                        msgElement.textContent = field.name + ' is required.';
+                        msgElement.style.display = 'block';
+                    } else if (!isManagedElsewhere) {
+                        msgElement.textContent = '';
+                        msgElement.style.display = '';
+                    }
+                }
 
                 if (isMissing) {
                     missing.push(field.name);
@@ -1702,6 +1748,30 @@
                 overtimeEligible.addEventListener('change', syncOvertimeRateState);
                 syncOvertimeRateState();
             }
+
+            getEmployeeRegistrationRequiredFields().forEach(function (field) {
+                if (EMPLOYEE_MANAGED_MESSAGE_IDS.indexOf(field.msgId) !== -1 || !field.msgId) {
+                    return;
+                }
+
+                var element = document.getElementById(field.id);
+                var msgElement = document.getElementById(field.msgId);
+                if (!element || !msgElement) {
+                    return;
+                }
+
+                var clearFieldMessage = function () {
+                    if ((element.value || '').trim() === '') {
+                        return;
+                    }
+                    element.classList.remove('validation-error');
+                    msgElement.textContent = '';
+                    msgElement.style.display = '';
+                };
+
+                element.addEventListener('input', clearFieldMessage);
+                element.addEventListener('change', clearFieldMessage);
+            });
 
             [
                 { field: 'EmployeeCode', element: employeeCode },

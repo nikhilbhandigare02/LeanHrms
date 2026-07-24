@@ -74,6 +74,7 @@ namespace HRMS.View.Modules
                 BindUserData(userId);
                 BindEmployeeAssets(userId);
                 BindEmployeeAssetReturns(userId);
+                BindAssetReturnOptions(userId);
                 BindEmployeeEducation(userId);
                 BindEmployeeWorkExperience(userId);
                 BindDocumentTypeDropdown();
@@ -112,6 +113,44 @@ namespace HRMS.View.Modules
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeAssetReturns", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        // Only assets already assigned (saved) to this employee and not already returned
+        // are eligible to be selected for return.
+        private void BindAssetReturnOptions(int userId, int selectAssetAssignmentId = 0)
+        {
+            try
+            {
+                List<EmployeeAssetDetailsDO> assets = GetOrInitializeAssetDraft(userId);
+
+                UserDetailsBL userBAL = new UserDetailsBL();
+                List<EmployeeAssetDetailsDO> assetReturns = userBAL.GetEmployeeAssetReturns(userId) ?? new List<EmployeeAssetDetailsDO>();
+                HashSet<int> returnedAssetIds = new HashSet<int>(assetReturns.Select(r => r.AssetAssignmentId));
+
+                ddlAssetReturnSelect.Items.Clear();
+                ddlAssetReturnSelect.Items.Add(new ListItem("-- Select Assigned Asset --", ""));
+
+                var eligibleAssets = assets
+                    .Where(a => a.AssetAssignmentId > 0)
+                    .Where(a => a.AssetAssignmentId == selectAssetAssignmentId || !returnedAssetIds.Contains(a.AssetAssignmentId))
+                    .OrderBy(a => a.AssetType);
+
+                foreach (EmployeeAssetDetailsDO asset in eligibleAssets)
+                {
+                    string text = asset.AssetType + " - " + asset.AssetNumber + " (" + asset.AssetName + ")";
+                    ddlAssetReturnSelect.Items.Add(new ListItem(text, asset.AssetAssignmentId.ToString()));
+                }
+
+                if (selectAssetAssignmentId > 0)
+                {
+                    SelectDropdownValue(ddlAssetReturnSelect, selectAssetAssignmentId.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "BindAssetReturnOptions", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
             }
         }
 
@@ -755,6 +794,7 @@ namespace HRMS.View.Modules
             SaveAssetDraft(employeeUserId, assets);
             ClearAssetForm();
             BindEmployeeAssets(employeeUserId);
+            BindAssetReturnOptions(employeeUserId);
             // Keep asset changes on the page only; final DB save happens on the main employee update.
         }
 
@@ -892,6 +932,7 @@ namespace HRMS.View.Modules
                 SaveAssetDraft(employeeUserId, assets);
                 ClearAssetForm();
                 BindEmployeeAssets(employeeUserId);
+                BindAssetReturnOptions(employeeUserId);
                 // Keep delete as a staged page change; final DB delete happens on the main employee update.
             }
         }
@@ -905,12 +946,25 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtAssetTypeReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Type is required."); return; }
-            if (string.IsNullOrWhiteSpace(txtAssetNumberReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Number is required."); return; }
-            if (string.IsNullOrWhiteSpace(txtAssetNameReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Name is required."); return; }
+            int selectedAssetAssignmentId;
+            if (!int.TryParse(ddlAssetReturnSelect.SelectedValue, out selectedAssetAssignmentId) || selectedAssetAssignmentId <= 0)
+            {
+                ShowAssetReturnEditor();
+                ShowAssetMessage("Failed", "Assigned Asset is required.");
+                return;
+            }
             if (!ParseAssetDate(txtReturnDateReturn.Text).HasValue) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Return Date is required."); return; }
             if (string.IsNullOrWhiteSpace(ddlAssetReturnCondition.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Condition is required."); return; }
             if (string.IsNullOrWhiteSpace(ddlAssetReturnStatus.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Status is required."); return; }
+
+            List<EmployeeAssetDetailsDO> assignedAssets = GetOrInitializeAssetDraft(employeeUserId);
+            EmployeeAssetDetailsDO selectedAsset = assignedAssets.FirstOrDefault(a => a.AssetAssignmentId == selectedAssetAssignmentId);
+            if (selectedAsset == null)
+            {
+                ShowAssetReturnEditor();
+                ShowAssetMessage("Failed", "Selected asset is not currently assigned to this employee.");
+                return;
+            }
 
             int assetReturnId;
             int.TryParse(hdnAssetReturnId.Value, out assetReturnId);
@@ -920,9 +974,9 @@ namespace HRMS.View.Modules
 
             EmployeeAssetDO assetReturn = new EmployeeAssetDO
             {
-                AssetType = txtAssetTypeReturn.Text.Trim(),
-                AssetNumber = txtAssetNumberReturn.Text.Trim(),
-                AssetName = txtAssetNameReturn.Text.Trim(),
+                AssetType = selectedAsset.AssetType,
+                AssetNumber = selectedAsset.AssetNumber,
+                AssetName = selectedAsset.AssetName,
                 ReturnDate = ParseAssetDate(txtReturnDateReturn.Text),
                 AssetCondition = ddlAssetReturnCondition.SelectedValue,
                 AssetStatus = ddlAssetReturnStatus.SelectedValue
@@ -947,6 +1001,7 @@ namespace HRMS.View.Modules
 
             ClearAssetReturnForm();
             BindEmployeeAssetReturns(employeeUserId);
+            BindAssetReturnOptions(employeeUserId);
         }
 
         protected void gvEmployeeAssetReturns_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -971,9 +1026,7 @@ namespace HRMS.View.Modules
                 }
 
                 hdnAssetReturnId.Value = asset.AssetAssignmentId.ToString();
-                txtAssetTypeReturn.Text = asset.AssetType;
-                txtAssetNumberReturn.Text = asset.AssetNumber;
-                txtAssetNameReturn.Text = asset.AssetName;
+                BindAssetReturnOptions(employeeUserId, asset.AssetAssignmentId);
                 txtReturnDateReturn.Text = FormatDateForInput(asset.ReturnDate);
                 SelectDropdownValue(ddlAssetReturnCondition, asset.AssetConditionId.ToString());
                 SelectDropdownValue(ddlAssetReturnStatus, asset.AssetStatusId.ToString());
@@ -992,6 +1045,7 @@ namespace HRMS.View.Modules
                 }
                 ClearAssetReturnForm();
                 BindEmployeeAssetReturns(employeeUserId);
+                BindAssetReturnOptions(employeeUserId);
             }
         }
 
@@ -1008,9 +1062,7 @@ namespace HRMS.View.Modules
         private void ClearAssetReturnForm()
         {
             hdnAssetReturnId.Value = "0";
-            txtAssetTypeReturn.Text = string.Empty;
-            txtAssetNumberReturn.Text = string.Empty;
-            txtAssetNameReturn.Text = string.Empty;
+            ddlAssetReturnSelect.SelectedIndex = 0;
             txtReturnDateReturn.Text = string.Empty;
             ddlAssetReturnCondition.SelectedIndex = 0;
             ddlAssetReturnStatus.SelectedIndex = 0;

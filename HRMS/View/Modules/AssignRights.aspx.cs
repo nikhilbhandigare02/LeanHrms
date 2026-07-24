@@ -1,4 +1,4 @@
-﻿using DataObject;
+using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,21 @@ namespace HRMS.View.Modules
     public partial class AssignRights : System.Web.UI.Page
     {
         protected string UserId = null;
+        private Dictionary<int, int> SubmenuToParentMenuMap
+        {
+            get
+            {
+                if (ViewState["SubmenuToParentMenuMap"] == null)
+                {
+                    ViewState["SubmenuToParentMenuMap"] = new Dictionary<int, int>();
+                }
+                return (Dictionary<int, int>)ViewState["SubmenuToParentMenuMap"];
+            }
+            set
+            {
+                ViewState["SubmenuToParentMenuMap"] = value;
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
@@ -62,20 +77,16 @@ namespace HRMS.View.Modules
                 list1 = commonbl.dropdownMenu(type, menuId);
                 if (list1 != null)
                 {
-                    ddlMenu.DataSource = list1;
-                    ddlMenu.DataTextField = "Text";
-                    ddlMenu.DataValueField = "Id";
+                    cbxMenu.DataSource = list1;
+                    cbxMenu.DataTextField = "Text";
+                    cbxMenu.DataValueField = "Id";
                 }
                 else
                 {
-                    ddlMenu.DataSource = null;
+                    cbxMenu.DataSource = null;
                 }
-                ddlMenu.DataBind();
-                ddlMenu.Items.Insert(0, new ListItem("-- Please Select --", ""));
-
-
+                cbxMenu.DataBind();
             }
-
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
@@ -83,46 +94,94 @@ namespace HRMS.View.Modules
             }
         }
 
-        protected void ddlMenu_SelectedIndexChanged(object sender, EventArgs e)
+        protected void cbxMenu_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
-                string menuId = ddlMenu.SelectedValue;
-                BindSubMenus("Bindsubmenu", menuId);
+                // Get all selected menu IDs
+                List<string> selectedMenuIds = new List<string>();
+                foreach (ListItem item in cbxMenu.Items)
+                {
+                    if (item.Selected)
+                    {
+                        selectedMenuIds.Add(item.Value);
+                    }
+                }
+
+                // Clear existing submenus and the map
+                cbx_submenu.Items.Clear();
+                SubmenuToParentMenuMap.Clear();
+
+                if (selectedMenuIds.Count > 0)
+                {
+                    // Get submenus for each selected menu
+                    CommonBL commonbl = new CommonBL();
+                    foreach (string menuId in selectedMenuIds)
+                    {
+                        List<DropDownData> submenus = commonbl.dropdownSubMenu("Bindsubmenu", menuId);
+                        if (submenus != null)
+                        {
+                            foreach (DropDownData submenu in submenus)
+                            {
+                                // Check if we already added this submenu
+                                bool exists = false;
+                                foreach (ListItem item in cbx_submenu.Items)
+                                {
+                                    if (item.Value == submenu.Id.ToString())
+                                    {
+                                        exists = true;
+                                        break;
+                                    }
+                                }
+                                if (!exists)
+                                {
+                                    cbx_submenu.Items.Add(new ListItem(submenu.Text, submenu.Id.ToString()));
+                                    SubmenuToParentMenuMap[submenu.Id] = Convert.ToInt32(menuId);
+                                }
+                            }
+                        }
+                    }
+                    if (cbx_submenu.Items.Count > 0)
+                    {
+                        lbl_submenu.Visible = true;
+                    }
+                    else
+                    {
+                        lbl_submenu.Visible = false;
+                    }
+                }
+                else
+                {
+                    lbl_submenu.Visible = false;
+                }
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("viewAssignRights", "ddlMenu_SelectedIndexChanged", "Exception Message=" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("viewAssignRights", "cbxMenu_SelectedIndexChanged", "Exception Message=" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
         }
         private void BindSubMenus(string type, string menuId)
         {
             try
             {
-                ddl_submenu.Items.Clear();
+                cbx_submenu.Items.Clear();
 
                 CommonBL commonbl = new CommonBL();
                 List<DropDownData> list1 = commonbl.dropdownSubMenu(type, menuId);
 
                 if (list1 != null && list1.Count > 0)
                 {
-                    ddl_submenu.DataSource = list1;
-                    ddl_submenu.DataTextField = "Text";
-                    ddl_submenu.DataValueField = "Id";
-                    ddl_submenu.DataBind();
-
-                    // Insert default option
-                    ddl_submenu.Items.Insert(0, new ListItem("-- Please Select --", ""));
+                    cbx_submenu.DataSource = list1;
+                    cbx_submenu.DataTextField = "Text";
+                    cbx_submenu.DataValueField = "Id";
+                    cbx_submenu.DataBind();
                     lbl_submenu.Visible = true;
                 }
                 else
                 {
-                    ddl_submenu.Items.Insert(0, new ListItem("-- No Submenu Found --", ""));
                     lbl_submenu.Visible = false;
                 }
-
-                ddl_submenu.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -131,18 +190,6 @@ namespace HRMS.View.Modules
             }
         }
 
-        protected void ddlSubMenu_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                string submenuId = ddl_submenu.SelectedValue;
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("AssignRights", "ddlSubMenu_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-            }
-        }
         private int GetClientIdFromSession()
         {
             int userId = 0;
@@ -162,8 +209,28 @@ namespace HRMS.View.Modules
             try
             {
                 ddlrole.SelectedIndex = 0;
-                ddlMenu.SelectedIndex = 0;
-                ddl_submenu.SelectedIndex = 0;
+                // Clear menu checkboxes
+                foreach (ListItem item in cbxMenu.Items)
+                {
+                    item.Selected = false;
+                }
+                // Clear submenu checkboxes
+                foreach (ListItem item in cbx_submenu.Items)
+                {
+                    item.Selected = false;
+                }
+                lbl_submenu.Visible = false;
+                SubmenuToParentMenuMap.Clear();
+                
+                // Clear the "Select All" checkboxes using JavaScript
+                string script = @"
+                    document.getElementById('selectAllMenus').checked = false;
+                    var selectAllSubmenus = document.getElementById('selectAllSubmenus');
+                    if (selectAllSubmenus) {
+                        selectAllSubmenus.checked = false;
+                    }
+                ";
+                ClientScript.RegisterStartupScript(this.GetType(), "ClearSelectAll", script, true);
             }
             catch (Exception ex)
             {
@@ -174,42 +241,84 @@ namespace HRMS.View.Modules
 
         protected void btn_submit_Click(object sender, EventArgs e)
         {
-            rightsDO rightsDO = new rightsDO();
             ResponseDO response = new ResponseDO();
             try
             {
                 int userId = GetClientIdFromSession();
-                rightsDO.Insertedby = userId;
                 assignRightsBL assignrights = new assignRightsBL();
-                rightsDO.roleid = Convert.ToInt32(ddlrole.SelectedValue);
-                rightsDO.menuid = Convert.ToInt32(ddlMenu.SelectedValue);
-                //rightsDO.submenuid = Convert.ToInt32(ddl_submenu.SelectedValue);
-                // rightsDO.submenuid = string.IsNullOrEmpty(ddl_submenu.SelectedValue) ? null : (int?)Convert.ToInt32(ddl_submenu.SelectedValue);
-                if (!string.IsNullOrEmpty(ddl_submenu.SelectedValue))
-                {
-                    rightsDO.submenuid = Convert.ToInt32(ddl_submenu.SelectedValue);
-                }
-                else
-                {
-                    rightsDO.submenuid = 0;
-                }
-                List<rightsDO> rights = assignrights.SaveRights(rightsDO);
-                if (rights[0].Status == "Success")
-                {
-                    string status = rights[0].Status;
-                    string remark = rights[0].Remarks;
+                int roleId = Convert.ToInt32(ddlrole.SelectedValue);
 
+                string finalStatus = "Success";
+                string finalRemark = "Rights assigned successfully!";
+                bool anySuccess = false;
+
+                // First, insert selected menus without submenus
+                foreach (ListItem menuItem in cbxMenu.Items)
+                {
+                    if (menuItem.Selected)
+                    {
+                        rightsDO rightsDO = new rightsDO();
+                        rightsDO.Insertedby = userId;
+                        rightsDO.roleid = roleId;
+                        rightsDO.menuid = Convert.ToInt32(menuItem.Value);
+                        rightsDO.submenuid = 0;
+
+                        List<rightsDO> rights = assignrights.SaveRights(rightsDO);
+                        if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
+                        {
+                            anySuccess = true;
+                        }
+                        else
+                        {
+                            finalStatus = "Error";
+                            finalRemark = "Some rights could not be assigned!";
+                        }
+                    }
+                }
+
+                // Then, insert selected submenus
+                foreach (ListItem submenuItem in cbx_submenu.Items)
+                {
+                    if (submenuItem.Selected)
+                    {
+                        int submenuId = Convert.ToInt32(submenuItem.Value);
+                        int menuId = 0;
+                        
+                        if (SubmenuToParentMenuMap.ContainsKey(submenuId))
+                        {
+                            menuId = SubmenuToParentMenuMap[submenuId];
+                        }
+
+                        rightsDO rightsDO = new rightsDO();
+                        rightsDO.Insertedby = userId;
+                        rightsDO.roleid = roleId;
+                        rightsDO.menuid = menuId;
+                        rightsDO.submenuid = submenuId;
+
+                        List<rightsDO> rights = assignrights.SaveRights(rightsDO);
+                        if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
+                        {
+                            anySuccess = true;
+                        }
+                        else
+                        {
+                            finalStatus = "Error";
+                            finalRemark = "Some rights could not be assigned!";
+                        }
+                    }
+                }
+
+                if (anySuccess)
+                {
                     ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
-                                   "showRightSavedMessage('" + status + "', '" + remark + "');" +
-                                   "setTimeout(function(){ window.location.href = 'ViewAssignRights.aspx'; }, 5000);", true);
+                                   "showRightSavedMessage('" + finalStatus + "', '" + finalRemark + "');" +
+                                   "setTimeout(function(){ window.location.href = 'viewAssignRights.aspx'; }, 5000);", true);
                 }
                 else
                 {
-                    string status = rights[0].Status;
-                    string remark = rights[0].Remarks;
                     ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
-                                    "showRightSavedMessage('" + status + "', '" + remark + "');" +
-                                    "setTimeout(function(){ window.location.href = 'ViewAssignRights.aspx'; }, 5000);", true);
+                                    "showRightSavedMessage('Error', 'Please select at least one menu or submenu!');" +
+                                    "setTimeout(function(){ window.location.href = 'AssignRights.aspx'; }, 5000);", true);
                 }
             }
             catch (Exception ex)

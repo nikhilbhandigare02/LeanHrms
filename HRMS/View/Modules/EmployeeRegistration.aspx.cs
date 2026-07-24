@@ -132,13 +132,18 @@ namespace HRMS.View.Modules
         {
             try
             {
-                string validationMessage = ValidateMandatoryFields();
-                if (!string.IsNullOrWhiteSpace(validationMessage))
+                MandatoryFieldError validationError = ValidateMandatoryFields();
+                if (validationError != null)
                 {
+                    string encodedMessage = HttpUtility.JavaScriptStringEncode(validationError.Message);
+                    string script =
+                        "if(window.Swal){Swal.fire({icon:'warning',title:'Please fill mandatory fields',text:'" + encodedMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + encodedMessage + "');}"
+                        + "if(window.applyServerFieldValidationError){applyServerFieldValidationError('" + HttpUtility.JavaScriptStringEncode(validationError.ElementId) + "','" + HttpUtility.JavaScriptStringEncode(validationError.MessageId) + "','" + encodedMessage + "');}";
+
                     ClientScript.RegisterStartupScript(
                         GetType(),
                         "EmployeeOnboardingValidation",
-                        "if(window.Swal){Swal.fire({icon:'warning',title:'Please fill mandatory fields',text:'" + HttpUtility.JavaScriptStringEncode(validationMessage) + "',confirmButtonColor:'#2563EB'});}else{alert('" + HttpUtility.JavaScriptStringEncode(validationMessage) + "');}",
+                        script,
                         true);
                     return;
                 }
@@ -257,50 +262,62 @@ namespace HRMS.View.Modules
             public string Message { get; set; }
         }
 
-        private string ValidateMandatoryFields()
+        private class MandatoryFieldError
         {
-            if (string.IsNullOrWhiteSpace(ValueOf(txtEmployeeCode))) return "Employee Code is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtUsername))) return "Username is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtFirstName))) return "First Name is required.";
-            if (!Regex.IsMatch(ValueOf(txtFirstName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (!string.IsNullOrWhiteSpace(ValueOf(txtMiddleName)) && !Regex.IsMatch(ValueOf(txtMiddleName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtLastName))) return "Last Name is required.";
-            if (!Regex.IsMatch(ValueOf(txtLastName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtEmail))) return "Email ID is required.";
-            if (!Regex.IsMatch(ValueOf(txtEmail), @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")) return "Enter a valid Email ID.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtMobileNumber))) return "Mobile Number is required.";
-            if (!Regex.IsMatch(ValueOf(txtMobileNumber), @"^\d{10}$")) return "Mobile Number must be 10 digits.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlGender))) return "Gender is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtDateOfBirth))) return "Date of Birth is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlNationality))) return "Nationality is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlMaritalStatus))) return "Marital Status is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlBloodGroup))) return "Blood Group is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmploymentType))) return "Employment Type is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeCategory))) return "Employee Category is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtJoiningDate))) return "Joining Date is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlProbationPeriod))) return "Probation Period is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Status is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Sub Status is required.";
-            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlCompany))) return "Company is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDepartment))) return "Department is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtBranchOffice))) return "Branch Office is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return "Location is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDesignation))) return "Designation is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlReportingManager))) return "Reporting Manager is required.";
+            public string ElementId { get; set; }
+            public string MessageId { get; set; }
+            public string Message { get; set; }
+        }
 
-            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlFunctionalManager))) return "Functional Manager is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlHod))) return "HOD is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendanceType))) return "Attendance Type is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWeeklyOff))) return "Weekly Off is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtWorkingHours))) return "Working Hours is required.";
-            if (!Regex.IsMatch(ValueOf(txtWorkingHours), @"^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$")) return "Working Hours must be in HH:mm format.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendancePolicy))) return "Attendance Policy is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return "Punching Device ID is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return "Biometric ID is required.";
-            if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return "Overtime Rate is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return "Work Location is required.";
+        private MandatoryFieldError FieldError(string elementId, string messageId, string message)
+        {
+            return new MandatoryFieldError { ElementId = elementId, MessageId = messageId, Message = message };
+        }
 
-            return string.Empty;
+        private MandatoryFieldError ValidateMandatoryFields()
+        {
+            if (string.IsNullOrWhiteSpace(ValueOf(txtEmployeeCode))) return FieldError(txtEmployeeCode.ClientID, "employeeCodeDuplicateMessage", "Employee Code is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtUsername))) return FieldError(txtUsername.ClientID, "usernameDuplicateMessage", "Username is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtFirstName))) return FieldError(txtFirstName.ClientID, "firstNameValidationMessage", "First Name is required.");
+            if (!Regex.IsMatch(ValueOf(txtFirstName), @"^[A-Za-z ]+$")) return FieldError(txtFirstName.ClientID, "firstNameValidationMessage", "Write name in correct format.");
+            if (!string.IsNullOrWhiteSpace(ValueOf(txtMiddleName)) && !Regex.IsMatch(ValueOf(txtMiddleName), @"^[A-Za-z ]+$")) return FieldError(txtMiddleName.ClientID, "middleNameValidationMessage", "Write name in correct format.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtLastName))) return FieldError(txtLastName.ClientID, "lastNameValidationMessage", "Last Name is required.");
+            if (!Regex.IsMatch(ValueOf(txtLastName), @"^[A-Za-z ]+$")) return FieldError(txtLastName.ClientID, "lastNameValidationMessage", "Write name in correct format.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtEmail))) return FieldError(txtEmail.ClientID, "emailDuplicateMessage", "Email ID is required.");
+            if (!Regex.IsMatch(ValueOf(txtEmail), @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")) return FieldError(txtEmail.ClientID, "emailDuplicateMessage", "Enter a valid Email ID.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtMobileNumber))) return FieldError(txtMobileNumber.ClientID, "mobileDuplicateMessage", "Mobile Number is required.");
+            if (!Regex.IsMatch(ValueOf(txtMobileNumber), @"^\d{10}$")) return FieldError(txtMobileNumber.ClientID, "mobileDuplicateMessage", "Mobile Number must be 10 digits.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlGender))) return FieldError(ddlGender.ClientID, "genderRequiredMessage", "Gender is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtDateOfBirth))) return FieldError(txtDateOfBirth.ClientID, "dobRequiredMessage", "Date of Birth is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlNationality))) return FieldError(ddlNationality.ClientID, "nationalityRequiredMessage", "Nationality is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlMaritalStatus))) return FieldError(ddlMaritalStatus.ClientID, "maritalStatusRequiredMessage", "Marital Status is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlBloodGroup))) return FieldError(ddlBloodGroup.ClientID, "bloodGroupRequiredMessage", "Blood Group is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmploymentType))) return FieldError(ddlEmploymentType.ClientID, "employmentTypeRequiredMessage", "Employment Type is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeCategory))) return FieldError(ddlEmployeeCategory.ClientID, "employeeCategoryRequiredMessage", "Employee Category is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtJoiningDate))) return FieldError(txtJoiningDate.ClientID, "joiningDateRequiredMessage", "Joining Date is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlProbationPeriod))) return FieldError(ddlProbationPeriod.ClientID, "probationPeriodRequiredMessage", "Probation Period is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeStatus))) return FieldError(ddlEmployeeStatus.ClientID, "employeeStatusRequiredMessage", "Employee Status is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return FieldError(ddlEmployeeSubStatus.ClientID, "employeeSubStatusRequiredMessage", "Employee Sub Status is required.");
+            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlCompany))) return FieldError(ddlCompany.ClientID, "companyRequiredMessage", "Company is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDepartment))) return FieldError(ddlDepartment.ClientID, "departmentRequiredMessage", "Department is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtBranchOffice))) return FieldError(txtBranchOffice.ClientID, "branchOfficeRequiredMessage", "Branch Office is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return FieldError(txtLocation.ClientID, "locationRequiredMessage", "Location is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDesignation))) return FieldError(ddlDesignation.ClientID, "designationRequiredMessage", "Designation is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlReportingManager))) return FieldError(ddlReportingManager.ClientID, "reportingManagerRequiredMessage", "Reporting Manager is required.");
+
+            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlFunctionalManager))) return FieldError(ddlFunctionalManager.ClientID, "functionalManagerRequiredMessage", "Functional Manager is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlHod))) return FieldError(ddlHod.ClientID, "hodRequiredMessage", "HOD is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendanceType))) return FieldError(ddlAttendanceType.ClientID, "attendanceTypeRequiredMessage", "Attendance Type is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWeeklyOff))) return FieldError(ddlWeeklyOff.ClientID, "weeklyOffRequiredMessage", "Weekly Off is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtWorkingHours))) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours is required.");
+            if (!Regex.IsMatch(ValueOf(txtWorkingHours), @"^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$")) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours must be in HH:mm format.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendancePolicy))) return FieldError(ddlAttendancePolicy.ClientID, "attendancePolicyRequiredMessage", "Attendance Policy is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return FieldError(txtPunchingDeviceId.ClientID, "punchingDeviceIdRequiredMessage", "Punching Device ID is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return FieldError(txtBiometricId.ClientID, "biometricIdRequiredMessage", "Biometric ID is required.");
+            if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return FieldError(txtOvertimeRate.ClientID, "overtimeRateRequiredMessage", "Overtime Rate is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return FieldError(ddlWorkLocation.ClientID, "workLocationRequiredMessage", "Work Location is required.");
+
+            return null;
         }
 
         private static readonly string[] AllowedDocumentExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf" };

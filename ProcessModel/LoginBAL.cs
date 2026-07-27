@@ -93,6 +93,8 @@ namespace ProcessModel
 
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_userId", MySqlDbType.VarChar, 100));
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_result", MySqlDbType.VarChar, 200));
+                //mysqlParameters.Add(DataClass.GetOutputParameter("p_subject", MySqlDbType.VarChar, 300));
+                //mysqlParameters.Add(DataClass.GetOutputParameter("p_body", MySqlDbType.VarChar, 500));
                 var outPassFlag = DataClass.GetOutputParameter("p_pass_resetflag", MySqlDbType.VarChar, 10);
                 mysqlParameters.Add(outPassFlag);
 
@@ -137,11 +139,13 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_user_fullname", MySqlDbType.VarChar, 100));
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_userId", MySqlDbType.VarChar, 100));
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_result", MySqlDbType.VarChar, 200));
+               // mysqlParameters.Add(DataClass.GetOutputParameter("p_body", MySqlDbType.VarChar, 8000));
+                //mysqlParameters.Add(DataClass.GetOutputParameter("p_subject", MySqlDbType.VarChar, 500));
                 var outPassFlag = DataClass.GetOutputParameter("p_pass_resetflag", MySqlDbType.VarChar, 10);
                 mysqlParameters.Add(outPassFlag);
 
                 listdata = getDrtolistParam.getdatafromreder<changePassDO>(
-                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "Sp_updatePasswordByEmail1")
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "Sp_updatePasswordByEmail12")
                 );
 
                 foreach (var item in listdata)
@@ -164,12 +168,12 @@ namespace ProcessModel
         }
 
 
-        public void SendVerificationCodeEmail(string email, string verificationCode)
+        public void SendVerificationCodeEmail(string email, string verificationCode, string body, string subject)
         {
             try
             {
-                string subject = "HRMS Application - Verification Code";
-                string body = $"<h4>Your verification code is: <b>{verificationCode}</b></h4><p>It is valid for 15 minutes.</p>";
+               // string subject = "HRMS Application - Verification Code";
+               // string body = $"<h4>Your verification code is: <b>{verificationCode}</b></h4><p>It is valid for 15 minutes.</p>";
 
                 string Email = ConfigurationManager.AppSettings["SenderEmail"];
                 string Password = ConfigurationManager.AppSettings["SenderPassword"];

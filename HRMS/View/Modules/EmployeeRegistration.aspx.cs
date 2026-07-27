@@ -7,7 +7,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Script.Services;
-using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -77,9 +76,26 @@ namespace HRMS.View.Modules
             BindLookup(ddlWeeklyOff, "Weekly Off");
             BindLookup(ddlAttendancePolicy, "Attendance Policy");
             BindLookup(ddlWorkLocation, "Work Location");
-            BindLookup(ddlAssetCondition, "Asset Condition");
-            // BindLookup(ddlAssetStatus, "Asset Status");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
+            ListItem item = ddlNationality.Items.FindByText("Indian");
+            if (item != null)
+            {
+                ddlNationality.ClearSelection();
+                item.Selected = true;
+            }
+
+            ListItem item1 = ddlEmployeeStatus.Items.FindByText("Working");
+            if (item1 != null)
+            {
+                ddlEmployeeStatus.ClearSelection();
+                item1.Selected = true;
+            }
+            ListItem item2 = ddlEmployeeSubStatus.Items.FindByText("Active");
+            if (item2 != null)
+            {
+                ddlEmployeeSubStatus.ClearSelection();
+                item2.Selected = true;
+            }
         }
 
         private void BindDocumentUploadRows()
@@ -135,13 +151,18 @@ namespace HRMS.View.Modules
         {
             try
             {
-                string validationMessage = ValidateMandatoryFields();
-                if (!string.IsNullOrWhiteSpace(validationMessage))
+                MandatoryFieldError validationError = ValidateMandatoryFields();
+                if (validationError != null)
                 {
+                    string encodedMessage = HttpUtility.JavaScriptStringEncode(validationError.Message);
+                    string script =
+                        "if(window.Swal){Swal.fire({icon:'warning',title:'Please fill mandatory fields',text:'" + encodedMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + encodedMessage + "');}"
+                        + "if(window.applyServerFieldValidationError){applyServerFieldValidationError('" + HttpUtility.JavaScriptStringEncode(validationError.ElementId) + "','" + HttpUtility.JavaScriptStringEncode(validationError.MessageId) + "','" + encodedMessage + "');}";
+
                     ClientScript.RegisterStartupScript(
                         GetType(),
                         "EmployeeOnboardingValidation",
-                        "if(window.Swal){Swal.fire({icon:'warning',title:'Please fill mandatory fields',text:'" + HttpUtility.JavaScriptStringEncode(validationMessage) + "',confirmButtonColor:'#2563EB'});}else{alert('" + HttpUtility.JavaScriptStringEncode(validationMessage) + "');}",
+                        script,
                         true);
                     return;
                 }
@@ -151,25 +172,6 @@ namespace HRMS.View.Modules
 
                 if (string.Equals(response.Status, "Success", StringComparison.OrdinalIgnoreCase))
                 {
-                    List<EmployeeAssetDO> assets = GetSubmittedAssets();
-                foreach (EmployeeAssetDO asset in assets)
-                {
-                    EmployeeOnboardingResponseDO assetResponse = onboardingBL.SaveEmployeeAsset(response.UserId, asset, employee.InsertedBy);
-                    if (!string.Equals(assetResponse.Status, "Success", StringComparison.OrdinalIgnoreCase))
-                    {
-                        string assetMessage = HttpUtility.JavaScriptStringEncode(string.IsNullOrWhiteSpace(assetResponse.Message)
-                            ? "Employee asset save failed."
-                            : assetResponse.Message);
-
-                        ClientScript.RegisterStartupScript(
-                            GetType(),
-                            "EmployeeAssetSaveFailed",
-                            "if(window.Swal){Swal.fire({icon:'error',title:'Employee onboarding save failed',text:'" + assetMessage + "',confirmButtonColor:'#2563EB'});}else{alert('" + assetMessage + "');}",
-                            true);
-                        return;
-                    }
-                }
-
                     SaveEmployeeDocuments(response.UserId, employee.Email, employee.EmployeeCode);
 
                     string generatedPassword = DefaultEmployeePassword;
@@ -279,156 +281,84 @@ namespace HRMS.View.Modules
             public string Message { get; set; }
         }
 
-        private string ValidateMandatoryFields()
+        private class MandatoryFieldError
         {
-            if (string.IsNullOrWhiteSpace(ValueOf(txtEmployeeCode))) return "Employee Code is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtUsername))) return "Username is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtFirstName))) return "First Name is required.";
-            if (!Regex.IsMatch(ValueOf(txtFirstName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (!string.IsNullOrWhiteSpace(ValueOf(txtMiddleName)) && !Regex.IsMatch(ValueOf(txtMiddleName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtLastName))) return "Last Name is required.";
-            if (!Regex.IsMatch(ValueOf(txtLastName), @"^[A-Za-z ]+$")) return "Write name in correct format.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtEmail))) return "Email ID is required.";
-            if (!Regex.IsMatch(ValueOf(txtEmail), @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")) return "Enter a valid Email ID.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtMobileNumber))) return "Mobile Number is required.";
-            if (!Regex.IsMatch(ValueOf(txtMobileNumber), @"^\d{10}$")) return "Mobile Number must be 10 digits.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlGender))) return "Gender is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtDateOfBirth))) return "Date of Birth is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlNationality))) return "Nationality is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlMaritalStatus))) return "Marital Status is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlBloodGroup))) return "Blood Group is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmploymentType))) return "Employment Type is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeCategory))) return "Employee Category is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtJoiningDate))) return "Joining Date is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlProbationPeriod))) return "Probation Period is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Status is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return "Employee Sub Status is required.";
-            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlCompany))) return "Company is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDepartment))) return "Department is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtBranchOffice))) return "Branch Office is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return "Location is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDesignation))) return "Designation is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlReportingManager))) return "Reporting Manager is required.";
-
-            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlFunctionalManager))) return "Functional Manager is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlHod))) return "HOD is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendanceType))) return "Attendance Type is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWeeklyOff))) return "Weekly Off is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtWorkingHours))) return "Working Hours is required.";
-            if (!Regex.IsMatch(ValueOf(txtWorkingHours), @"^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$")) return "Working Hours must be in HH:mm format.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendancePolicy))) return "Attendance Policy is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return "Punching Device ID is required.";
-            if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return "Biometric ID is required.";
-            if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return "Overtime Rate is required.";
-            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return "Work Location is required.";
-            string assetValidationMessage = ValidateSubmittedAssets();
-            if (!string.IsNullOrWhiteSpace(assetValidationMessage)) return assetValidationMessage;
-
-            return string.Empty;
+            public string ElementId { get; set; }
+            public string MessageId { get; set; }
+            public string Message { get; set; }
         }
 
-        private string ValidateSubmittedAssets()
+        private MandatoryFieldError FieldError(string elementId, string messageId, string message)
         {
-            List<EmployeeAssetDO> assets = GetSubmittedAssets();
-            if (assets.Count == 0)
-            {
-                return "Asset Type is required.";
-            }
-
-            for (int i = 0; i < assets.Count; i++)
-            {
-                EmployeeAssetDO asset = assets[i];
-                string suffix = assets.Count > 1 ? " for asset row " + (i + 1) : string.Empty;
-
-                if (string.IsNullOrWhiteSpace(asset.AssetType)) return "Asset Type is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetNumber)) return "Asset Number is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetName)) return "Asset Name is required" + suffix + ".";
-                if (!asset.AssignedDate.HasValue) return "Assigned Date is required" + suffix + ".";
-                if (string.IsNullOrWhiteSpace(asset.AssetCondition)) return "Asset Condition is required" + suffix + ".";
-                //if (string.IsNullOrWhiteSpace(asset.AssetStatus)) return "Asset Status is required" + suffix + ".";
-            }
-
-            return string.Empty;
+            return new MandatoryFieldError { ElementId = elementId, MessageId = messageId, Message = message };
         }
 
-        private List<EmployeeAssetDO> GetSubmittedAssets()
+        private MandatoryFieldError ValidateMandatoryFields()
         {
-            List<EmployeeAssetDO> assets = new List<EmployeeAssetDO>();
-            string assetsJson = hdnAssetsJson == null ? string.Empty : Convert.ToString(hdnAssetsJson.Value ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(ValueOf(txtEmployeeCode))) return FieldError(txtEmployeeCode.ClientID, "employeeCodeDuplicateMessage", "Employee Code is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtUsername))) return FieldError(txtUsername.ClientID, "usernameDuplicateMessage", "Username is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtFirstName))) return FieldError(txtFirstName.ClientID, "firstNameValidationMessage", "First Name is required.");
+            if (!Regex.IsMatch(ValueOf(txtFirstName), @"^[A-Za-z ]+$")) return FieldError(txtFirstName.ClientID, "firstNameValidationMessage", "Write name in correct format.");
+            if (!string.IsNullOrWhiteSpace(ValueOf(txtMiddleName)) && !Regex.IsMatch(ValueOf(txtMiddleName), @"^[A-Za-z ]+$")) return FieldError(txtMiddleName.ClientID, "middleNameValidationMessage", "Write name in correct format.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtLastName))) return FieldError(txtLastName.ClientID, "lastNameValidationMessage", "Last Name is required.");
+            if (!Regex.IsMatch(ValueOf(txtLastName), @"^[A-Za-z ]+$")) return FieldError(txtLastName.ClientID, "lastNameValidationMessage", "Write name in correct format.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtEmail))) return FieldError(txtEmail.ClientID, "emailDuplicateMessage", "Email ID is required.");
+            if (!Regex.IsMatch(ValueOf(txtEmail), @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")) return FieldError(txtEmail.ClientID, "emailDuplicateMessage", "Enter a valid Email ID.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtMobileNumber))) return FieldError(txtMobileNumber.ClientID, "mobileDuplicateMessage", "Mobile Number is required.");
+            if (!Regex.IsMatch(ValueOf(txtMobileNumber), @"^\d{10}$")) return FieldError(txtMobileNumber.ClientID, "mobileDuplicateMessage", "Mobile Number must be 10 digits.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlGender))) return FieldError(ddlGender.ClientID, "genderRequiredMessage", "Gender is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtDateOfBirth))) return FieldError(txtDateOfBirth.ClientID, "dobRequiredMessage", "Date of Birth is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlNationality))) return FieldError(ddlNationality.ClientID, "nationalityRequiredMessage", "Nationality is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlMaritalStatus))) return FieldError(ddlMaritalStatus.ClientID, "maritalStatusRequiredMessage", "Marital Status is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlBloodGroup))) return FieldError(ddlBloodGroup.ClientID, "bloodGroupRequiredMessage", "Blood Group is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmploymentType))) return FieldError(ddlEmploymentType.ClientID, "employmentTypeRequiredMessage", "Employment Type is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeCategory))) return FieldError(ddlEmployeeCategory.ClientID, "employeeCategoryRequiredMessage", "Employee Category is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtJoiningDate))) return FieldError(txtJoiningDate.ClientID, "joiningDateRequiredMessage", "Joining Date is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlProbationPeriod))) return FieldError(ddlProbationPeriod.ClientID, "probationPeriodRequiredMessage", "Probation Period is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeStatus))) return FieldError(ddlEmployeeStatus.ClientID, "employeeStatusRequiredMessage", "Employee Status is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlEmployeeSubStatus))) return FieldError(ddlEmployeeSubStatus.ClientID, "employeeSubStatusRequiredMessage", "Employee Sub Status is required.");
+            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlCompany))) return FieldError(ddlCompany.ClientID, "companyRequiredMessage", "Company is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDepartment))) return FieldError(ddlDepartment.ClientID, "departmentRequiredMessage", "Department is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtBranchOffice))) return FieldError(txtBranchOffice.ClientID, "branchOfficeRequiredMessage", "Branch Office is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtLocation))) return FieldError(txtLocation.ClientID, "locationRequiredMessage", "Location is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlDesignation))) return FieldError(ddlDesignation.ClientID, "designationRequiredMessage", "Designation is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlReportingManager))) return FieldError(ddlReportingManager.ClientID, "reportingManagerRequiredMessage", "Reporting Manager is required.");
 
-            if (!string.IsNullOrWhiteSpace(assetsJson))
-            {
-                try
-                {
-                    JavaScriptSerializer serializer = new JavaScriptSerializer();
-                    List<SubmittedAssetRow> submittedAssets = serializer.Deserialize<List<SubmittedAssetRow>>(assetsJson);
-                    if (submittedAssets != null)
-                    {
-                        foreach (SubmittedAssetRow submittedAsset in submittedAssets)
-                        {
-                            assets.Add(new EmployeeAssetDO
-                            {
-                                AssetType = Convert.ToString(submittedAsset.asset_type ?? string.Empty).Trim(),
-                                AssetNumber = Convert.ToString(submittedAsset.asset_number ?? string.Empty).Trim(),
-                                AssetName = Convert.ToString(submittedAsset.asset_name ?? string.Empty).Trim(),
-                                AssignedDate = ParseDate(submittedAsset.assigned_date),
-                                ReturnDate = ParseDate(submittedAsset.return_date),
-                                AssetCondition = Convert.ToString(submittedAsset.asset_condition ?? string.Empty).Trim(),
-                                AssetStatus = Convert.ToString(submittedAsset.asset_status ?? string.Empty).Trim()
-                            });
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CommonBL errorlog = new CommonBL();
-                    errorlog.fnStoreErrorLog("EmployeeRegistration", "GetSubmittedAssets", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
-                }
-            }
+            //if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlFunctionalManager))) return FieldError(ddlFunctionalManager.ClientID, "functionalManagerRequiredMessage", "Functional Manager is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlHod))) return FieldError(ddlHod.ClientID, "hodRequiredMessage", "HOD is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendanceType))) return FieldError(ddlAttendanceType.ClientID, "attendanceTypeRequiredMessage", "Attendance Type is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWeeklyOff))) return FieldError(ddlWeeklyOff.ClientID, "weeklyOffRequiredMessage", "Weekly Off is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtWorkingHours))) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours is required.");
+            if (!Regex.IsMatch(ValueOf(txtWorkingHours), @"^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$")) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours must be in HH:mm format.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendancePolicy))) return FieldError(ddlAttendancePolicy.ClientID, "attendancePolicyRequiredMessage", "Attendance Policy is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return FieldError(txtPunchingDeviceId.ClientID, "punchingDeviceIdRequiredMessage", "Punching Device ID is required.");
+            if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return FieldError(txtBiometricId.ClientID, "biometricIdRequiredMessage", "Biometric ID is required.");
+            if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return FieldError(txtOvertimeRate.ClientID, "overtimeRateRequiredMessage", "Overtime Rate is required.");
+            if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return FieldError(ddlWorkLocation.ClientID, "workLocationRequiredMessage", "Work Location is required.");
 
-            if (assets.Count == 0)
-            {
-                assets.Add(new EmployeeAssetDO
-                {
-                    AssetType = ValueOf(txtAssetType),
-                    AssetNumber = ValueOf(txtAssetNumber),
-                    AssetName = ValueOf(txtAssetName),
-                    AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-                    //ReturnDate = ParseDate(ValueOf(txtReturnDate)),
-                    AssetCondition = SelectedValueOf(ddlAssetCondition),
-                    //AssetStatus = SelectedValueOf(ddlAssetStatus)
-                });
-            }
-
-            return assets;
+            return null;
         }
 
-        private class SubmittedAssetRow
-        {
-            public string asset_type { get; set; }
-            public string asset_number { get; set; }
-            public string asset_name { get; set; }
-            public string assigned_date { get; set; }
-            public string return_date { get; set; }
-            public string asset_condition { get; set; }
-            public string asset_status { get; set; }
-        }
+        private static readonly string[] AllowedDocumentExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf" };
 
         private void SaveEmployeeDocuments(int userId, string employeeEmail, string employeeCode)
         {
-            const int maxFileSize = 5 * 1024 * 1024;
+            const int maxFileSize = 3 * 1024 * 1024;
             string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+            string webPathRoot = ConfigurationManager.AppSettings["WebPath"];
             if (documentsRoot.StartsWith("~"))
             {
                 documentsRoot = Server.MapPath(documentsRoot);
             }
 
             DateTime now = DateTime.Now;
-            string basePath = Path.Combine(
-                documentsRoot,
+            string basePath1 = Path.Combine(
+                "EmployeeDocument",
                 now.Year.ToString(),
                 now.Month.ToString("00"),
                 employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
+
+            string basePath = Path.Combine(documentsRoot, basePath1);
 
             userDocumentBL userDocBL = new userDocumentBL();
 
@@ -450,17 +380,25 @@ namespace HRMS.View.Modules
                         continue;
                     }
 
+                    string originalFileName = Path.GetFileName(fileUpload.FileName);
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+                    string fileExt = Path.GetExtension(originalFileName);
+
+                    if (string.IsNullOrWhiteSpace(fileExt) || Array.IndexOf(AllowedDocumentExtensions, fileExt.ToLowerInvariant()) < 0)
+                    {
+                        continue;
+                    }
+
                     if (!Directory.Exists(basePath))
                     {
                         Directory.CreateDirectory(basePath);
                     }
 
-                    string originalFileName = Path.GetFileName(fileUpload.FileName);
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
-                    string fileExt = Path.GetExtension(originalFileName);
                     string filePath = Path.Combine(basePath, originalFileName);
 
                     fileUpload.SaveAs(filePath);
+
+                    string fileWebPath = Path.Combine(webPathRoot, basePath1, originalFileName).Replace('\\', '/');
 
                     FileAttachment file = new FileAttachment
                     {
@@ -471,7 +409,7 @@ namespace HRMS.View.Modules
                         EmailId = employeeEmail
                     };
 
-                    userDocBL.SaveUserDocument(userId, file, fileExt, basePath);
+                    userDocBL.SaveUserDocument(userId, file, fileExt, basePath1, fileWebPath);
                 }
                 catch (Exception ex)
                 {
@@ -549,13 +487,6 @@ namespace HRMS.View.Modules
                 // LabourWelfareFundNumber = string.Empty,
                 // TaxRegime = string.Empty,
                 // TdsApplicable = string.Empty,
-                AssetType = ValueOf(txtAssetType),
-                AssetNumber = ValueOf(txtAssetNumber),
-                AssetName = ValueOf(txtAssetName),
-                AssignedDate = ParseDate(ValueOf(txtAssignedDate)),
-               // ReturnDate = ParseDate(ValueOf(txtReturnDate)),
-                AssetCondition = SelectedValueOf(ddlAssetCondition),
-              //  AssetStatus = SelectedValueOf(ddlAssetStatus),
                 InsertedBy = ParseInt(Convert.ToString(Session["userId"]))
             };
         }

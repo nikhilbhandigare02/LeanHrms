@@ -15,15 +15,6 @@ namespace HRMS.View.Modules
     {
 
         /// <summary>
-        /// hdnAssetsJson control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnAssetsJson;
-
-        /// <summary>
         /// txtEmployeeCode control.
         /// </summary>
         /// <remarks>
@@ -346,51 +337,6 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlWorkLocation;
-
-        /// <summary>
-        /// txtAssetType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetType;
-
-        /// <summary>
-        /// txtAssetNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetNumber;
-
-        /// <summary>
-        /// txtAssetName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText txtAssetName;
-
-        /// <summary>
-        /// txtAssignedDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputGenericControl txtAssignedDate;
-
-        /// <summary>
-        /// ddlAssetCondition control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAssetCondition;
 
         /// <summary>
         /// rptDocumentUpload control.

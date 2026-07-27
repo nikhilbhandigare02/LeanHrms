@@ -74,6 +74,7 @@ namespace HRMS.View.Modules
                 BindUserData(userId);
                 BindEmployeeAssets(userId);
                 BindEmployeeAssetReturns(userId);
+                BindAssetReturnOptions(userId);
                 BindEmployeeEducation(userId);
                 BindEmployeeWorkExperience(userId);
                 BindDocumentTypeDropdown();
@@ -112,6 +113,44 @@ namespace HRMS.View.Modules
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("AddEmployee", "BindEmployeeAssetReturns", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        // Only assets already assigned (saved) to this employee and not already returned
+        // are eligible to be selected for return.
+        private void BindAssetReturnOptions(int userId, int selectAssetAssignmentId = 0)
+        {
+            try
+            {
+                List<EmployeeAssetDetailsDO> assets = GetOrInitializeAssetDraft(userId);
+
+                UserDetailsBL userBAL = new UserDetailsBL();
+                List<EmployeeAssetDetailsDO> assetReturns = userBAL.GetEmployeeAssetReturns(userId) ?? new List<EmployeeAssetDetailsDO>();
+                HashSet<int> returnedAssetIds = new HashSet<int>(assetReturns.Select(r => r.AssetAssignmentId));
+
+                ddlAssetReturnSelect.Items.Clear();
+                ddlAssetReturnSelect.Items.Add(new ListItem("-- Select Assigned Asset --", ""));
+
+                var eligibleAssets = assets
+                    .Where(a => a.AssetAssignmentId > 0)
+                    .Where(a => a.AssetAssignmentId == selectAssetAssignmentId || !returnedAssetIds.Contains(a.AssetAssignmentId))
+                    .OrderBy(a => a.AssetType);
+
+                foreach (EmployeeAssetDetailsDO asset in eligibleAssets)
+                {
+                    string text = asset.AssetType + " - " + asset.AssetNumber + " (" + asset.AssetName + ")";
+                    ddlAssetReturnSelect.Items.Add(new ListItem(text, asset.AssetAssignmentId.ToString()));
+                }
+
+                if (selectAssetAssignmentId > 0)
+                {
+                    SelectDropdownValue(ddlAssetReturnSelect, selectAssetAssignmentId.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "BindAssetReturnOptions", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
             }
         }
 
@@ -185,10 +224,10 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            const int maxFileSize = 5 * 1024 * 1024;
+            const int maxFileSize = 3 * 1024 * 1024;
             if (fuUploadDocument.PostedFile.ContentLength > maxFileSize)
             {
-                ShowAssetMessage("Failed", "File must be less than 5MB.");
+                ShowAssetMessage("Failed", "File must be less than 3MB.");
                 return;
             }
 
@@ -211,13 +250,18 @@ namespace HRMS.View.Modules
                 }
 
                 string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                string webPath = ConfigurationManager.AppSettings["WebPath"];
                 if (documentsRoot.StartsWith("~"))
                 {
                     documentsRoot = Server.MapPath(documentsRoot);
                 }
 
                 DateTime now = DateTime.Now;
-                string basePath = Path.Combine(
+                string basePath1 = Path.Combine("EmployeeDocument", now.Year.ToString(),
+                    now.Month.ToString("00"),
+                    employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
+
+                string basePath = Path.Combine("EmployeeDocument",
                     documentsRoot,
                     now.Year.ToString(),
                     now.Month.ToString("00"),
@@ -233,6 +277,7 @@ namespace HRMS.View.Modules
                 string fileExt = Path.GetExtension(originalFileName);
                 string filePath = Path.Combine(basePath, originalFileName);
 
+                webPath = Path.Combine(webPath, basePath1, originalFileName).Replace('\\', '/');
                 fuUploadDocument.SaveAs(filePath);
 
                 FileAttachment file = new FileAttachment
@@ -244,10 +289,14 @@ namespace HRMS.View.Modules
                     EmailId = txt_email.Text
                 };
 
-                docBL.SaveUserDocument(employeeUserId, file, fileExt, basePath);
+                docBL.SaveUserDocument(employeeUserId, file, fileExt, basePath1, webPath);
 
                 ddlUploadDocumentType.ClearSelection();
                 BindEmployeeDocuments(employeeUserId);
+
+                string safeFileName = HttpUtility.JavaScriptStringEncode(originalFileName);
+                ScriptManager.RegisterStartupScript(this, GetType(), Guid.NewGuid().ToString("N"),
+                    "showUserSavedMessage('Success', 'Document \"" + safeFileName + "\" uploaded successfully.');", true);
             }
             catch (Exception ex)
             {
@@ -296,21 +345,23 @@ namespace HRMS.View.Modules
         {
             try
             {
+                string path = "";
+                string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
                 userDocumentBL docBL = new userDocumentBL();
                 userDocumentsDO doc = docBL.GetUserDocumentById(userDocId);
-
-                if (doc == null || !File.Exists(doc.filepath))
+                path = Path.Combine(documentsRoot, doc.filepath);
+                if (doc == null || !File.Exists(path))
                 {
                     ShowAssetMessage("Failed", "File not found.");
                     return;
                 }
 
-                FileInfo fileInfo = new FileInfo(doc.filepath);
+                FileInfo fileInfo = new FileInfo(path);
                 Response.Clear();
                 Response.ContentType = "application/octet-stream";
                 Response.AddHeader("Content-Disposition", "attachment; filename=" + fileInfo.Name);
                 Response.AddHeader("Content-Length", fileInfo.Length.ToString());
-                Response.TransmitFile(doc.filepath);
+                Response.TransmitFile(path);
                 Response.Flush();
                 Response.End();
             }
@@ -743,6 +794,7 @@ namespace HRMS.View.Modules
             SaveAssetDraft(employeeUserId, assets);
             ClearAssetForm();
             BindEmployeeAssets(employeeUserId);
+            BindAssetReturnOptions(employeeUserId);
             // Keep asset changes on the page only; final DB save happens on the main employee update.
         }
 
@@ -880,6 +932,7 @@ namespace HRMS.View.Modules
                 SaveAssetDraft(employeeUserId, assets);
                 ClearAssetForm();
                 BindEmployeeAssets(employeeUserId);
+                BindAssetReturnOptions(employeeUserId);
                 // Keep delete as a staged page change; final DB delete happens on the main employee update.
             }
         }
@@ -893,12 +946,25 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtAssetTypeReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Type is required."); return; }
-            if (string.IsNullOrWhiteSpace(txtAssetNumberReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Number is required."); return; }
-            if (string.IsNullOrWhiteSpace(txtAssetNameReturn.Text)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Name is required."); return; }
+            int selectedAssetAssignmentId;
+            if (!int.TryParse(ddlAssetReturnSelect.SelectedValue, out selectedAssetAssignmentId) || selectedAssetAssignmentId <= 0)
+            {
+                ShowAssetReturnEditor();
+                ShowAssetMessage("Failed", "Assigned Asset is required.");
+                return;
+            }
             if (!ParseAssetDate(txtReturnDateReturn.Text).HasValue) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Return Date is required."); return; }
             if (string.IsNullOrWhiteSpace(ddlAssetReturnCondition.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Condition is required."); return; }
             if (string.IsNullOrWhiteSpace(ddlAssetReturnStatus.SelectedValue)) { ShowAssetReturnEditor(); ShowAssetMessage("Failed", "Asset Status is required."); return; }
+
+            List<EmployeeAssetDetailsDO> assignedAssets = GetOrInitializeAssetDraft(employeeUserId);
+            EmployeeAssetDetailsDO selectedAsset = assignedAssets.FirstOrDefault(a => a.AssetAssignmentId == selectedAssetAssignmentId);
+            if (selectedAsset == null)
+            {
+                ShowAssetReturnEditor();
+                ShowAssetMessage("Failed", "Selected asset is not currently assigned to this employee.");
+                return;
+            }
 
             int assetReturnId;
             int.TryParse(hdnAssetReturnId.Value, out assetReturnId);
@@ -908,9 +974,9 @@ namespace HRMS.View.Modules
 
             EmployeeAssetDO assetReturn = new EmployeeAssetDO
             {
-                AssetType = txtAssetTypeReturn.Text.Trim(),
-                AssetNumber = txtAssetNumberReturn.Text.Trim(),
-                AssetName = txtAssetNameReturn.Text.Trim(),
+                AssetType = selectedAsset.AssetType,
+                AssetNumber = selectedAsset.AssetNumber,
+                AssetName = selectedAsset.AssetName,
                 ReturnDate = ParseAssetDate(txtReturnDateReturn.Text),
                 AssetCondition = ddlAssetReturnCondition.SelectedValue,
                 AssetStatus = ddlAssetReturnStatus.SelectedValue
@@ -935,6 +1001,7 @@ namespace HRMS.View.Modules
 
             ClearAssetReturnForm();
             BindEmployeeAssetReturns(employeeUserId);
+            BindAssetReturnOptions(employeeUserId);
         }
 
         protected void gvEmployeeAssetReturns_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -959,9 +1026,7 @@ namespace HRMS.View.Modules
                 }
 
                 hdnAssetReturnId.Value = asset.AssetAssignmentId.ToString();
-                txtAssetTypeReturn.Text = asset.AssetType;
-                txtAssetNumberReturn.Text = asset.AssetNumber;
-                txtAssetNameReturn.Text = asset.AssetName;
+                BindAssetReturnOptions(employeeUserId, asset.AssetAssignmentId);
                 txtReturnDateReturn.Text = FormatDateForInput(asset.ReturnDate);
                 SelectDropdownValue(ddlAssetReturnCondition, asset.AssetConditionId.ToString());
                 SelectDropdownValue(ddlAssetReturnStatus, asset.AssetStatusId.ToString());
@@ -980,6 +1045,7 @@ namespace HRMS.View.Modules
                 }
                 ClearAssetReturnForm();
                 BindEmployeeAssetReturns(employeeUserId);
+                BindAssetReturnOptions(employeeUserId);
             }
         }
 
@@ -996,9 +1062,7 @@ namespace HRMS.View.Modules
         private void ClearAssetReturnForm()
         {
             hdnAssetReturnId.Value = "0";
-            txtAssetTypeReturn.Text = string.Empty;
-            txtAssetNumberReturn.Text = string.Empty;
-            txtAssetNameReturn.Text = string.Empty;
+            ddlAssetReturnSelect.SelectedIndex = 0;
             txtReturnDateReturn.Text = string.Empty;
             ddlAssetReturnCondition.SelectedIndex = 0;
             ddlAssetReturnStatus.SelectedIndex = 0;
@@ -1651,7 +1715,7 @@ namespace HRMS.View.Modules
                         SetText(txtPanNumber, userDetails.PanNumber);
                         SetText(txtPassportNumber, userDetails.PassportNumber);
                         SetText(txtPassportExpiryDate, FormatDateForInput(userDetails.PassportExpiryDate));
-                        BindEmployeePhoto(userDetails.EmployeePhoto);
+                        BindEmployeePhoto(ResolveEmployeePhotoUrl(userId, userDetails.EmployeePhoto));
                         SetText(txtAlternateMobile, userDetails.AlternateMobileNumber);
                         SetText(txtPersonalEmail, userDetails.PersonalEmail);
                         SetText(txtPermanentHouseNumber, userDetails.PermanentHouseNumber);
@@ -1972,6 +2036,82 @@ namespace HRMS.View.Modules
             }
         }
 
+        // "Employee Photograph" document_master_id in alpha_hrms.user_document_details.
+        // Not looked up dynamically: sp_bindDocuments's ids don't necessarily line up
+        // with this value across environments (same caveat as document_master_id
+        // numbering elsewhere in this app) - confirmed directly against sample data.
+        private const int EmployeePhotographDocumentMasterId = 7;
+
+        // Prefers the "Employee Photograph" row in alpha_hrms.user_document_details -
+        // combines its file_path with EmployeeDocumentServerPath (Web.config) to find the
+        // physical file on disk, then embeds it as a data URI, since the raw disk path
+        // can't be used as an <img src> directly. Falls back to the legacy EmployeePhoto
+        // column value for employees whose photo was saved before this table existed.
+        private string ResolveEmployeePhotoUrl(int userId, string legacyEmployeePhotoValue)
+        {
+            try
+            {
+                string relativePath = new userDocumentBL().GetLatestDocumentRelativePath(userId, EmployeePhotographDocumentMasterId);
+                if (!string.IsNullOrWhiteSpace(relativePath))
+                {
+                    string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                    if (!string.IsNullOrWhiteSpace(documentsRoot))
+                    {
+                        if (documentsRoot.StartsWith("~"))
+                        {
+                            documentsRoot = Server.MapPath(documentsRoot);
+                        }
+
+                        string physicalPath = Path.Combine(documentsRoot, relativePath);
+                        string dataUri = ReadImageFileAsDataUri(physicalPath);
+                        if (!string.IsNullOrWhiteSpace(dataUri))
+                        {
+                            return dataUri;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "ResolveEmployeePhotoUrl", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+
+            return legacyEmployeePhotoValue;
+        }
+
+        private string ReadImageFileAsDataUri(string physicalPath)
+        {
+            if (string.IsNullOrWhiteSpace(physicalPath) || !File.Exists(physicalPath))
+            {
+                return null;
+            }
+
+            byte[] bytes = File.ReadAllBytes(physicalPath);
+            string mimeType = GetImageMimeTypeFromExtension(Path.GetExtension(physicalPath));
+            return "data:" + mimeType + ";base64," + Convert.ToBase64String(bytes);
+        }
+
+        private string GetImageMimeTypeFromExtension(string extension)
+        {
+            switch ((extension ?? string.Empty).ToLowerInvariant())
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".bmp":
+                    return "image/bmp";
+                case ".webp":
+                    return "image/webp";
+                default:
+                    return "image/png";
+            }
+        }
+
         private void BindEmployeePhoto(string filePath)
         {
             string rawValue = Convert.ToString(filePath ?? string.Empty).Trim();
@@ -1989,6 +2129,12 @@ namespace HRMS.View.Modules
             {
                 imgEmployeePhotoPreview.ImageUrl = url;
                 imgEmployeePhotoPreview.Visible = hasPhoto;
+            }
+
+            if (imgEmployeePhotoThumbnail != null)
+            {
+                imgEmployeePhotoThumbnail.ImageUrl = url;
+                imgEmployeePhotoThumbnail.Visible = hasPhoto;
             }
 
             if (lblEmployeePhotoFileName != null)

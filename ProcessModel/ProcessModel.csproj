@@ -98,6 +98,7 @@
     <Compile Include="AppraisalBL.cs" />
     <Compile Include="assignRightsBL.cs" />
     <Compile Include="AssignRoleBL.cs" />
+    <Compile Include="AttendanceBL.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="CommonBL.cs" />
     <Compile Include="DataClass.cs" />

@@ -22,6 +22,7 @@ namespace Lean.View.Layout
             if (name.Equals("Remuneration Form", StringComparison.OrdinalIgnoreCase)) return 3;
             if (name.Equals("Document", StringComparison.OrdinalIgnoreCase)) return 4;
             if (name.Equals("Employee Leave List", StringComparison.OrdinalIgnoreCase)) return 5;
+            if (name.Equals("Attendance Details", StringComparison.OrdinalIgnoreCase)) return 6;
             return 999;
         }
         private static int GetMainMenuOrder(string menuName)
@@ -137,6 +138,7 @@ namespace Lean.View.Layout
             upsertSubMenu("Remuneration Form", "/View/Modules/Remunerationform.aspx");
             //upsertSubMenu("Document", "/View/Modules/useruploaddocuments.aspx");
             upsertSubMenu("Employee Leave List", "/View/Modules/EmployeeLeaveList.aspx");
+            upsertSubMenu("Attendance Details", "/View/Modules/AttendanceDetails.aspx");
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -162,7 +164,8 @@ namespace Lean.View.Layout
                         string.Equals(lastSegment, "EmployeeList.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AddEmployee.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AccountsDashboard.aspx", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(lastSegment, "ImageLibrary.aspx", StringComparison.OrdinalIgnoreCase);
+                        string.Equals(lastSegment, "ImageLibrary.aspx", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(lastSegment, "AttendanceDetails.aspx", StringComparison.OrdinalIgnoreCase);
 
                     //bool isAddProjectViewMode = url.Contains("Addproject") && url.Contains("mode=view");
                     int roleId = Convert.ToInt32(Session["roleid"]);

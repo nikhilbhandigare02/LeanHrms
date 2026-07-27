@@ -188,6 +188,15 @@
             margin: 7px 0 0;
         }
 
+        .upload-note {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--onboarding-muted);
+            font-size: 12px;
+            margin: 0;
+        }
+
         .step-pill {
             color: var(--onboarding-blue);
             background: #EFF6FF;
@@ -343,12 +352,6 @@
             padding: 18px;
         }
 
-        .asset-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 14px;
-        }
-
         .table-responsive {
             overflow-x: auto;
             padding-bottom: 2px;
@@ -415,25 +418,6 @@
         .asset-table .form-select-modern {
             min-width: 0;
             width: 100%;
-        }
-
-        .asset-delete-btn {
-            align-items: center;
-            background: #FFF1F2;
-            border: 1px solid #FFE4E6;
-            border-radius: 8px;
-            color: #E11D48;
-            display: inline-flex;
-            height: 36px;
-            justify-content: center;
-            transition: background .18s ease, border-color .18s ease, transform .18s ease;
-            width: 36px;
-        }
-
-        .asset-delete-btn:hover {
-            background: #FFE4E6;
-            border-color: #FDA4AF;
-            transform: translateY(-1px);
         }
 
         .asset-table tr:last-child td {
@@ -706,9 +690,9 @@
         .wizard-step.collapsed > .form-grid,
         .wizard-step.collapsed > .premium-grid,
         .wizard-step.collapsed > .setup-band,
-        .wizard-step.collapsed > .asset-toolbar,
         .wizard-step.collapsed > .table-responsive,
         .wizard-step.collapsed > .review-grid,
+        .wizard-step.collapsed > .upload-note,
         .wizard-step.collapsed > .section-save-row {
             display: none;
         }
@@ -802,12 +786,12 @@
             padding: 22px 28px 20px;
         }
 
-        .wizard-step > .asset-toolbar {
-            padding: 18px 28px 0;
-        }
-
         .wizard-step > .table-responsive {
             padding: 14px 28px 22px;
+        }
+
+        .wizard-step > .upload-note {
+            padding: 14px 28px 0;
         }
 
         .setup-band {
@@ -1063,7 +1047,8 @@
             .wizard-step > .premium-grid,
             .wizard-step > .setup-band,
             .wizard-step > .review-grid,
-            .wizard-step > .table-responsive {
+            .wizard-step > .table-responsive,
+            .wizard-step > .upload-note {
                 padding-left: 16px;
                 padding-right: 16px;
             }
@@ -1096,18 +1081,16 @@
                 <div class="step-item" data-step-link="2"><span class="step-number">2</span><span class="step-title">Employment Information</span></div>
                 <div class="step-item" data-step-link="3"><span class="step-number">3</span><span class="step-title">Organization Details</span></div>
                 <div class="step-item" data-step-link="4"><span class="step-number">4</span><span class="step-title">Attendance &amp; Shift Information</span></div>
-                <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Assets Assignment</span></div>
-                <div class="step-item" data-step-link="6"><span class="step-number">6</span><span class="step-title">Review &amp; Submit</span></div>
+                <div class="step-item" data-step-link="5"><span class="step-number">5</span><span class="step-title">Review &amp; Submit</span></div>
             </aside>
 
             <main class="onboarding-card">
-                <asp:HiddenField ID="hdnAssetsJson" runat="server" ClientIDMode="Static" />
                 <section class="wizard-step active pending" data-step="1">
                     <div class="card-heading">
                         <div><span class="accordion-number">1</span><h2>Basic Information</h2><p>Capture the employee identity and primary contact details.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 1 of 6</span>
+                        <span class="step-pill">Step 1 of 5</span>
                     </div>
                     <div class="form-grid">
                         <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" readonly="readonly" disabled="disabled" /><span id="employeeCodeDuplicateMessage" class="validation-message" aria-readonly="true" ></span></div>
@@ -1117,11 +1100,11 @@
                         <div class="form-group"><label class="is-required">Last Name</label><input id="txtLastName" runat="server" class="form-control-modern" placeholder="Enter last name" /><span id="lastNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Email ID</label><input id="txtEmail" runat="server" class="form-control-modern" type="email" placeholder="name@company.com" /><span id="emailDuplicateMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Mobile Number</label><input id="txtMobileNumber" runat="server" class="form-control-modern" placeholder="Enter mobile number" inputmode="numeric" maxlength="10" /><span id="mobileDuplicateMessage" class="validation-message"></span></div>
-                        <div class="form-group"><label class="is-required">Gender</label><asp:DropDownList ID="ddlGender" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Date of Birth</label><input id="txtDateOfBirth" runat="server" class="form-control-modern" type="date" /></div>
-                        <div class="form-group"><label class="is-required">Nationality</label><asp:DropDownList ID="ddlNationality" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Marital Status</label><asp:DropDownList ID="ddlMaritalStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Blood Group</label><asp:DropDownList ID="ddlBloodGroup" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="form-group"><label class="is-required">Gender</label><asp:DropDownList ID="ddlGender" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="genderRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Date of Birth</label><input id="txtDateOfBirth" runat="server" class="form-control-modern" type="date" /><span id="dobRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Nationality</label><asp:DropDownList ID="ddlNationality" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="nationalityRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Marital Status</label><asp:DropDownList ID="ddlMaritalStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="maritalStatusRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Blood Group</label><asp:DropDownList ID="ddlBloodGroup" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="bloodGroupRequiredMessage" class="validation-message"></span></div>
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="1">Save</button></div>
                 </section>
@@ -1131,17 +1114,23 @@
                         <div><span class="accordion-number">2</span><h2>Employment Information</h2><p>Set the employee lifecycle, joining, probation, and separation attributes.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 2 of 6</span>
+                        <span class="step-pill">Step 2 of 5</span>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label class="is-required">Employment Type</label><asp:DropDownList ID="ddlEmploymentType" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /></div>
-                        <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="form-group"><label class="is-required">Employment Type</label><asp:DropDownList ID="ddlEmploymentType" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employmentTypeRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeCategoryRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /><span id="joiningDateRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="probationPeriodRequiredMessage" class="validation-message"></span></div>
 <%--                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>--%>
-                        <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                      <div class="form-group">
+                          <%-- <label class="is-required">Employee Status</label>--%>
+                            
+                            <asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern" Visible="false" ></asp:DropDownList><span id="employeeStatusRequiredMessage" class="validation-message"></span></div>
+                          <div class="form-group">
+                            <%--<label class="is-required">Employee Sub Status</label>--%>
+                            <asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern" Visible="false" ></asp:DropDownList><span id="employeeSubStatusRequiredMessage" class="validation-message"></span>
+                    </div>
 
        <%--                 <div class="form-group"><label>Notice Period </label>--%>
                             <input id="txtNoticePeriod" runat="server" class="form-control-modern" placeholder="Enter notice period days" visible="false" />
@@ -1164,17 +1153,17 @@
                         <div><span class="accordion-number">3</span><h2>Organization Details</h2><p>Map the employee into company structure, reporting hierarchy, and level.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 3 of 6</span>
+                        <span class="step-pill">Step 3 of 5</span>
                     </div>
                     <div class="premium-grid">
                         <%--<div class="premium-field"><label class="is-required">Company</label><asp:DropDownList ID="ddlCompany" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
-                        <div class="premium-field"><label class="is-required">Department</label><asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label class="is-required">Branch Office</label><input id="txtBranchOffice" runat="server" class="form-control-modern" placeholder="Enter branch office" /></div>
-                        <div class="premium-field"><label class="is-required">Location</label><input id="txtLocation" runat="server" class="form-control-modern" placeholder="Enter location" /></div>
-                        <div class="premium-field"><label class="is-required">Designation</label><asp:DropDownList ID="ddlDesignation" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                        <div class="premium-field"><label class="is-required">Reporting Manager</label><asp:DropDownList ID="ddlReportingManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="premium-field"><label class="is-required">Department</label><asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="departmentRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Branch Office</label><input id="txtBranchOffice" runat="server" class="form-control-modern" placeholder="Enter branch office" /><span id="branchOfficeRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Location</label><input id="txtLocation" runat="server" class="form-control-modern" placeholder="Enter location" /><span id="locationRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Designation</label><asp:DropDownList ID="ddlDesignation" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="designationRequiredMessage" class="validation-message"></span></div>
+                        <div class="premium-field"><label class="is-required">Reporting Manager</label><asp:DropDownList ID="ddlReportingManager" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="reportingManagerRequiredMessage" class="validation-message"></span></div>
                        <%-- <div class="premium-field"><label class="is-required">Functional Manager</label><asp:DropDownList ID="ddlFunctionalManager" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>--%>
-                        <div class="premium-field"><label class="is-required">HOD</label><asp:DropDownList ID="ddlHod" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                        <div class="premium-field"><label class="is-required">HOD</label><asp:DropDownList ID="ddlHod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="hodRequiredMessage" class="validation-message"></span></div>
                        
                        <%-- <div class="premium-field"><label>Employee Level</label><asp:DropDownList ID="ddlEmployeeLevel" runat="server" CssClass="form-select-modern"></asp:DropDownList--%><%--</div>--%>
                     </div>
@@ -1186,16 +1175,16 @@
                         <div><span class="accordion-number">4</span><h2>Attendance Information</h2><p>Configure work schedule, attendance rules, device mapping, and location policy.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 4 of 6</span>
+                        <span class="step-pill">Step 4 of 5</span>
                     </div>
                     <div class="setup-band">
                         <div class="form-grid">
-                            <div class="form-group"><label class="is-required">Attendance Type</label><asp:DropDownList ID="ddlAttendanceType" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                            <div class="form-group"><label class="is-required">Weekly Off</label><asp:DropDownList ID="ddlWeeklyOff" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                            <div class="form-group"><label class="is-required">Attendance Type</label><asp:DropDownList ID="ddlAttendanceType" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="attendanceTypeRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Weekly Off</label><asp:DropDownList ID="ddlWeeklyOff" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="weeklyOffRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group"><label class="is-required">Working Hours</label><input id="txtWorkingHours" runat="server" class="form-control-modern" placeholder="HH:mm" inputmode="numeric" /><span id="workingHoursValidationMessage" class="validation-message"></span></div>
-                            <div class="form-group"><label class="is-required">Attendance Policy</label><asp:DropDownList ID="ddlAttendancePolicy" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
-                            <div class="form-group"><label class="is-required">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /></div>
-                            <div class="form-group"><label class="is-required">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /></div>
+                            <div class="form-group"><label class="is-required">Attendance Policy</label><asp:DropDownList ID="ddlAttendancePolicy" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="attendancePolicyRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /><span id="punchingDeviceIdRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /><span id="biometricIdRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group">
                                 <label class="is-required">Overtime Eligible</label>
                                 <div class="toggle-field">
@@ -1207,56 +1196,21 @@
                                     <span class="switch-option">Yes</span>
                                 </div>
                             </div>
-                            <div class="form-group"><label id="overtimeRateLabel">Overtime Rate</label><input id="txtOvertimeRate" runat="server" class="form-control-modern" placeholder="Per hour rate" disabled /></div>
-                            <div class="form-group"><label class="is-required">Work Location</label><asp:DropDownList ID="ddlWorkLocation" runat="server" CssClass="form-select-modern"></asp:DropDownList></div>
+                            <div class="form-group"><label id="overtimeRateLabel">Overtime Rate</label><input id="txtOvertimeRate" runat="server" class="form-control-modern" placeholder="Per hour rate" disabled /><span id="overtimeRateRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label class="is-required">Work Location</label><asp:DropDownList ID="ddlWorkLocation" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="workLocationRequiredMessage" class="validation-message"></span></div>
                         </div>
                     </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="4">Save</button></div>
                 </section>
 
-                <section class="wizard-step collapsed pending" data-step="5">
-                    <div class="card-heading">
-                        <div><span class="accordion-number">5</span><h2>Assets Assignment</h2><p>Allocate company assets and track return status from day one.</p></div>
-                        <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
-                        <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 5 of 6</span>
-                    </div>
-                    <div class="asset-toolbar">
-                        <button type="button" id="assignAssetButton" class="btn-modern btn-primary-modern">Assign Asset</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="asset-table">
-                            <thead><tr><th class="is-required">Asset Type</th><th class="is-required">Asset Number</th>
-                                <th class="is-required">Asset Name</th>
-                                <th class="is-required">Assigned Date</th>
-                               <%-- <th>Return Date</th>--%>
-                                <th class="is-required">Asset assigned Condition</th>
-                              <%--  <th class="is-required">Asset Status</th>--%>
-                                <th>Action</th></tr></thead>
-                            <tbody id="assetRows">
-                                <tr class="asset-row">
-                                    <td><input id="txtAssetType" runat="server" class="form-control-modern" placeholder="Enter asset type" /></td>
-                                    <td><input id="txtAssetNumber" runat="server" class="form-control-modern" /></td>
-                                    <td><input id="txtAssetName" runat="server" class="form-control-modern" /></td>
-                                    <td><input id="txtAssignedDate" runat="server" class="form-control-modern" type="date" /></td>
-                                   <%-- <td><input id="txtReturnDate" runat="server" class="form-control-modern" type="date" /></td>--%>
-                                    <td><asp:DropDownList ID="ddlAssetCondition" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>
-                                   <%-- <td><asp:DropDownList ID="ddlAssetStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList></td>--%>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="5">Save</button></div>
-                </section>
-
                 <section class="wizard-step collapsed pending" data-step="6">
                     <div class="card-heading">
-                        <div><span class="accordion-number">6</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
+                        <div><span class="accordion-number">5</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
-                        <span class="step-pill">Step 6 of 6</span>
+                        <span class="step-pill">Step 5 of 5</span>
                     </div>
+                    <p class="upload-note"><i class="fas fa-info-circle"></i> Only image and PDF files are allowed, up to 3 MB.</p>
                     <div class="table-responsive">
                         <table class="asset-table">
                             <thead><tr><th>Document Type</th><th>File</th></tr></thead>
@@ -1268,7 +1222,7 @@
                                                 <%# Eval("Text") %>
                                                 <asp:HiddenField ID="hdnDocumentTypeId" runat="server" Value='<%# Eval("Id") %>' />
                                             </td>
-                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern" /></td>
+                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern document-upload-input" Accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,image/*,application/pdf" /></td>
                                         </tr>
                                     </ItemTemplate>
                                 </asp:Repeater>
@@ -1327,46 +1281,51 @@
     <script>
         function getEmployeeRegistrationRequiredFields() {
             return [
-                { id: '<%= txtEmployeeCode.ClientID %>', name: 'Employee Code' },
-                { id: '<%= txtUsername.ClientID %>', name: 'Username' },
-                { id: '<%= txtFirstName.ClientID %>', name: 'First Name' },
-                { id: '<%= txtLastName.ClientID %>', name: 'Last Name' },
-                { id: '<%= txtEmail.ClientID %>', name: 'Email ID' },
-                { id: '<%= txtMobileNumber.ClientID %>', name: 'Mobile Number' },
-                { id: '<%= ddlGender.ClientID %>', name: 'Gender' },
-                { id: '<%= txtDateOfBirth.ClientID %>', name: 'Date of Birth' },
-                { id: '<%= ddlNationality.ClientID %>', name: 'Nationality' },
-                { id: '<%= ddlMaritalStatus.ClientID %>', name: 'Marital Status' },
-                { id: '<%= ddlBloodGroup.ClientID %>', name: 'Blood Group' },
-                { id: '<%= ddlEmploymentType.ClientID %>', name: 'Employment Type' },
-                { id: '<%= ddlEmployeeCategory.ClientID %>', name: 'Employee Category' },
-                { id: '<%= txtJoiningDate.ClientID %>', name: 'Joining Date' },
-                { id: '<%= ddlProbationPeriod.ClientID %>', name: 'Probation Period' },
-                { id: '<%= ddlEmployeeStatus.ClientID %>', name: 'Employee Status' },
-                { id: '<%= ddlEmployeeSubStatus.ClientID %>', name: 'Employee Sub Status' },
+                { id: '<%= txtEmployeeCode.ClientID %>', name: 'Employee Code', msgId: 'employeeCodeDuplicateMessage' },
+                { id: '<%= txtUsername.ClientID %>', name: 'Username', msgId: 'usernameDuplicateMessage' },
+                { id: '<%= txtFirstName.ClientID %>', name: 'First Name', msgId: 'firstNameValidationMessage' },
+                { id: '<%= txtLastName.ClientID %>', name: 'Last Name', msgId: 'lastNameValidationMessage' },
+                { id: '<%= txtEmail.ClientID %>', name: 'Email ID', msgId: 'emailDuplicateMessage' },
+                { id: '<%= txtMobileNumber.ClientID %>', name: 'Mobile Number', msgId: 'mobileDuplicateMessage' },
+                { id: '<%= ddlGender.ClientID %>', name: 'Gender', msgId: 'genderRequiredMessage' },
+                { id: '<%= txtDateOfBirth.ClientID %>', name: 'Date of Birth', msgId: 'dobRequiredMessage' },
+                { id: '<%= ddlNationality.ClientID %>', name: 'Nationality', msgId: 'nationalityRequiredMessage' },
+                { id: '<%= ddlMaritalStatus.ClientID %>', name: 'Marital Status', msgId: 'maritalStatusRequiredMessage' },
+                { id: '<%= ddlBloodGroup.ClientID %>', name: 'Blood Group', msgId: 'bloodGroupRequiredMessage' },
+                { id: '<%= ddlEmploymentType.ClientID %>', name: 'Employment Type', msgId: 'employmentTypeRequiredMessage' },
+                { id: '<%= ddlEmployeeCategory.ClientID %>', name: 'Employee Category', msgId: 'employeeCategoryRequiredMessage' },
+                { id: '<%= txtJoiningDate.ClientID %>', name: 'Joining Date', msgId: 'joiningDateRequiredMessage' },
+                { id: '<%= ddlProbationPeriod.ClientID %>', name: 'Probation Period', msgId: 'probationPeriodRequiredMessage' },
+                { id: '<%= ddlEmployeeStatus.ClientID %>', name: 'Employee Status', msgId: 'employeeStatusRequiredMessage' },
+                { id: '<%= ddlEmployeeSubStatus.ClientID %>', name: 'Employee Sub Status', msgId: 'employeeSubStatusRequiredMessage' },
                 <%--{ id: '<%= ddlCompany.ClientID %>', name: 'Company' },--%>
-                { id: '<%= ddlDepartment.ClientID %>', name: 'Department' },
-                { id: '<%= txtBranchOffice.ClientID %>', name: 'Branch Office' },
-                { id: '<%= txtLocation.ClientID %>', name: 'Location' },
-                { id: '<%= ddlDesignation.ClientID %>', name: 'Designation' },
-                { id: '<%= ddlReportingManager.ClientID %>', name: 'Reporting Manager' },
+                { id: '<%= ddlDepartment.ClientID %>', name: 'Department', msgId: 'departmentRequiredMessage' },
+                { id: '<%= txtBranchOffice.ClientID %>', name: 'Branch Office', msgId: 'branchOfficeRequiredMessage' },
+                { id: '<%= txtLocation.ClientID %>', name: 'Location', msgId: 'locationRequiredMessage' },
+                { id: '<%= ddlDesignation.ClientID %>', name: 'Designation', msgId: 'designationRequiredMessage' },
+                { id: '<%= ddlReportingManager.ClientID %>', name: 'Reporting Manager', msgId: 'reportingManagerRequiredMessage' },
              <%--   { id: '<%= ddlFunctionalManager.ClientID %>', name: 'Functional Manager' },--%>
-                { id: '<%= ddlHod.ClientID %>', name: 'HOD' },
-                { id: '<%= ddlAttendanceType.ClientID %>', name: 'Attendance Type' },
-                { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off' },
-                { id: '<%= txtWorkingHours.ClientID %>', name: 'Working Hours' },
-                { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy' },
-                { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID' },
-                { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID' },
-                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location' },
-                { id: '<%= txtAssetType.ClientID %>', name: 'Asset Type' },
-                { id: '<%= txtAssetNumber.ClientID %>', name: 'Asset Number' },
-                { id: '<%= txtAssetName.ClientID %>', name: 'Asset Name' },
-                { id: '<%= txtAssignedDate.ClientID %>', name: 'Assigned Date' },
-                { id: '<%= ddlAssetCondition.ClientID %>', name: 'Asset Condition' }
-               <%-- { id: '<%= ddlAssetStatus.ClientID %>', name: 'Asset Status' }--%>
+                { id: '<%= ddlHod.ClientID %>', name: 'HOD', msgId: 'hodRequiredMessage' },
+                { id: '<%= ddlAttendanceType.ClientID %>', name: 'Attendance Type', msgId: 'attendanceTypeRequiredMessage' },
+                { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off', msgId: 'weeklyOffRequiredMessage' },
+                { id: '<%= txtWorkingHours.ClientID %>', name: 'Working Hours', msgId: 'workingHoursValidationMessage' },
+                { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy', msgId: 'attendancePolicyRequiredMessage' },
+                { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID', msgId: 'punchingDeviceIdRequiredMessage' },
+                { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID', msgId: 'biometricIdRequiredMessage' },
+                { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location', msgId: 'workLocationRequiredMessage' }
             ];
         }
+
+        var EMPLOYEE_MANAGED_MESSAGE_IDS = [
+            'employeeCodeDuplicateMessage',
+            'usernameDuplicateMessage',
+            'firstNameValidationMessage',
+            'middleNameValidationMessage',
+            'lastNameValidationMessage',
+            'emailDuplicateMessage',
+            'mobileDuplicateMessage',
+            'workingHoursValidationMessage'
+        ];
 
         function showMandatoryFieldMessage(fieldName) {
             if (window.Swal) {
@@ -1381,6 +1340,68 @@
             }
         }
 
+        function applyServerFieldValidationError(elementId, msgId, message) {
+            var element = document.getElementById(elementId);
+            var msgElement = msgId ? document.getElementById(msgId) : null;
+
+            if (element) {
+                element.classList.add('validation-error');
+
+                var section = element.closest('.wizard-step');
+                if (section) {
+                    document.querySelectorAll('.wizard-step').forEach(function (panel) {
+                        panel.classList.toggle('collapsed', panel !== section);
+                    });
+                }
+
+                element.focus();
+            }
+
+            if (msgElement) {
+                msgElement.textContent = message || '';
+                msgElement.style.display = message ? 'block' : '';
+            }
+        }
+
+        var ALLOWED_DOCUMENT_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.pdf'];
+        var MAX_DOCUMENT_UPLOAD_SIZE = 3 * 1024 * 1024;
+
+        function showDocumentUploadError(message) {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid file',
+                    text: message,
+                    confirmButtonColor: '#2563EB'
+                });
+            } else {
+                alert(message);
+            }
+        }
+
+        function bindDocumentUploadValidation() {
+            document.querySelectorAll('.document-upload-input').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    var file = input.files && input.files[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    var extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+                    if (ALLOWED_DOCUMENT_EXTENSIONS.indexOf(extension) === -1) {
+                        input.value = '';
+                        showDocumentUploadError('Only image and PDF files are allowed.');
+                        return;
+                    }
+
+                    if (file.size > MAX_DOCUMENT_UPLOAD_SIZE) {
+                        input.value = '';
+                        showDocumentUploadError('File size must be 3 MB or less.');
+                    }
+                });
+            });
+        }
+
         function isOvertimeEligibleChecked() {
             var overtimeToggle = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             return !!(overtimeToggle && overtimeToggle.checked);
@@ -1389,7 +1410,7 @@
         function validateEmployeeFields(section) {
             var requiredFields = getEmployeeRegistrationRequiredFields();
             if (isOvertimeEligibleChecked()) {
-                requiredFields.push({ id: '<%= txtOvertimeRate.ClientID %>', name: 'Overtime Rate' });
+                requiredFields.push({ id: '<%= txtOvertimeRate.ClientID %>', name: 'Overtime Rate', msgId: 'overtimeRateRequiredMessage' });
             }
             var missing = [];
             var firstInvalid = null;
@@ -1407,6 +1428,18 @@
                 var value = (element.value || '').trim();
                 var isMissing = value === '';
                 element.classList.toggle('validation-error', isMissing);
+
+                var msgElement = field.msgId ? document.getElementById(field.msgId) : null;
+                if (msgElement) {
+                    var isManagedElsewhere = EMPLOYEE_MANAGED_MESSAGE_IDS.indexOf(field.msgId) !== -1;
+                    if (isMissing) {
+                        msgElement.textContent = field.name + ' is required.';
+                        msgElement.style.display = 'block';
+                    } else if (!isManagedElsewhere) {
+                        msgElement.textContent = '';
+                        msgElement.style.display = '';
+                    }
+                }
 
                 if (isMissing) {
                     missing.push(field.name);
@@ -1461,78 +1494,12 @@
                 }
             }
 
-            return validateEmployeeAssets(section);
+            return true;
         }
 
         function validateEmployeeRegistration() {
             return validateEmployeeFields() && validateEmployeeDuplicatesBeforeSubmit();
         }
-
-        function validateEmployeeAssets(section) {
-            var assetSection = document.querySelector('.wizard-step[data-step="5"]');
-            if (section && section !== assetSection) {
-                return true;
-            }
-
-            var hiddenAssets = document.getElementById('hdnAssetsJson');
-            var rows = document.querySelectorAll('#assetRows tr.asset-row');
-            var assets = [];
-            var firstInvalid = null;
-            var missingName = '';
-
-            rows.forEach(function (row, index) {
-                var inputs = row.querySelectorAll('input');
-                var selects = row.querySelectorAll('select');
-                var asset = {
-                    asset_type: inputs[0] ? inputs[0].value.trim() : '',
-                    asset_number: inputs[1] ? inputs[1].value.trim() : '',
-                    asset_name: inputs[2] ? inputs[2].value.trim() : '',
-                    assigned_date: inputs[3] ? inputs[3].value.trim() : '',
-                    return_date: inputs[4] ? inputs[4].value.trim() : '',
-                    asset_condition: selects[0] ? selects[0].value : '',
-                    asset_status: selects[1] ? selects[1].value : ''
-                };
-
-                [
-                    { element: inputs[0], value: asset.asset_type, name: 'Asset Type' },
-                    { element: inputs[1], value: asset.asset_number, name: 'Asset Number' },
-                    { element: inputs[2], value: asset.asset_name, name: 'Asset Name' },
-                    { element: inputs[3], value: asset.assigned_date, name: 'Assigned Date' },
-                    { element: selects[0], value: asset.asset_condition, name: 'Asset Condition' },
-                    { element: selects[1], value: asset.asset_status, name: 'Asset Status' }
-                ].forEach(function (field) {
-                    var isMissing = !field.value;
-                    if (field.element) {
-                        field.element.classList.toggle('validation-error', isMissing);
-                    }
-
-                    if (isMissing && !firstInvalid) {
-                        firstInvalid = field.element;
-                        missingName = rows.length > 1 ? field.name + ' is required for asset row ' + (index + 1) : field.name;
-                    }
-                });
-
-                assets.push(asset);
-            });
-
-            if (firstInvalid) {
-                if (assetSection) {
-                    document.querySelectorAll('.wizard-step').forEach(function (panel) {
-                        panel.classList.toggle('collapsed', panel !== assetSection);
-                    });
-                }
-                firstInvalid.focus();
-                showMandatoryFieldMessage(missingName);
-                return false;
-            }
-
-            if (hiddenAssets) {
-                hiddenAssets.value = JSON.stringify(assets);
-            }
-
-            return true;
-        }
-
 
         var employeeDuplicateState = {};
         var employeeDuplicateLastShown = {};
@@ -1564,10 +1531,11 @@
 
         function checkEmployeeDuplicateField(fieldName, element) {
             if (!element || !element.value || !element.value.trim()) {
+                // Leave the message/border alone here - an empty value is a "required"
+                // concern, not a "duplicate" one, and the required-field validator (run on
+                // section Save / submit) is authoritative for that. Clearing it here on blur
+                // was racing with and stomping the "<Field> is required." message it sets.
                 employeeDuplicateState[fieldName] = false;
-                if (element) {
-                    setEmployeeValidationMessage(fieldName, element, '');
-                }
                 return;
             }
 
@@ -1683,8 +1651,6 @@
             var statusText = document.getElementById('statusText');
             var backButton = document.getElementById('backButton');
             var createAnotherButton = document.getElementById('createAnotherButton');
-            var assignAssetButton = document.getElementById('assignAssetButton');
-            var assetRows = document.getElementById('assetRows');
             var overtimeEligible = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             var overtimeRate = document.getElementById('<%= txtOvertimeRate.ClientID %>');
             var overtimeRateLabel = document.getElementById('overtimeRateLabel');
@@ -1789,6 +1755,30 @@
                 overtimeEligible.addEventListener('change', syncOvertimeRateState);
                 syncOvertimeRateState();
             }
+
+            getEmployeeRegistrationRequiredFields().forEach(function (field) {
+                if (EMPLOYEE_MANAGED_MESSAGE_IDS.indexOf(field.msgId) !== -1 || !field.msgId) {
+                    return;
+                }
+
+                var element = document.getElementById(field.id);
+                var msgElement = document.getElementById(field.msgId);
+                if (!element || !msgElement) {
+                    return;
+                }
+
+                var clearFieldMessage = function () {
+                    if ((element.value || '').trim() === '') {
+                        return;
+                    }
+                    element.classList.remove('validation-error');
+                    msgElement.textContent = '';
+                    msgElement.style.display = '';
+                };
+
+                element.addEventListener('input', clearFieldMessage);
+                element.addEventListener('change', clearFieldMessage);
+            });
 
             [
                 { field: 'EmployeeCode', element: employeeCode },
@@ -2102,62 +2092,13 @@
 
             initMobileSelects(document);
             bindRealtimeRequiredFieldCleanup();
-
-            function clearAssetRow(row) {
-                row.querySelectorAll('input').forEach(function (input) {
-                    input.value = '';
-                });
-                row.querySelectorAll('select').forEach(function (select) {
-                    select.selectedIndex = 0;
-                    updateMobileSelect(select);
-                });
-            }
-
-            function bindAssetDelete(button) {
-                button.addEventListener('click', function () {
-                    var row = button.closest('tr');
-                    if (!row || !assetRows) {
-                        return;
-                    }
-
-                    row.remove();
-                });
-            }
+            bindDocumentUploadValidation();
 
             function applyNoFutureDates(scope) {
                 var root = scope || document;
                 var today = new Date().toISOString().split('T')[0];
                 root.querySelectorAll('input[type="date"]').forEach(function (input) {
                     input.setAttribute('max', today);
-                });
-            }
-
-            function createAssetRow() {
-                var conditionSelect = document.getElementById('<%= ddlAssetCondition.ClientID %>');
-                <%--var statusSelect = document.getElementById('<%= ddlAssetStatus.ClientID %>');--%>
-
-                var row = document.createElement('tr');
-                row.className = 'asset-row';
-                row.innerHTML =
-                    '<td><input class="form-control-modern" placeholder="Enter asset type" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" /></td>' +
-                    '<td><input class="form-control-modern" type="date" /></td>' +
-                    //'<td><input class="form-control-modern" type="date" /></td>' +
-                    '<td><select class="form-select-modern">' + (conditionSelect ? conditionSelect.innerHTML : '') + '</select></td>' +
-                    //'<td><select class="form-select-modern">' + (statusSelect ? statusSelect.innerHTML : '') + '</select></td>' +
-                    '<td><button type="button" class="asset-delete-btn" data-delete-asset title="Delete asset"><i class="fas fa-trash-alt"></i></button></td>';
-                return row;
-            }
-
-
-            if (assignAssetButton && assetRows) {
-                assignAssetButton.addEventListener('click', function () {
-                    var row = createAssetRow();
-                    assetRows.appendChild(row);
-                    initMobileSelects(row);
-                    bindAssetDelete(row.querySelector('[data-delete-asset]'));
-                    applyNoFutureDates(row);
                 });
             }
 

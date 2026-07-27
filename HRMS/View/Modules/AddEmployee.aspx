@@ -1051,6 +1051,18 @@
             flex: 0 0 auto;
         }
 
+        .employee-photo-thumbnail-wrap {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .employee-photo-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .employee-photo-file-name {
             font-size: 13px;
             font-weight: 800;
@@ -1612,10 +1624,12 @@
                             <div id="employeePhotoPreviewState" runat="server" class="employee-photo-existing is-hidden">
                                 <div class="employee-photo-info">
                                     <div class="employee-photo-file">
-                                        <div class="employee-photo-file-icon"><i class="far fa-image"></i></div>
+                                        <div class="employee-photo-file-icon employee-photo-thumbnail-wrap">
+                                            <asp:Image ID="imgEmployeePhotoThumbnail" runat="server" CssClass="employee-photo-thumbnail" AlternateText="Employee Photo" />
+                                        </div>
                                         <div>
                                             <asp:Label ID="lblEmployeePhotoFileName" runat="server" CssClass="employee-photo-file-name" />
-                                            <div class="employee-photo-status"><i class="fas fa-check-circle"></i> Photo Uploaded Successfully</div>
+                                            <%--<div class="employee-photo-status"><i class="fas fa-check-circle"></i> Photo Uploaded Successfully</div>--%>
                                         </div>
                                     </div>
                                     <div class="employee-photo-file-meta">245 KB  .  JPG</div>
@@ -2253,14 +2267,14 @@
             <details class="update-section">
                 <summary>
                     <span class="section-icon"><i class="fas fa-undo-alt"></i></span>
-                    <span class="section-title">Assets Return</span>
+                    <span class="section-title">Assets Return/Lost</span>
                     <span class="section-owner">HRMS</span>
                     <i class="fas fa-chevron-down section-chevron"></i>
                 </summary>
                 <div class="section-body">
                     <div class="managed-entry-block">
                         <div class="managed-entry-header">
-                            <button type="button" class="managed-entry-button" onclick="showAssetReturnEditor(false)">Add Asset Return</button>
+                            <button type="button" class="managed-entry-button" onclick="showAssetReturnEditor(false)">Add Asset Return/Lost</button>
                         </div>
                         <div class="asset-table-wrap">
                             <asp:GridView ID="gvEmployeeAssetReturns" runat="server" AutoGenerateColumns="false"
@@ -2300,9 +2314,7 @@
                         </div>
                         <div class="entry-editor-body">
                             <div class="form-grid">
-                                <div class="field-block"><label class="required-label">Asset Type</label><asp:TextBox ID="txtAssetTypeReturn" runat="server" CssClass="form-control" placeholder="Laptop / Mobile Phone / SIM Card" /></div>
-                                <div class="field-block"><label class="required-label">Asset Number</label><asp:TextBox ID="txtAssetNumberReturn" runat="server" CssClass="form-control" /></div>
-                                <div class="field-block"><label class="required-label">Asset Name</label><asp:TextBox ID="txtAssetNameReturn" runat="server" CssClass="form-control" /></div>
+                                <div class="field-block"><label class="required-label">Assigned Asset</label><asp:DropDownList ID="ddlAssetReturnSelect" runat="server" CssClass="form-control"></asp:DropDownList></div>
                                 <div class="field-block"><label class="required-label">Return Date</label><asp:TextBox ID="txtReturnDateReturn" runat="server" CssClass="form-control" TextMode="Date" /></div>
                                 <div class="field-block"><label class="required-label">Asset Condition</label><asp:DropDownList ID="ddlAssetReturnCondition" runat="server" CssClass="form-control"></asp:DropDownList></div>
                                 <div class="field-block"><label class="required-label">Asset Status</label><asp:DropDownList ID="ddlAssetReturnStatus" runat="server" CssClass="form-control"></asp:DropDownList></div>
@@ -3030,9 +3042,7 @@
                 if (element) element.value = value;
             };
             setValue('<%= hdnAssetReturnId.ClientID %>', '0');
-            setValue('<%= txtAssetTypeReturn.ClientID %>', '');
-            setValue('<%= txtAssetNumberReturn.ClientID %>', '');
-            setValue('<%= txtAssetNameReturn.ClientID %>', '');
+            setValue('<%= ddlAssetReturnSelect.ClientID %>', '');
             setValue('<%= txtReturnDateReturn.ClientID %>', '');
             setValue('<%= ddlAssetReturnCondition.ClientID %>', '');
             setValue('<%= ddlAssetReturnStatus.ClientID %>', '');
@@ -3042,9 +3052,7 @@
 
         function validateAssetReturnClientForm() {
             var validations = [
-                { element: document.getElementById('<%= txtAssetTypeReturn.ClientID %>'), type: 'required', name: 'Asset Type' },
-                { element: document.getElementById('<%= txtAssetNumberReturn.ClientID %>'), type: 'required', name: 'Asset Number' },
-                { element: document.getElementById('<%= txtAssetNameReturn.ClientID %>'), type: 'required', name: 'Asset Name' },
+                { element: document.getElementById('<%= ddlAssetReturnSelect.ClientID %>'), type: 'select', name: 'Assigned Asset' },
                 { element: document.getElementById('<%= txtReturnDateReturn.ClientID %>'), type: 'required', name: 'Return Date' },
                 { element: document.getElementById('<%= ddlAssetReturnCondition.ClientID %>'), type: 'select', name: 'Asset Condition' },
                 { element: document.getElementById('<%= ddlAssetReturnStatus.ClientID %>'), type: 'select', name: 'Asset Status' }

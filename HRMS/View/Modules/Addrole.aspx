@@ -33,7 +33,7 @@
                             <div class="col-lg-12">
                                 <div class="mb-3 position-relative custom-dropdown-container">
                                     <label for="input-role">Create Role</label>
-                                    <asp:TextBox ID="txt_role" runat="server" CssClass="form-control" MaxLength="15" onkeypress="return blockSpecialChar(event)" placeholder="Enter Role"></asp:TextBox>
+                                    <asp:TextBox ID="txt_role" runat="server" CssClass="form-control" MaxLength="300" onkeypress="return blockSpecialChar(event)" placeholder="Enter Role"></asp:TextBox>
                                     <asp:RequiredFieldValidator ID="rfv_role" runat="server" ControlToValidate="txt_role" InitialValue="" ErrorMessage="Please Enter Role" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
                                     <asp:RegularExpressionValidator ID="rev_role" runat="server" ControlToValidate="txt_role" ValidationExpression="^[a-zA-Z\s]*$" ErrorMessage="Please enter only characters" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />
                                 </div>

@@ -18,6 +18,7 @@ namespace HRMS.View.Modules
 
         protected void Page_Load(object sender, EventArgs e)
         {
+           // Page.MaintainScrollPositionOnPostBack = true;
             UserId = Convert.ToString(Session["userId"]);
             if (!IsPostBack)
             {
@@ -38,6 +39,10 @@ namespace HRMS.View.Modules
                 BindActiveEmployeeCount();
                 BindEmployeeSalaryDetails();
                 BindEmployeeReimbursement();
+                BindEmployeeCode();
+                BindEmployeeName();
+                BindReimbEmployeeCode();
+                BindReimbEmployeeName();
             }
         }
 
@@ -140,39 +145,58 @@ namespace HRMS.View.Modules
                 litActiveEmployeeCount.Text = "0";
             }
         }
-
         public void BindEmployeeSalaryDetails()
         {
             try
             {
-                List<EmployeeSalaryDetailsDO> list = objBL.GetEmployeeSalaryDetails();
+                string empCode = string.IsNullOrEmpty(ddlEmployeeCodeSearch.SelectedValue)
+                 ? ""
+                 : ddlEmployeeCodeSearch.SelectedValue;
+
+                string empName = string.IsNullOrEmpty(ddlEmployeeNameSearch.SelectedValue)
+                     ? ""
+                     : ddlEmployeeNameSearch.SelectedValue;
+
+                string status = string.IsNullOrEmpty(ddlStatusSearch.SelectedValue)
+                                ? ""
+                                : ddlStatusSearch.SelectedValue;
+
+
+                List<EmployeeSalaryDetailsDO> list =
+                    objBL.GetEmployeeSalaryDetails(empCode, empName, status);
 
                 rptEmployeeSalary.DataSource = list;
                 rptEmployeeSalary.DataBind();
 
-                lblNoSalaryData.Visible = (list == null || list.Count == 0);
-
+                lblNoSalaryData.Visible = list.Count == 0;
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-
                 errorlog.fnStoreErrorLog(
                     "AccountsDashboard",
                     "BindEmployeeSalaryDetails",
-                    "Exception Message : " + ex.Message +
-                    " StackTrace : " + ex.StackTrace,
+                    ex.Message + ex.StackTrace,
                     UserId);
-                lblNoSalaryData.Visible = true;
-
             }
         }
-
         public void BindEmployeeReimbursement()
         {
             try
             {
-                List<EmployeeReimbursementDO> list = objBL.GetEmployeeReimbursementDetails();
+                string empCode = string.IsNullOrEmpty(ddlReimbEmployeeCode.SelectedValue)
+                ? ""
+                : ddlReimbEmployeeCode.SelectedValue;
+
+                string empName = string.IsNullOrEmpty(ddlReimbEmployeeName.SelectedValue)
+                     ? ""
+                     : ddlReimbEmployeeName.SelectedValue;
+
+                string status = string.IsNullOrEmpty(ddlReimbStatusSearch.SelectedValue)
+                                ? ""
+                                : ddlReimbStatusSearch.SelectedValue;
+
+                List<EmployeeReimbursementDO> list = objBL.GetEmployeeReimbursementDetails(empCode, empName, status);
 
                 rptEmployeeReimbursement.DataSource = list;
                 rptEmployeeReimbursement.DataBind();
@@ -194,21 +218,469 @@ namespace HRMS.View.Modules
 
             }
         }
-        protected string GetStatusClass(string status)
+        protected void ddlStatus_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (status.Trim().ToLower())
+            try
             {
-                case "approved":
-                    return "bg-success";
+                DropDownList ddl = (DropDownList)sender;
 
-                case "pending":
-                    return "bg-warning";
+                int salarySlipId = Convert.ToInt32(ddl.ToolTip);
+                string status = ddl.SelectedValue;
 
-                case "rejected":
-                    return "bg-danger";
+                List<UpdateSalaryStatusDO> result = objBL.UpdateSalaryStatus(
+                    salarySlipId,
+                    status,
+                    UserId);
 
-                default:
-                    return "bg-secondary";
+                if (result != null && result.Count > 0)
+                {
+                    string Status = result[0].Success;
+                    string remarks = result[0].Result;
+
+                    if (Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Send Mail only when status is Paid
+                        if (status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+                        {
+                            List<SalaryPaidMailDO> mailDetails = objBL.GetSalaryPaidMailDetails(salarySlipId);
+
+                            if (mailDetails != null && mailDetails.Count > 0)
+                            {
+                                objBL.SendSalaryPaidMail(
+                                    mailDetails[0].ToEmail,
+                                    mailDetails[0].CcEmail,
+                                    mailDetails[0].Subject,
+                                    mailDetails[0].Body);
+                            }
+                        }
+
+                        BindEmployeeSalaryDetails();
+                        BindTotalSalaryDisbursed();
+                        ClientScript.RegisterStartupScript(
+                            this.GetType(),
+                            "SalaryStatus",
+                            "showAccountsSavedMessage('" + Status + "','" + remarks + "');",
+                            true);
+                    }
+                    else
+                    {
+                        ClientScript.RegisterStartupScript(
+                            this.GetType(),
+                            "SalaryStatus",
+                            "showAccountsSavedMessage('" + Status + "','" + remarks + "');",
+                            true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "SalarySlip",
+                    "ddlStatus_SelectedIndexChanged",
+                    ex.Message + ex.StackTrace,
+                    UserId);
+
+                ClientScript.RegisterStartupScript(
+                    this.GetType(),
+                    "SalaryStatus",
+                    "showAccountsSavedMessage('Failed','Unable to update salary status.');",
+                    true);
+            }
+        }
+
+        protected void rptEmployeeSalary_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item ||
+                e.Item.ItemType == ListItemType.AlternatingItem)
+            {
+                DropDownList ddl = (DropDownList)e.Item.FindControl("ddlStatus");
+
+                if (ddl != null)
+                {
+                    string status = DataBinder.Eval(e.Item.DataItem, "status").ToString();
+
+                    if (ddl.Items.FindByValue(status) != null)
+                    {
+                        ddl.SelectedValue = status;
+                    }
+                }
+            }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ddlSearchBy.SelectedIndex = 0;
+
+
+            if (ddlEmployeeCodeSearch.Items.Count > 0)
+                ddlEmployeeCodeSearch.SelectedIndex = 0;
+
+            if (ddlEmployeeNameSearch.Items.Count > 0)
+                ddlEmployeeNameSearch.SelectedIndex = 0;
+
+            if (ddlStatusSearch.Items.Count > 0)
+                ddlStatusSearch.SelectedIndex = 0;
+
+
+            divEmployeeCode.Visible = false;
+            divEmployeeName.Visible = false;
+            divStatus.Visible = false;
+
+            BindEmployeeSalaryDetails();
+        }
+        protected void ddlSearchBy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ddlEmployeeCodeSearch.SelectedIndex = 0;
+            ddlEmployeeNameSearch.SelectedIndex = 0;
+            ddlStatusSearch.SelectedIndex = 0;
+
+            divStatus.Visible = false;
+            divEmployeeCode.Visible = false;
+            divEmployeeName.Visible = false;
+
+
+            if (ddlSearchBy.SelectedValue == "Status")
+            {
+                divStatus.Visible = true;
+            }
+            else if (ddlSearchBy.SelectedValue == "EmployeeCode")
+            {
+                divEmployeeCode.Visible = true;
+                BindEmployeeCode();
+            }
+            else if (ddlSearchBy.SelectedValue == "EmployeeName")
+            {
+                divEmployeeName.Visible = true;
+                BindEmployeeName();
+            }
+        }
+
+        public void BindEmployeeCode()
+        {
+            List<DropDownData_account> list1 = new List<DropDownData_account>();
+            CommonBL commonbl = new CommonBL();
+            try
+            {
+                list1 = commonbl.dropdownempcode_accountdashboard();
+                if (list1 != null)
+                {
+                    ddlEmployeeCodeSearch.DataSource = list1;
+                    ddlEmployeeCodeSearch.DataTextField = "Text";
+                    ddlEmployeeCodeSearch.DataValueField = "Id";
+                }
+                else
+                {
+                    ddlEmployeeCodeSearch.DataSource = null;
+                }
+                ddlEmployeeCodeSearch.DataBind();
+                ddlEmployeeCodeSearch.Items.Insert(0, new ListItem("-- Please Select and Search --", ""));
+                ddlEmployeeCodeSearch.SelectedIndex = 0;
+
+
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AccountsDashboard", "BindEmployeeCode", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+       
+        public void BindEmployeeName()
+        {
+            List<DropDownData_account> list1 = new List<DropDownData_account>();
+            CommonBL commonbl = new CommonBL();
+            try
+            {
+                list1 = commonbl.dropdownusername_accountdashboard();
+                if (list1 != null)
+                {
+                    ddlEmployeeNameSearch.DataSource = list1;
+                    ddlEmployeeNameSearch.DataTextField = "Text";
+                    ddlEmployeeNameSearch.DataValueField = "Id";
+                }
+                else
+                {
+                    ddlEmployeeNameSearch.DataSource = null;
+                }
+                ddlEmployeeNameSearch.DataBind();
+                ddlEmployeeNameSearch.Items.Insert(0, new ListItem("-- Please Select and Search --", ""));
+                ddlEmployeeNameSearch.SelectedIndex = 0;
+
+
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AccountsDashboard", "BindEmployeeName", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            if (ddlSearchBy.SelectedValue == "")
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Search By.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchBy.SelectedValue == "EmployeeName" &&
+                string.IsNullOrEmpty(ddlEmployeeNameSearch.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Employee Name.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchBy.SelectedValue == "EmployeeCode" &&
+                string.IsNullOrEmpty(ddlEmployeeCodeSearch.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Employee Code.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchBy.SelectedValue == "Status" &&
+                string.IsNullOrEmpty(ddlStatusSearch.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Status.','warning');", true);
+                return;
+            }
+
+            BindEmployeeSalaryDetails();
+        }
+        protected void ddlreimbStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                DropDownList ddl = (DropDownList)sender;
+
+                int reimbursementId = Convert.ToInt32(ddl.ToolTip);
+                string status = ddl.SelectedValue;
+
+                List<UpdateReimbursementStatusDO> result =
+                    objBL.UpdatereimbSalaryStatus(
+                        reimbursementId,
+                        status,
+                        UserId);
+
+                if (result != null && result.Count > 0)
+                {
+                    string Status = result[0].Success;
+                    string remarks = result[0].Result;
+
+                    if (Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+                        {
+                            List<SalaryPaidMailDO> mailDetails = objBL.GetReimbPaidMailDetails(reimbursementId);
+
+                            if (mailDetails != null && mailDetails.Count > 0)
+                            {
+                                objBL.SendSalaryPaidMail(
+                                    mailDetails[0].ToEmail,
+                                    mailDetails[0].CcEmail,
+                                    mailDetails[0].Subject,
+                                    mailDetails[0].Body);
+                            }
+                        }
+                        BindEmployeeReimbursement();   
+                        BindTotalReimburesement();
+                        ClientScript.RegisterStartupScript(
+                            this.GetType(),
+                            "ReimbStatus",
+                            "showAccountsSavedMessage('" + Status + "','" + remarks + "');",
+                            true);
+                    }
+                    else
+                    {
+                        ClientScript.RegisterStartupScript(
+                            this.GetType(),
+                            "ReimbStatus",
+                            "showAccountsSavedMessage('" + Status + "','" + remarks + "');",
+                            true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+
+                errorlog.fnStoreErrorLog(
+                    "AccountsDashboard",
+                    "ddlreimbStatus_SelectedIndexChanged",
+                    ex.Message + ex.StackTrace,
+                    UserId);
+
+                ClientScript.RegisterStartupScript(
+                    this.GetType(),
+                    "ReimbStatus",
+                    "showAccountsSavedMessage('Failed','Unable to update reimbursement status.');",
+                    true);
+            }
+        }
+
+        protected void rptEmployeeReimbursement_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item ||
+                e.Item.ItemType == ListItemType.AlternatingItem)
+            {
+                DropDownList ddl = (DropDownList)e.Item.FindControl("ddlreimbStatus");
+
+                if (ddl != null)
+                {
+                    string status = DataBinder.Eval(e.Item.DataItem, "status").ToString();
+
+                    if (ddl.Items.FindByValue(status) != null)
+                    {
+                        ddl.SelectedValue = status;
+                    }
+                }
+            }
+        }
+
+        protected void btnReimbClear_Click(object sender, EventArgs e)
+        {
+            ddlSearchByReimb.SelectedIndex = 0;
+
+            if (ddlReimbEmployeeCode.Items.Count > 0)
+                ddlReimbEmployeeCode.SelectedIndex = 0;
+
+            if (ddlReimbEmployeeName.Items.Count > 0)
+                ddlReimbEmployeeName.SelectedIndex = 0;
+
+            if (ddlReimbStatusSearch.Items.Count > 0)
+                ddlReimbStatusSearch.SelectedIndex = 0;
+
+            divReimbStatus.Visible = false;
+            divReimbEmpCode.Visible = false;
+            divReimbEmpName.Visible = false;
+
+            BindEmployeeReimbursement();
+        }
+
+        protected void ddlSearchByReimb_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ddlReimbEmployeeCode.SelectedIndex = 0;
+            ddlReimbEmployeeName.SelectedIndex = 0;
+            ddlReimbStatusSearch.SelectedIndex = 0;
+
+            divReimbStatus.Visible = false;
+            divReimbEmpCode.Visible = false;
+            divReimbEmpName.Visible = false;
+
+
+            if (ddlSearchByReimb.SelectedValue == "Status")
+            {
+                divReimbStatus.Visible = true;
+            }
+            else if (ddlSearchByReimb.SelectedValue == "EmployeeCode")
+            {
+                divReimbEmpCode.Visible = true;
+                BindReimbEmployeeCode();
+            }
+            else if (ddlSearchByReimb.SelectedValue == "EmployeeName")
+            {
+                divReimbEmpName.Visible = true;
+                BindReimbEmployeeName();
+            }
+
+        }
+
+        protected void btnReimbSearch_Click(object sender, EventArgs e)
+        {
+            if (ddlSearchByReimb.SelectedValue == "")
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Search By.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchByReimb.SelectedValue == "EmployeeName" &&
+                string.IsNullOrEmpty(ddlReimbEmployeeName.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Employee Name.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchByReimb.SelectedValue == "EmployeeCode" &&
+                string.IsNullOrEmpty(ddlReimbEmployeeCode.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Employee Code.','warning');", true);
+                return;
+            }
+
+            if (ddlSearchByReimb.SelectedValue == "Status" &&
+                string.IsNullOrEmpty(ddlReimbStatusSearch.SelectedValue))
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "msg",
+                    "Swal.fire('Validation','Please select Status.','warning');", true);
+                return;
+            }
+
+            BindEmployeeReimbursement();
+        }
+
+        public void BindReimbEmployeeCode()
+        {
+            List<DropDownData_account> list1 = new List<DropDownData_account>();
+            CommonBL commonbl = new CommonBL();
+            try
+            {
+                list1 = commonbl.dropdownempcode_accountdashboard();
+                if (list1 != null)
+                {
+                    ddlReimbEmployeeCode.DataSource = list1;
+                    ddlReimbEmployeeCode.DataTextField = "Text";
+                    ddlReimbEmployeeCode.DataValueField = "Id";
+                }
+                else
+                {
+                    ddlReimbEmployeeCode.DataSource = null;
+                }
+                ddlReimbEmployeeCode.DataBind();
+                ddlReimbEmployeeCode.Items.Insert(0, new ListItem("-- Please Select and Search --", ""));
+                ddlReimbEmployeeCode.SelectedIndex = 0;
+
+
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AccountsDashboard", "BindReimbEmployeeCode", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        public void BindReimbEmployeeName()
+        {
+            List<DropDownData_account> list1 = new List<DropDownData_account>();
+            CommonBL commonbl = new CommonBL();
+            try
+            {
+                list1 = commonbl.dropdownusername_accountdashboard();
+                if (list1 != null)
+                {
+                    ddlReimbEmployeeName.DataSource = list1;
+                    ddlReimbEmployeeName.DataTextField = "Text";
+                    ddlReimbEmployeeName.DataValueField = "Id";
+                }
+                else
+                {
+                    ddlReimbEmployeeName.DataSource = null;
+                }
+                ddlReimbEmployeeName.DataBind();
+                ddlReimbEmployeeName.Items.Insert(0, new ListItem("-- Please Select and Search --", ""));
+                ddlReimbEmployeeName.SelectedIndex = 0;
+
+
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AccountsDashboard", "BindReimbEmployeeName", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
             }
         }
     }

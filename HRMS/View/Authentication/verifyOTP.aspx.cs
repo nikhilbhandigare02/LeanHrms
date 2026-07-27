@@ -34,12 +34,14 @@ namespace HRMS.View.Authentication
                         Session["verificationCode"] = listdata[0].generated_otp;
                         Session["isPasswordReset"] = listdata[0].passresetflag;
 
-                        loginBAL.SendVerificationCodeEmail(listdata[0].user_mail_id, listdata[0].generated_otp);
+                        loginBAL.SendVerificationCodeEmail(listdata[0].user_mail_id, listdata[0].generated_otp, listdata[0].body, listdata[0].subject);
 
                         div_otp.Visible = true;
                         string status = "Success";
                                        string remark = "OTP generated successfully on your registered Email-ID";
-                                      ClientScript.RegisterStartupScript(
+                        //string remark = "OTP has been sent successfully to your registered Email ID.<br/><small>If you don't find it in your Inbox, please check your Spam/Junk folder.</small>";
+
+                        ClientScript.RegisterStartupScript(
                                          this.GetType(),
                                           "ShowRequiredFieldsScript",
                                           $"showDataSavedMessage('{status}', '{remark}');",

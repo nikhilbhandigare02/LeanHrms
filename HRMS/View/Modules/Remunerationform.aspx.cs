@@ -600,6 +600,8 @@ namespace HRMS.View.Modules
                     if (result.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
                     {
                         ShowSuccessAlert(result.Message);
+                        string redirectUrl = ResolveUrl("~/View/Modules/Remunerationdetails.aspx");
+                        ScriptManager.RegisterStartupScript(this, GetType(), "redirect", "setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 1500);", true);
                     }
                     else
                     {
@@ -646,8 +648,8 @@ namespace HRMS.View.Modules
                     if (result.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
                     {
                         ShowSuccessAlert(result.Message);
-                        // Reload page to clear all fields and reset form
-                        ScriptManager.RegisterStartupScript(this, GetType(), "reloadPage", "setTimeout(function() { window.location.href = window.location.href; }, 1500);", true);
+                        string redirectUrl = ResolveUrl("~/View/Modules/Remunerationdetails.aspx");
+                        ScriptManager.RegisterStartupScript(this, GetType(), "redirect", "setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 1500);", true);
                     }
                     else
                     {

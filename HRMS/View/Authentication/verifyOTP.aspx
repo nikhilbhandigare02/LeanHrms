@@ -80,10 +80,10 @@
             background: #fff;
         }
 
-        .otp-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
-        }
+            .otp-input:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+            }
 
         .otp-timer {
             color: #64748b;
@@ -92,10 +92,10 @@
             margin: 14px 0 18px;
         }
 
-        .otp-timer span {
-            color: #2563eb;
-            font-weight: 800;
-        }
+            .otp-timer span {
+                color: #2563eb;
+                font-weight: 800;
+            }
 
         .otp-button {
             height: 42px;
@@ -107,10 +107,10 @@
             color: #fff;
         }
 
-        .otp-button:hover {
-            background: #4659d4;
-            border-color: #4659d4;
-        }
+            .otp-button:hover {
+                background: #4659d4;
+                border-color: #4659d4;
+            }
 
         .otp-resend {
             text-align: center;
@@ -119,15 +119,15 @@
             margin-top: 18px;
         }
 
-        .otp-resend a {
-            color: #2563eb;
-            font-weight: 700;
-            text-decoration: none;
-        }
+            .otp-resend a {
+                color: #2563eb;
+                font-weight: 700;
+                text-decoration: none;
+            }
 
-        .otp-resend a:hover {
-            text-decoration: underline;
-        }
+                .otp-resend a:hover {
+                    text-decoration: underline;
+                }
     </style>
     <script type="text/javascript">
         function showDataSavedMessage(status, remark) {
@@ -194,7 +194,10 @@
                                         <div class="text-center">
                                             <span class="otp-icon"><i class="mdi mdi-email-check-outline"></i></span>
                                             <div class="otp-heading">Verify OTP</div>
-                                            <div class="otp-help">We have sent a 6-digit OTP to your registered email</div>
+                                            <div class="otp-help">We have sent a 6-digit OTP to your registered email
+                                         <br />
+                                            <small class="text-muted">If you don't find it in your Inbox, please check your Spam/Junk folder.
+                                             </small> </div>
                                         </div>
 
                                         <div class="form-group">

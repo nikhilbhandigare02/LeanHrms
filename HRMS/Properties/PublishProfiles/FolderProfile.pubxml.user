@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>D:\Alphonsol\HRMS Publish</_PublishTargetUrl>
-    <History>True|2026-07-21T13:29:51.9506512Z||;True|2026-06-17T14:19:20.4485369+05:30||;True|2026-06-17T13:34:10.9969608+05:30||;False|2026-06-01T11:44:40.7196299+05:30||;True|2026-05-05T12:27:19.8330703+05:30||;True|2026-05-05T11:40:49.5497151+05:30||;True|2026-05-05T11:39:16.0333231+05:30||;True|2026-05-05T10:47:35.2376728+05:30||;True|2026-05-04T18:03:41.8722660+05:30||;</History>
+    <History>True|2026-07-27T09:49:14.8912538Z||;True|2026-07-27T15:15:55.0312480+05:30||;True|2026-07-24T16:22:50.5485535+05:30||;True|2026-07-24T15:45:09.3956534+05:30||;True|2026-07-24T14:22:44.9648091+05:30||;True|2026-07-21T18:59:51.9506512+05:30||;True|2026-06-17T14:19:20.4485369+05:30||;True|2026-06-17T13:34:10.9969608+05:30||;False|2026-06-01T11:44:40.7196299+05:30||;True|2026-05-05T12:27:19.8330703+05:30||;True|2026-05-05T11:40:49.5497151+05:30||;True|2026-05-05T11:39:16.0333231+05:30||;True|2026-05-05T10:47:35.2376728+05:30||;True|2026-05-04T18:03:41.8722660+05:30||;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
@@ -5090,10 +5090,10 @@
       <publishTime>07/10/2026 10:30:17</publishTime>
     </File>
     <File Include="bin/DataObject.dll">
-      <publishTime>07/21/2026 18:59:39</publishTime>
+      <publishTime>07/27/2026 15:15:49</publishTime>
     </File>
     <File Include="bin/DataObject.pdb">
-      <publishTime>07/21/2026 18:59:39</publishTime>
+      <publishTime>07/27/2026 15:15:49</publishTime>
     </File>
     <File Include="bin/ExcelDataReader.DataSet.dll">
       <publishTime>07/10/2026 10:30:17</publishTime>
@@ -5114,10 +5114,10 @@
       <publishTime>03/05/2025 03:16:38</publishTime>
     </File>
     <File Include="bin/HRMS.dll">
-      <publishTime>07/21/2026 18:59:41</publishTime>
+      <publishTime>07/27/2026 15:19:11</publishTime>
     </File>
     <File Include="bin/HRMS.pdb">
-      <publishTime>07/21/2026 18:59:41</publishTime>
+      <publishTime>07/27/2026 15:19:11</publishTime>
     </File>
     <File Include="bin/itext.barcodes.dll">
       <publishTime>07/10/2026 10:30:18</publishTime>
@@ -5207,13 +5207,13 @@
       <publishTime>07/10/2026 10:30:18</publishTime>
     </File>
     <File Include="bin/ProcessModel.dll">
-      <publishTime>07/21/2026 18:59:40</publishTime>
+      <publishTime>07/27/2026 15:15:49</publishTime>
     </File>
     <File Include="bin/ProcessModel.dll.config">
       <publishTime>07/10/2026 10:30:17</publishTime>
     </File>
     <File Include="bin/ProcessModel.pdb">
-      <publishTime>07/21/2026 18:59:40</publishTime>
+      <publishTime>07/27/2026 15:15:49</publishTime>
     </File>
     <File Include="bin/roslyn/csc.exe">
       <publishTime>07/10/2026 10:30:18</publishTime>
@@ -5588,7 +5588,7 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Authentication/login.aspx">
-      <publishTime>07/21/2026 18:20:46</publishTime>
+      <publishTime>07/22/2026 15:13:21</publishTime>
     </File>
     <File Include="View/Authentication/logout.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
@@ -5597,13 +5597,13 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Authentication/verifyOTP.aspx">
-      <publishTime>07/16/2026 18:47:24</publishTime>
+      <publishTime>07/27/2026 10:23:20</publishTime>
     </File>
     <File Include="View/Layout/Site1.Master">
-      <publishTime>07/21/2026 17:39:15</publishTime>
+      <publishTime>07/27/2026 11:01:13</publishTime>
     </File>
     <File Include="View/Modules/AccountsDashboard.aspx">
-      <publishTime>07/21/2026 17:31:01</publishTime>
+      <publishTime>07/24/2026 09:14:59</publishTime>
     </File>
     <File Include="View/Modules/AddAppraisalForm.aspx">
       <publishTime>07/13/2026 17:40:20</publishTime>
@@ -5612,7 +5612,7 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/AddEmployee.aspx">
-      <publishTime>07/21/2026 14:49:09</publishTime>
+      <publishTime>07/27/2026 13:29:53</publishTime>
     </File>
     <File Include="View/Modules/AddImsetsalaryForm.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
@@ -5621,7 +5621,7 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/Addrole.aspx">
-      <publishTime>07/10/2026 10:30:16</publishTime>
+      <publishTime>07/24/2026 18:09:46</publishTime>
     </File>
     <File Include="View/Modules/AddSalarySlipData.aspx">
       <publishTime>07/16/2026 18:47:24</publishTime>
@@ -5639,10 +5639,13 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/AssignRights.aspx">
-      <publishTime>07/10/2026 10:30:16</publishTime>
+      <publishTime>07/24/2026 18:08:43</publishTime>
     </File>
     <File Include="View/Modules/assignRole.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
+    </File>
+    <File Include="View/Modules/AttendanceDetails.aspx">
+      <publishTime>07/27/2026 13:23:43</publishTime>
     </File>
     <File Include="View/Modules/EmployeeAction.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
@@ -5660,16 +5663,16 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/EmployeeRegistration.aspx">
-      <publishTime>07/21/2026 18:28:04</publishTime>
+      <publishTime>07/27/2026 15:12:15</publishTime>
     </File>
     <File Include="View/Modules/HandoverProcess.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/HolidayList.aspx">
-      <publishTime>07/10/2026 10:30:16</publishTime>
+      <publishTime>07/24/2026 18:09:46</publishTime>
     </File>
     <File Include="View/Modules/Home.aspx">
-      <publishTime>07/21/2026 17:30:43</publishTime>
+      <publishTime>07/22/2026 15:11:11</publishTime>
     </File>
     <File Include="View/Modules/ImageLibrary.aspx">
       <publishTime>07/21/2026 14:49:09</publishTime>
@@ -5678,7 +5681,7 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="View/Modules/ReimbursementDetails.aspx">
-      <publishTime>07/10/2026 10:30:16</publishTime>
+      <publishTime>07/24/2026 11:41:56</publishTime>
     </File>
     <File Include="View/Modules/Remunerationdetails.aspx">
       <publishTime>07/10/2026 10:30:16</publishTime>
@@ -5732,7 +5735,7 @@
       <publishTime>07/10/2026 10:30:16</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>07/21/2026 18:59:44</publishTime>
+      <publishTime>07/24/2026 15:45:08</publishTime>
     </File>
   </ItemGroup>
 </Project>

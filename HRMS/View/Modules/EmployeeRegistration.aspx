@@ -1123,8 +1123,14 @@
                         <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="probationPeriodRequiredMessage" class="validation-message"></span></div>
 <%--                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>--%>
-                        <div class="form-group"><label class="is-required">Employee Status</label><asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeStatusRequiredMessage" class="validation-message"></span></div>
-                        <div class="form-group"><label class="is-required">Employee Sub Status</label><asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeSubStatusRequiredMessage" class="validation-message"></span></div>
+                      <div class="form-group">
+                          <%-- <label class="is-required">Employee Status</label>--%>
+                            
+                            <asp:DropDownList ID="ddlEmployeeStatus" runat="server" CssClass="form-select-modern" Visible="false" ></asp:DropDownList><span id="employeeStatusRequiredMessage" class="validation-message"></span></div>
+                          <div class="form-group">
+                            <%--<label class="is-required">Employee Sub Status</label>--%>
+                            <asp:DropDownList ID="ddlEmployeeSubStatus" runat="server" CssClass="form-select-modern" Visible="false" ></asp:DropDownList><span id="employeeSubStatusRequiredMessage" class="validation-message"></span>
+                    </div>
 
        <%--                 <div class="form-group"><label>Notice Period </label>--%>
                             <input id="txtNoticePeriod" runat="server" class="form-control-modern" placeholder="Enter notice period days" visible="false" />
@@ -1525,10 +1531,11 @@
 
         function checkEmployeeDuplicateField(fieldName, element) {
             if (!element || !element.value || !element.value.trim()) {
+                // Leave the message/border alone here - an empty value is a "required"
+                // concern, not a "duplicate" one, and the required-field validator (run on
+                // section Save / submit) is authoritative for that. Clearing it here on blur
+                // was racing with and stomping the "<Field> is required." message it sets.
                 employeeDuplicateState[fieldName] = false;
-                if (element) {
-                    setEmployeeValidationMessage(fieldName, element, '');
-                }
                 return;
             }
 

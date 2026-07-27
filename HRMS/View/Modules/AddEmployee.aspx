@@ -1051,6 +1051,18 @@
             flex: 0 0 auto;
         }
 
+        .employee-photo-thumbnail-wrap {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .employee-photo-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .employee-photo-file-name {
             font-size: 13px;
             font-weight: 800;
@@ -1612,10 +1624,12 @@
                             <div id="employeePhotoPreviewState" runat="server" class="employee-photo-existing is-hidden">
                                 <div class="employee-photo-info">
                                     <div class="employee-photo-file">
-                                        <div class="employee-photo-file-icon"><i class="far fa-image"></i></div>
+                                        <div class="employee-photo-file-icon employee-photo-thumbnail-wrap">
+                                            <asp:Image ID="imgEmployeePhotoThumbnail" runat="server" CssClass="employee-photo-thumbnail" AlternateText="Employee Photo" />
+                                        </div>
                                         <div>
                                             <asp:Label ID="lblEmployeePhotoFileName" runat="server" CssClass="employee-photo-file-name" />
-                                            <div class="employee-photo-status"><i class="fas fa-check-circle"></i> Photo Uploaded Successfully</div>
+                                            <%--<div class="employee-photo-status"><i class="fas fa-check-circle"></i> Photo Uploaded Successfully</div>--%>
                                         </div>
                                     </div>
                                     <div class="employee-photo-file-meta">245 KB  .  JPG</div>

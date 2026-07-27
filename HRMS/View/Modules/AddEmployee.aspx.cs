@@ -257,11 +257,11 @@ namespace HRMS.View.Modules
                 }
 
                 DateTime now = DateTime.Now;
-                string basePath1 = Path.Combine(now.Year.ToString(),
+                string basePath1 = Path.Combine("EmployeeDocument", now.Year.ToString(),
                     now.Month.ToString("00"),
                     employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
 
-                string basePath = Path.Combine(
+                string basePath = Path.Combine("EmployeeDocument",
                     documentsRoot,
                     now.Year.ToString(),
                     now.Month.ToString("00"),
@@ -1715,7 +1715,7 @@ namespace HRMS.View.Modules
                         SetText(txtPanNumber, userDetails.PanNumber);
                         SetText(txtPassportNumber, userDetails.PassportNumber);
                         SetText(txtPassportExpiryDate, FormatDateForInput(userDetails.PassportExpiryDate));
-                        BindEmployeePhoto(userDetails.EmployeePhoto);
+                        BindEmployeePhoto(ResolveEmployeePhotoUrl(userId, userDetails.EmployeePhoto));
                         SetText(txtAlternateMobile, userDetails.AlternateMobileNumber);
                         SetText(txtPersonalEmail, userDetails.PersonalEmail);
                         SetText(txtPermanentHouseNumber, userDetails.PermanentHouseNumber);
@@ -2036,6 +2036,82 @@ namespace HRMS.View.Modules
             }
         }
 
+        // "Employee Photograph" document_master_id in alpha_hrms.user_document_details.
+        // Not looked up dynamically: sp_bindDocuments's ids don't necessarily line up
+        // with this value across environments (same caveat as document_master_id
+        // numbering elsewhere in this app) - confirmed directly against sample data.
+        private const int EmployeePhotographDocumentMasterId = 7;
+
+        // Prefers the "Employee Photograph" row in alpha_hrms.user_document_details -
+        // combines its file_path with EmployeeDocumentServerPath (Web.config) to find the
+        // physical file on disk, then embeds it as a data URI, since the raw disk path
+        // can't be used as an <img src> directly. Falls back to the legacy EmployeePhoto
+        // column value for employees whose photo was saved before this table existed.
+        private string ResolveEmployeePhotoUrl(int userId, string legacyEmployeePhotoValue)
+        {
+            try
+            {
+                string relativePath = new userDocumentBL().GetLatestDocumentRelativePath(userId, EmployeePhotographDocumentMasterId);
+                if (!string.IsNullOrWhiteSpace(relativePath))
+                {
+                    string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                    if (!string.IsNullOrWhiteSpace(documentsRoot))
+                    {
+                        if (documentsRoot.StartsWith("~"))
+                        {
+                            documentsRoot = Server.MapPath(documentsRoot);
+                        }
+
+                        string physicalPath = Path.Combine(documentsRoot, relativePath);
+                        string dataUri = ReadImageFileAsDataUri(physicalPath);
+                        if (!string.IsNullOrWhiteSpace(dataUri))
+                        {
+                            return dataUri;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AddEmployee", "ResolveEmployeePhotoUrl", "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace, UserId);
+            }
+
+            return legacyEmployeePhotoValue;
+        }
+
+        private string ReadImageFileAsDataUri(string physicalPath)
+        {
+            if (string.IsNullOrWhiteSpace(physicalPath) || !File.Exists(physicalPath))
+            {
+                return null;
+            }
+
+            byte[] bytes = File.ReadAllBytes(physicalPath);
+            string mimeType = GetImageMimeTypeFromExtension(Path.GetExtension(physicalPath));
+            return "data:" + mimeType + ";base64," + Convert.ToBase64String(bytes);
+        }
+
+        private string GetImageMimeTypeFromExtension(string extension)
+        {
+            switch ((extension ?? string.Empty).ToLowerInvariant())
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".bmp":
+                    return "image/bmp";
+                case ".webp":
+                    return "image/webp";
+                default:
+                    return "image/png";
+            }
+        }
+
         private void BindEmployeePhoto(string filePath)
         {
             string rawValue = Convert.ToString(filePath ?? string.Empty).Trim();
@@ -2053,6 +2129,12 @@ namespace HRMS.View.Modules
             {
                 imgEmployeePhotoPreview.ImageUrl = url;
                 imgEmployeePhotoPreview.Visible = hasPhoto;
+            }
+
+            if (imgEmployeePhotoThumbnail != null)
+            {
+                imgEmployeePhotoThumbnail.ImageUrl = url;
+                imgEmployeePhotoThumbnail.Visible = hasPhoto;
             }
 
             if (lblEmployeePhotoFileName != null)

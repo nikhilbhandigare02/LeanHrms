@@ -467,6 +467,10 @@
                 return true;
             }
 
+            if (label.indexOf('attendance') >= 0 && currentFile === 'attendancedetails') {
+                return true;
+            }
+
             if (label.indexOf('salary slip') >= 0 && (currentFile === 'salaryslip' || currentFile === 'uploadexcelforsalary' || currentFile === 'addsalaryslipdata')) {
                 return true;
             }

@@ -211,6 +211,9 @@ namespace ProcessModel
                                     case "status":
                                         item.status = Convert.ToString(val);
                                         break;
+                                    case "userfullname":
+                                        item.userFullName = Convert.ToString(val);
+                                        break;
                                 }
                             }
 
@@ -225,6 +228,123 @@ namespace ProcessModel
             }
 
             return list;
+        }
+
+        // Reimbursement documents for a user, via sp_getEmpReimbursementDocuments
+        // (Database\sp_getEmpReimbursementDocuments.sql).
+        public List<ReimbursementDocumentDO> GetReimbursementDocuments(int userId,string reimbursement_number)
+        {
+            List<ReimbursementDocumentDO> list = new List<ReimbursementDocumentDO>();
+
+            try
+            {
+                List<MySqlParameter> parameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("p_user_id", userId),
+                     DataClass.GetParameter("p_reimbursement_number", reimbursement_number)
+                };
+
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSpWithParam(
+                        parameters,
+                        "",
+                        "sp_getEmpReimbursementDocuments"))
+                {
+                    if (dr != null)
+                    {
+                        while (dr.Read())
+                        {
+                            ReimbursementDocumentDO item = new ReimbursementDocumentDO();
+
+                            for (int i = 0; i < dr.FieldCount; i++)
+                            {
+                                string colName = dr.GetName(i).ToLower();
+                                object val = dr[i];
+
+                                if (val == DBNull.Value)
+                                    continue;
+
+                                switch (colName)
+                                {
+                                    case "userdocdetid":
+                                        item.UserDocDetId = Convert.ToInt32(val);
+                                        break;
+                                    case "userid":
+                                        item.UserId = Convert.ToInt32(val);
+                                        break;
+                                    case "documentmasterid":
+                                        item.DocumentMasterId = Convert.ToInt32(val);
+                                        break;
+                                    case "filepath":
+                                        item.filepath = Convert.ToString(val);
+                                        break;
+                                    case "filename":
+                                        item.FileName = Convert.ToString(val);
+                                        break;
+                                    case "fileextension":
+                                        item.FileExtension = Convert.ToString(val);
+                                        break;
+                                    case "insertedby":
+                                        item.InsertedBy = Convert.ToInt32(val);
+                                        break;
+                                    case "inserteddate":
+                                        item.InsertedDate = Convert.ToDateTime(val);
+                                        break;
+                                    case "documenttype":
+                                        item.DocumentType = Convert.ToString(val);
+                                        break;
+                                }
+                            }
+
+                            list.Add(item);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Log the error if needed, but return empty list
+            }
+
+            return list;
+        }
+
+        // Resolves the owning user and reimbursement number for a reimbursement_id,
+        // via sp_get_reimbursement_owner_by_id (Database\sp_get_reimbursement_owner_by_id.sql).
+        public ReimbursementOwnerDO GetReimbursementOwnerById(int reimbursementId)
+        {
+            ReimbursementOwnerDO result = null;
+
+            try
+            {
+                List<MySqlParameter> parameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("p_reimbursement_id", reimbursementId)
+                };
+
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSpWithParam(
+                        parameters,
+                        "",
+                        "sp_get_reimbursement_owner_by_id"))
+                {
+                    if (dr != null && dr.Read())
+                    {
+                        result = new ReimbursementOwnerDO
+                        {
+                            ReimbursementId = Convert.ToInt32(dr["ReimbursementId"]),
+                            UserId = Convert.ToInt32(dr["UserId"]),
+                            ReimbursementNumber = Convert.ToString(dr["ReimbursementNumber"])
+                        };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Log the error if needed
+            }
+
+            return result;
         }
 
         public ResponseDO DeleteReimbursementDetails(string reimbursementNumber)

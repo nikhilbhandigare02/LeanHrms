@@ -429,7 +429,7 @@
                             <asp:TemplateField HeaderText="Action" ItemStyle-Width="100px">
                                 <ItemTemplate>
                                     <asp:LinkButton ID="lnkView" runat="server" CommandName="viewRole" title="View Role" CommandArgument='<%# Eval("Roleid") %>'>
-                      <i class="fa fa-edit"></i> 
+                     <%-- <i class="fa fa-edit"></i> --%>
           </asp:LinkButton>
                                     &nbsp;                                               
                     

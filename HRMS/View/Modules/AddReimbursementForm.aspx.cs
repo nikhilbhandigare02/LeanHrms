@@ -1,6 +1,9 @@
 using DataObject;
 using ProcessModel;
 using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -60,6 +63,7 @@ namespace HRMS.View.Modules
                     }
 
                     LoadReimbursementDetails(reimbursementNumber);
+                    BindReimbursementDocuments();
 
                     if (isViewMode)
                     {
@@ -175,6 +179,98 @@ namespace HRMS.View.Modules
                         ddlMonth.SelectedValue = details.claimDate.Month.ToString();
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ClientScript.RegisterStartupScript(
+                    GetType(),
+                    "error",
+                    $"Swal.fire('Error','{HttpUtility.JavaScriptStringEncode(ex.Message)}','error');",
+                    true);
+            }
+        }
+
+        // Lists documents uploaded against the reimbursement flow for the current user,
+        // via ReimbursementBL.GetReimbursementDocuments -> sp_getEmpReimbursementDocuments.
+        private void BindReimbursementDocuments()
+        {
+            try
+            {
+                int userId = Convert.ToInt32(Session["userId"]);
+                string reimbureseNo = txtReimbursementNumber.Text.ToString();
+                ReimbursementBL bl = new ReimbursementBL();
+                List<ReimbursementDocumentDO> documents = bl.GetReimbursementDocuments(userId, reimbureseNo) ?? new List<ReimbursementDocumentDO>();
+
+                rptReimbursementDocuments.DataSource = documents;
+                rptReimbursementDocuments.DataBind();
+
+                rptReimbursementDocuments.Visible = documents.Count > 0;
+                lblNoReimbursementDocuments.Visible = documents.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                ClientScript.RegisterStartupScript(
+                    GetType(),
+                    "error",
+                    $"Swal.fire('Error','{HttpUtility.JavaScriptStringEncode(ex.Message)}','error');",
+                    true);
+            }
+        }
+
+        protected void rptReimbursementDocuments_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (!string.Equals(e.CommandName, "DownloadReimbursementDocument", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                int userDocDetId;
+                if (!int.TryParse(Convert.ToString(e.CommandArgument), out userDocDetId))
+                {
+                    return;
+                }
+
+                int userId = Convert.ToInt32(Session["userId"]);
+                string reimbureseNo = txtReimbursementNumber.Text.ToString();
+                ReimbursementBL bl = new ReimbursementBL();
+                List<ReimbursementDocumentDO> documents = bl.GetReimbursementDocuments(userId, reimbureseNo) ?? new List<ReimbursementDocumentDO>();
+                ReimbursementDocumentDO document = documents.FirstOrDefault(d => d.UserDocDetId == userDocDetId);
+
+                if (document == null)
+                {
+                    ClientScript.RegisterStartupScript(GetType(), "warning", "Swal.fire('Warning','Document not found','warning');", true);
+                    return;
+                }
+
+                string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                if (string.IsNullOrWhiteSpace(documentsRoot))
+                {
+                    return;
+                }
+
+                if (documentsRoot.StartsWith("~"))
+                {
+                    documentsRoot = Server.MapPath(documentsRoot);
+                }
+
+                string physicalPath = Path.Combine(documentsRoot, document.filepath ?? string.Empty, (document.FileName ?? string.Empty) + document.FileExtension);
+
+                if (!File.Exists(physicalPath))
+                {
+                    ClientScript.RegisterStartupScript(GetType(), "warning", "Swal.fire('Warning','File not found on server','warning');", true);
+                    return;
+                }
+
+                FileInfo fileInfo = new FileInfo(physicalPath);
+                Response.Clear();
+                Response.ContentType = "application/octet-stream";
+                Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fileInfo.Name + "\"");
+                Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+                Response.TransmitFile(physicalPath);
+                Response.Flush();
+                Response.End();
             }
             catch (Exception ex)
             {

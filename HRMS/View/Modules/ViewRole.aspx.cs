@@ -450,7 +450,10 @@ namespace HRMS.View.Modules
                     }
                     else
                     {
-                        // Handle deletion failure
+                        string status = role.Status;
+                        string remark = role.Remarks;
+                        ClientScript.RegisterStartupScript(this.GetType(), "UserSavedScript", "showUserSavedMessage('" + status + "', '" + remark + "');", true);
+
                     }
                 }
                 else

@@ -216,6 +216,8 @@
 
                     <asp:BoundField DataField="claimType"
                         HeaderText="Claim Type" />
+                     <asp:BoundField DataField="userFullName"
+                          HeaderText="Employee Name" />
 
                     <asp:BoundField DataField="claimDate"
                         HeaderText="Claim Date"

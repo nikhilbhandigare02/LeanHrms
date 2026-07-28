@@ -16,5 +16,6 @@ namespace DataObject
         public string document { get; set; }
         public string remarks { get; set; }
         public string status { get; set; }
+        public string userFullName { get; set; }
     }
 }

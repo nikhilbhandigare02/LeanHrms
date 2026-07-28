@@ -102,7 +102,7 @@
                             <div class="form-group mb-0">
                                 <label>Select Menu</label>
                                 <div class="select-all-container">
-                                    <input type="checkbox" id="selectAllMenus" onclick="toggleSelectAll('<%= cbxMenu.ClientID %>', this.checked)" />
+                                    <input type="checkbox" id="selectAllMenus" onclick="toggleSelectAllMenus(this.checked)" />
                                     <label for="selectAllMenus" style="display: inline; margin-left: 6px; cursor: pointer;">Select All</label>
                                 </div>
                                 <div class="checkbox-list-container">
@@ -158,6 +158,34 @@
                 }
             }
         }
+
+        function toggleSelectAllMenus(isChecked) {
+            toggleSelectAll('<%= cbxMenu.ClientID %>', isChecked);
+            // Force a postback so cbxMenu_SelectedIndexChanged runs and the
+            // submenu list opens (when checked) or hides (when unchecked),
+            // same as it does for a manual checkbox click.
+            __doPostBack('<%= cbxMenu.UniqueID %>', '');
+        }
+
+        // Keeps a "Select All" checkbox in sync with its list's actual state.
+        // Every postback re-renders the whole page, so without this the plain
+        // HTML "Select All" checkbox always resets to unchecked and a second
+        // click would select-all again instead of unselecting.
+        function syncSelectAllState(checkBoxListId, selectAllId) {
+            var checkBoxList = document.getElementById(checkBoxListId);
+            var selectAll = document.getElementById(selectAllId);
+            if (checkBoxList && selectAll) {
+                var checkboxes = checkBoxList.getElementsByTagName('input');
+                var allChecked = checkboxes.length > 0;
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (!checkboxes[i].checked) {
+                        allChecked = false;
+                        break;
+                    }
+                }
+                selectAll.checked = allChecked;
+            }
+        }
     </script>
     <script type="text/javascript">
         window.onload = function () {
@@ -167,6 +195,9 @@
                 ddl.options[0].disabled = true;
                 ddl.options[0].style.color = 'gray';
             }
+
+            syncSelectAllState('<%= cbxMenu.ClientID %>', 'selectAllMenus');
+            syncSelectAllState('<%= cbx_submenu.ClientID %>', 'selectAllSubmenus');
         };
 </script>
 </asp:Content>

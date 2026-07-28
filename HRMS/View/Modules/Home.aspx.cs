@@ -370,10 +370,23 @@ namespace HRMS.View.Modules
                 eventDO.event_type = eventType.SelectedValue;
                 eventDO.event_date = Convert.ToDateTime(eventDate.Text);
 
-                if (!string.IsNullOrWhiteSpace(eventTime.Text))
-                    eventDO.event_time = TimeSpan.Parse(eventTime.Text);
-                else
-                    eventDO.event_time = null;
+                TimeSpan? eventTimeValue = !string.IsNullOrWhiteSpace(eventTime.Text)
+                    ? TimeSpan.Parse(eventTime.Text)
+                    : (TimeSpan?)null;
+
+                if (eventTimeValue.HasValue &&
+                    eventDO.event_date.Date == DateTime.Today &&
+                    eventTimeValue.Value <= DateTime.Now.TimeOfDay)
+                {
+                    ClientScript.RegisterStartupScript(
+                        this.GetType(),
+                        "EventSaved",
+                        "showNewsSavedMessage('Failed','Please select a future time.');",
+                        true);
+                    return;
+                }
+
+                eventDO.event_time = eventTimeValue;
 
                 eventDO.event_title = eventTitle.Text.Trim();
                 eventDO.event_description = eventDesc.Text.Trim();

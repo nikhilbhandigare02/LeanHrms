@@ -424,7 +424,7 @@ namespace ProcessModel
             }
         }
 
-        public List<UpdateReimbursementStatusDO> UpdatereimbSalaryStatus(int reimbursementId, string status, string updatedBy)
+        public List<UpdateReimbursementStatusDO> UpdatereimbSalaryStatus(int reimbursementId, int status, string updatedBy)
         {
             List<UpdateReimbursementStatusDO> listData = new List<UpdateReimbursementStatusDO>();
 
@@ -432,7 +432,7 @@ namespace ProcessModel
             {
                 using (MySqlConnection con = new MySqlConnection(Sqlconnection))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand("sp_update_reimbursement_status", con))
+                    using (MySqlCommand cmd = new MySqlCommand("sp_update_reimbursement_status_byID", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -448,11 +448,10 @@ namespace ProcessModel
                             {
                                 listData.Add(new UpdateReimbursementStatusDO
                                 {
-                                    reimbursement_id = Convert.ToInt32(dr["reimbursement_id"]),
-                                    status = dr["status"].ToString(),
-                                    updated_by = Convert.ToInt32(dr["updated_by"]),
-                                    Success = dr["Success"].ToString(),
-                                    Result = dr["Result"].ToString()
+                                    
+                                    status = dr["Status"].ToString(),
+   
+                                    Result = dr["Remarks"].ToString()
                                 });
                             }
                         }

@@ -261,8 +261,9 @@ namespace HRMS.View.Modules
                     now.Month.ToString("00"),
                     employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
 
-                string basePath = Path.Combine("EmployeeDocument",
+                string basePath = Path.Combine(
                     documentsRoot,
+                    "EmployeeDocument",
                     now.Year.ToString(),
                     now.Month.ToString("00"),
                     employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;

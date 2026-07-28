@@ -33,6 +33,19 @@
             margin-bottom: 16px;
         }
 
+        .count-ratio-badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 3px 12px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
         .table-container {
             background: white;
             border-radius: 12px;
@@ -74,6 +87,148 @@
             font-size: 14px;
             font-weight: 500;
         }
+
+        /* Reimbursement Documents modal */
+        #reimbDocsModal .modal-content {
+            border: none;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        #reimbDocsModal .modal-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-bottom: none;
+            padding: 18px 22px;
+        }
+
+        #reimbDocsModal .modal-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        #reimbDocsModal .modal-title small {
+            display: block;
+            font-weight: 400;
+            font-size: .75rem;
+            opacity: .9;
+            margin-top: 2px;
+        }
+
+        #reimbDocsModal .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: .9;
+        }
+
+        #reimbDocsModal .modal-body {
+            padding: 18px 20px;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .reimb-doc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            transition: background .15s ease, box-shadow .15s ease;
+        }
+
+            .reimb-doc-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .reimb-doc-item:hover {
+                background: #fff;
+                box-shadow: 0 4px 14px rgba(17,24,39,.08);
+            }
+
+        .reimb-doc-icon {
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .reimb-doc-icon.pdf {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+
+        .reimb-doc-icon.image {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .reimb-doc-icon.doc {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .reimb-doc-icon.other {
+            background: #94a3b8;
+        }
+
+        .reimb-doc-info {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .reimb-doc-name {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reimb-doc-meta {
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .reimb-doc-view-btn {
+            flex: 0 0 auto;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #e0f2fe;
+            background: #e0f2fe;
+            color: #0284c7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background .15s ease, color .15s ease;
+        }
+
+            .reimb-doc-view-btn:hover {
+                background: #0284c7;
+                color: #fff;
+            }
+
+        .reimb-doc-empty {
+            text-align: center;
+            padding: 30px 10px;
+            color: #94a3b8;
+        }
+
+            .reimb-doc-empty i {
+                font-size: 32px;
+                display: block;
+                margin-bottom: 10px;
+                opacity: .6;
+            }
     </style>
 </asp:Content>
 
@@ -137,7 +292,12 @@
     <div class="row mb-4">
         <div class="col-lg-12">
             <div class="table-container">
-                <h5 class="section-title">Employee-wise Salary Details</h5>
+                <h5 class="section-title">
+                    Employee-wise Salary Details
+                    <span class="count-ratio-badge">
+                        <asp:Literal ID="litSalaryCountRatio" runat="server"></asp:Literal>
+                    </span>
+                </h5>
 
                 <div class="row mb-3 align-items-end">
 
@@ -385,8 +545,8 @@
                             Width="220px">
 
                             <asp:ListItem Text="-- Select Status --" Value=""></asp:ListItem>
-                            <asp:ListItem Text="Approved" Value="Approved"></asp:ListItem>
-                            <asp:ListItem Text="Paid" Value="Paid"></asp:ListItem>
+                            <asp:ListItem Text="Approved" Value="168"></asp:ListItem>
+                            <asp:ListItem Text="Paid" Value="166"></asp:ListItem>
 
                         </asp:DropDownList>
 
@@ -460,7 +620,9 @@
                                 <th scope="col">Reimbursement Type</th>
                                 <th scope="col">Amount</th>
                                 <th scope="col">Date</th>
-                                <th scope="col">Status</th>
+                              
+                                <th scope="col">Documents</th>
+                                  <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <%--             <tbody>
@@ -490,7 +652,7 @@
                             </tr>
                         </tbody>--%>
                         <tbody>
-                            <asp:Repeater ID="rptEmployeeReimbursement" runat="server" OnItemDataBound="rptEmployeeReimbursement_ItemDataBound">
+                            <asp:Repeater ID="rptEmployeeReimbursement" runat="server" OnItemDataBound="rptEmployeeReimbursement_ItemDataBound" OnItemCommand="rptEmployeeReimbursement_ItemCommand">
                                 <ItemTemplate>
                                     <tr>
                                         <td><%# Eval("employee_name") %></td>
@@ -499,31 +661,41 @@
                                         <td>&#8377;<%# Convert.ToDecimal(Eval("claim_amount")).ToString("N2") %></td>
                                         <td><%# Convert.ToDateTime(Eval("claim_date")).ToString("dd MMM yyyy") %></td>
 
+                                        
                                         <td>
-                                            <asp:Panel ID="pnlreimbPending" runat="server" Visible='<%# Eval("status").ToString() != "Paid" %>'>
-                                                <asp:DropDownList
-                                                    ID="ddlreimbStatus"
-                                                    runat="server"
-                                                    CssClass="form-select form-select-sm"
-                                                    AutoPostBack="true"
-                                                    ToolTip='<%# Eval("reimbursement_id") %>'
-                                                    OnSelectedIndexChanged="ddlreimbStatus_SelectedIndexChanged">
-
-                                                    <asp:ListItem Value="Pending">Approved</asp:ListItem>
-                                                    <asp:ListItem Value="Paid">Paid</asp:ListItem>
-
-                                                </asp:DropDownList>
-                                            </asp:Panel>
-
-                                            <asp:Panel ID="pnlreimbPaid" runat="server"
-                                                Visible='<%# Eval("status").ToString() == "Paid" %>'>
-
-                                                <span class="paid-status">
-                                                    <%# Eval("status") %>
-                                                </span>
-
-                                            </asp:Panel>
+                                            <asp:LinkButton runat="server"
+                                                CssClass="btn btn-sm btn-outline-primary"
+                                                CommandName="ViewDocs"
+                                                CommandArgument='<%# Eval("reimbursement_id") %>'
+                                                CausesValidation="false">
+                                                <i class="far fa-eye"></i> View Doc
+                                            </asp:LinkButton>
                                         </td>
+                                        <td>
+    <asp:Panel ID="pnlreimbPending" runat="server" Visible='<%# Eval("status").ToString() != "Paid" %>'>
+        <asp:DropDownList
+            ID="ddlreimbStatus"
+            runat="server"
+            CssClass="form-select form-select-sm"
+            AutoPostBack="true"
+            ToolTip='<%# Eval("reimbursement_id") %>'
+            OnSelectedIndexChanged="ddlreimbStatus_SelectedIndexChanged">
+
+            <asp:ListItem Value="Pending">Approved</asp:ListItem>
+            <asp:ListItem Value="Paid">Paid</asp:ListItem>
+
+        </asp:DropDownList>
+    </asp:Panel>
+
+    <asp:Panel ID="pnlreimbPaid" runat="server"
+        Visible='<%# Eval("status").ToString() == "Paid" %>'>
+
+        <span class="paid-status">
+            <%# Eval("status") %>
+        </span>
+
+    </asp:Panel>
+</td>
                                     </tr>
                                 </ItemTemplate>
                             </asp:Repeater>
@@ -540,6 +712,52 @@
             </div>
         </div>
     </div>
+
+    <!-- Reimbursement Documents Modal -->
+    <div class="modal fade" id="reimbDocsModal" tabindex="-1" aria-labelledby="reimbDocsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reimbDocsModalLabel">
+                        Reimbursement Documents
+                        <small>
+                            <asp:Literal ID="litReimbDocsCount" runat="server"></asp:Literal>
+                        </small>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <asp:Repeater ID="rptReimbDocsModal" runat="server" OnItemCommand="rptReimbDocsModal_ItemCommand">
+                        <ItemTemplate>
+                            <div class="reimb-doc-item">
+                                <div class='<%# "reimb-doc-icon " + GetFileIconClass(Eval("FileExtension")) %>'>
+                                    <i class='<%# GetFileIconGlyph(Eval("FileExtension")) %>'></i>
+                                </div>
+                                <div class="reimb-doc-info">
+                                    <span class="reimb-doc-name" title='<%# Eval("FileName") %><%# Eval("FileExtension") %>'><%# Eval("FileName") %><%# Eval("FileExtension") %></span>
+                                    <span class="reimb-doc-meta">Uploaded <%# Eval("InsertedDate", "{0:dd MMM yyyy}") %></span>
+                                </div>
+                                <asp:LinkButton runat="server"
+                                    CssClass="reimb-doc-view-btn"
+                                    ToolTip="View / Download"
+                                    CommandName="DownloadReimbDoc"
+                                    CommandArgument='<%# Eval("UserDocDetId") %>'
+                                    CausesValidation="false">
+                                    <i class="far fa-eye"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                    <div class="reimb-doc-empty" id="reimbDocsEmptyState" runat="server" visible="false">
+                        <i class="far fa-folder-open"></i>
+                        <asp:Label ID="lblNoReimbDocs" runat="server" Text="No documents uploaded for this reimbursement."></asp:Label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <asp:HiddenField ID="hdnOpenReimbDocsModal" runat="server" Value="false" />
 
     <script>
         function toggleAmount(id, btn) {
@@ -638,6 +856,31 @@
             }
         });
     </script>
+    <script>
+        function showReimbDocsModal() {
+            var modalEl = document.getElementById('reimbDocsModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+        }
+
+        $(document).ready(function () {
+            if ($('#<%= hdnOpenReimbDocsModal.ClientID %>').val() === 'true') {
+                showReimbDocsModal();
+                $('#<%= hdnOpenReimbDocsModal.ClientID %>').val('false');
+            }
+        });
+
+        if (typeof Sys !== 'undefined' && Sys.WebForms) {
+            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+                if ($('#<%= hdnOpenReimbDocsModal.ClientID %>').val() === 'true') {
+                    showReimbDocsModal();
+                    $('#<%= hdnOpenReimbDocsModal.ClientID %>').val('false');
+                }
+            });
+        }
+    </script>
+
     <script>
         function showAccountsSavedMessage(status, remark) {
             Swal.fire({

@@ -3,6 +3,8 @@ using iText.Kernel.Pdf.Canvas.Parser.Data;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -169,6 +171,10 @@ namespace HRMS.View.Modules
                 rptEmployeeSalary.DataBind();
 
                 lblNoSalaryData.Visible = list.Count == 0;
+
+                int activeEmployeeCount;
+                int.TryParse(litActiveEmployeeCount.Text, out activeEmployeeCount);
+                litSalaryCountRatio.Text = list.Count + "/" + activeEmployeeCount;
             }
             catch (Exception ex)
             {
@@ -457,7 +463,15 @@ namespace HRMS.View.Modules
                 DropDownList ddl = (DropDownList)sender;
 
                 int reimbursementId = Convert.ToInt32(ddl.ToolTip);
-                string status = ddl.SelectedValue;
+
+                // sp_update_reimbursement_status_byID expects numeric status codes:
+                // 166 = Paid, 168 = Approved (ddlreimbStatus's "Pending" ListItem).
+                const int ReimbursementStatusPaid = 166;
+                const int ReimbursementStatusApproved = 168;
+
+                int status = ddl.SelectedValue.Equals("Paid", StringComparison.OrdinalIgnoreCase)
+                    ? ReimbursementStatusPaid
+                    : ReimbursementStatusApproved;
 
                 List<UpdateReimbursementStatusDO> result =
                     objBL.UpdatereimbSalaryStatus(
@@ -467,12 +481,12 @@ namespace HRMS.View.Modules
 
                 if (result != null && result.Count > 0)
                 {
-                    string Status = result[0].Success;
+                    string Status = result[0].status;
                     string remarks = result[0].Result;
 
                     if (Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+                        if (status == 166)
                         {
                             List<SalaryPaidMailDO> mailDetails = objBL.GetReimbPaidMailDetails(reimbursementId);
 
@@ -537,6 +551,178 @@ namespace HRMS.View.Modules
                         ddl.SelectedValue = status;
                     }
                 }
+            }
+        }
+
+        // Loads documents for the clicked reimbursement row (via
+        // ReimbursementBL.GetReimbursementOwnerById + GetReimbursementDocuments ->
+        // sp_get_reimbursement_owner_by_id / sp_getEmpReimbursementDocuments) and
+        // shows them in the reimbDocsModal popup.
+        protected void rptEmployeeReimbursement_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (!string.Equals(e.CommandName, "ViewDocs", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                int reimbursementId = Convert.ToInt32(e.CommandArgument);
+
+                ReimbursementBL bl = new ReimbursementBL();
+                ReimbursementOwnerDO owner = bl.GetReimbursementOwnerById(reimbursementId);
+
+                if (owner == null)
+                {
+                    reimbDocsEmptyState.Visible = true;
+                    litReimbDocsCount.Text = "";
+                    rptReimbDocsModal.DataSource = null;
+                    rptReimbDocsModal.DataBind();
+                    ViewState["ReimbDocsUserId"] = null;
+                    ViewState["ReimbDocsReimbNumber"] = null;
+                    hdnOpenReimbDocsModal.Value = "true";
+                    return;
+                }
+
+                ViewState["ReimbDocsUserId"] = owner.UserId;
+                ViewState["ReimbDocsReimbNumber"] = owner.ReimbursementNumber;
+
+                List<ReimbursementDocumentDO> documents =
+                    bl.GetReimbursementDocuments(owner.UserId, owner.ReimbursementNumber) ??
+                    new List<ReimbursementDocumentDO>();
+
+                rptReimbDocsModal.DataSource = documents;
+                rptReimbDocsModal.DataBind();
+
+                reimbDocsEmptyState.Visible = documents.Count == 0;
+                litReimbDocsCount.Text = documents.Count == 0
+                    ? ""
+                    : documents.Count + (documents.Count == 1 ? " file" : " files");
+                hdnOpenReimbDocsModal.Value = "true";
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "AccountsDashboard",
+                    "rptEmployeeReimbursement_ItemCommand",
+                    "Exception Message : " + ex.Message +
+                    " StackTrace : " + ex.StackTrace,
+                    UserId);
+            }
+        }
+
+        // Maps a document's file extension to an icon background style / glyph
+        // for the reimbDocsModal list, used from the aspx markup.
+        protected string GetFileIconClass(object fileExtension)
+        {
+            string ext = Convert.ToString(fileExtension).ToLowerInvariant().TrimStart('.');
+
+            switch (ext)
+            {
+                case "pdf":
+                    return "pdf";
+                case "jpg":
+                case "jpeg":
+                case "png":
+                case "gif":
+                case "bmp":
+                case "webp":
+                    return "image";
+                case "doc":
+                case "docx":
+                case "xls":
+                case "xlsx":
+                    return "doc";
+                default:
+                    return "other";
+            }
+        }
+
+        protected string GetFileIconGlyph(object fileExtension)
+        {
+            switch (GetFileIconClass(fileExtension))
+            {
+                case "pdf":
+                    return "far fa-file-pdf";
+                case "image":
+                    return "far fa-file-image";
+                case "doc":
+                    return "far fa-file-word";
+                default:
+                    return "far fa-file";
+            }
+        }
+
+        // Streams the selected reimbursement document to the browser for
+        // viewing/downloading from the reimbDocsModal popup.
+        protected void rptReimbDocsModal_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (!string.Equals(e.CommandName, "DownloadReimbDoc", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                int userDocDetId;
+                if (!int.TryParse(Convert.ToString(e.CommandArgument), out userDocDetId))
+                {
+                    return;
+                }
+
+                int userId = Convert.ToInt32(ViewState["ReimbDocsUserId"]);
+                string reimbNumber = Convert.ToString(ViewState["ReimbDocsReimbNumber"]);
+
+                ReimbursementBL bl = new ReimbursementBL();
+                List<ReimbursementDocumentDO> documents =
+                    bl.GetReimbursementDocuments(userId, reimbNumber) ?? new List<ReimbursementDocumentDO>();
+
+                ReimbursementDocumentDO document = documents.FirstOrDefault(d => d.UserDocDetId == userDocDetId);
+
+                if (document == null)
+                {
+                    ClientScript.RegisterStartupScript(GetType(), "warning", "Swal.fire('Warning','Document not found','warning');", true);
+                    return;
+                }
+
+                string documentsRoot = ConfigurationManager.AppSettings["EmployeeDocumentServerPath"];
+                if (string.IsNullOrWhiteSpace(documentsRoot))
+                {
+                    return;
+                }
+
+                if (documentsRoot.StartsWith("~"))
+                {
+                    documentsRoot = Server.MapPath(documentsRoot);
+                }
+
+                string physicalPath = Path.Combine(documentsRoot, document.filepath ?? string.Empty, (document.FileName ?? string.Empty) + document.FileExtension);
+
+                if (!File.Exists(physicalPath))
+                {
+                    ClientScript.RegisterStartupScript(GetType(), "warning", "Swal.fire('Warning','File not found on server','warning');", true);
+                    return;
+                }
+
+                FileInfo fileInfo = new FileInfo(physicalPath);
+                Response.Clear();
+                Response.ContentType = "application/octet-stream";
+                Response.AddHeader("Content-Disposition", "attachment; filename=\"" + fileInfo.Name + "\"");
+                Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+                Response.TransmitFile(physicalPath);
+                Response.Flush();
+                Response.End();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "AccountsDashboard",
+                    "rptReimbDocsModal_ItemCommand",
+                    "Exception Message : " + ex.Message +
+                    " StackTrace : " + ex.StackTrace,
+                    UserId);
             }
         }
 

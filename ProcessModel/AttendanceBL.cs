@@ -36,11 +36,13 @@ namespace ProcessModel
             return dropDownData;
         }
 
-        // Attendance list via sp_get_attendance_list (Database\sp_get_attendance_list.sql).
-        // Mapped manually (not via the getdatafromreder<T> reflection mapper) because
-        // LoginTime/LogoutTime are nullable TimeSpan, which Convert.ChangeType can't target.
-        // employeeId = 0 means "all employees"; fromDate/toDate = null means no bound
-        // on that side of the login_date range (advance search).
+        // Attendance list via sp_get_attendance_list (Database\sp_get_attendance_list.sql),
+        // which only filters by employee. Mapped manually (not via the getdatafromreder<T>
+        // reflection mapper) because LoginTime/LogoutTime are nullable TimeSpan, which
+        // Convert.ChangeType can't target. employeeId = 0 means "all employees".
+        //
+        // fromDate/toDate (advance search) are applied here in C#, not in the SP, by design
+        // - null on either side means no bound on that side of the login_date range.
         public List<EmpAttendanceDO> GetAttendanceList(int employeeId, DateTime? fromDate = null, DateTime? toDate = null)
         {
             List<EmpAttendanceDO> list = new List<EmpAttendanceDO>();
@@ -52,8 +54,8 @@ namespace ProcessModel
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@p_employee_id", employeeId);
-                    cmd.Parameters.AddWithValue("@p_from_date", (object)fromDate ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@p_to_date", (object)toDate ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_from_date", fromDate);
+                    cmd.Parameters.AddWithValue("@p_to_date", toDate);
                     con.Open();
 
                     using (MySqlDataReader dr = cmd.ExecuteReader())
@@ -73,6 +75,18 @@ namespace ProcessModel
                             });
                         }
                     }
+                }
+
+                if (fromDate.HasValue)
+                {
+                    DateTime fromDateOnly = fromDate.Value.Date;
+                    list = list.FindAll(a => a.LoginDate.Date >= fromDateOnly);
+                }
+
+                if (toDate.HasValue)
+                {
+                    DateTime toDateOnly = toDate.Value.Date;
+                    list = list.FindAll(a => a.LoginDate.Date <= toDateOnly);
                 }
             }
             catch (Exception ex)

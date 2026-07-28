@@ -26,6 +26,7 @@ namespace HRMS.View.Modules
                 }
                 string today = DateTime.Now.ToString("yyyy-MM-dd");
 
+                
                 txtFromDate.Text = today;
                 txtToDate.Text = today;
                 BindEmployeeFilter();

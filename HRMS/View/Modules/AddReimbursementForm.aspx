@@ -206,6 +206,43 @@
         .hidden-field {
             display: none;
         }
+
+        .reimbursement-documents-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .reimbursement-documents-table th {
+                background: #f8fafc;
+                padding: 10px 12px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #374151;
+                border-bottom: 1px solid var(--hrms-border);
+                text-align: left;
+            }
+
+            .reimbursement-documents-table td {
+                padding: 10px 12px;
+                font-size: 13px;
+                border-bottom: 1px solid #edf2f7;
+            }
+
+        .btn-link-action {
+            color: var(--hrms-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+            .btn-link-action:hover {
+                text-decoration: underline;
+            }
+
+        .hrms-muted-text {
+            color: var(--hrms-muted);
+            font-size: 13px;
+        }
     </style>
 </asp:Content>
 
@@ -255,9 +292,9 @@
                     <asp:TextBox ID="txtClaimDate" runat="server" CssClass="form-control datepicker"></asp:TextBox>
                 </div>
 
-                <div class="field-block" id="fieldPaymentMonth">
-                    <label>Payment Month</label>
-                    <asp:TextBox ID="txtPaymentMonth" runat="server" CssClass="form-control"></asp:TextBox>
+                <div class="field-block" id="fieldPaymentMonth" aria-disabled="true">
+                    <%--<label>Payment Month</label>--%>
+                    <asp:TextBox ID="txtPaymentMonth" runat="server" CssClass="form-control" Visible="false"></asp:TextBox>
                 </div>
 
                 <div class="field-block" id="fieldClaimAmount">
@@ -266,12 +303,39 @@
                 </div>
 
                 <div class="field-block" id="fieldDocument" style="grid-column: span 2;">
-                    <label>Document</label>
+                    <%--<label>Document</label>--%>
                     <div style="display: flex; gap: 10px;">
-                        <asp:TextBox ID="txtDocument" runat="server" CssClass="form-control" style="flex: 1;"></asp:TextBox>
+                        <asp:TextBox ID="txtDocument" runat="server" CssClass="form-control" style="flex: 1;" Visible="false"></asp:TextBox>
                         <asp:HiddenField ID="hdnDocumentData" runat="server" />
-                        <asp:Button ID="btnDownloadDocument" runat="server" Text="Download" CssClass="btn btn-primary" OnClick="btnDownloadDocument_Click" />
+                        <asp:Button ID="btnDownloadDocument" runat="server" Text="Download" CssClass="btn btn-primary" OnClick="btnDownloadDocument_Click" visible="false"/>
                     </div>
+                </div>
+
+                <div class="field-block" id="fieldReimbursementDocuments" style="grid-column: span 2;">
+                    <label>Uploaded Documents</label>
+                    <asp:Repeater ID="rptReimbursementDocuments" runat="server" OnItemCommand="rptReimbursementDocuments_ItemCommand">
+                        <HeaderTemplate>
+                            <table class="reimbursement-documents-table">
+                                <thead><tr><th>File</th><th>Uploaded On</th><th>Action</th></tr></thead>
+                                <tbody>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <tr>
+                                <td><%# Eval("FileName") %><%# Eval("FileExtension") %></td>
+                                <td><%# Eval("InsertedDate", "{0:dd-MMM-yyyy}") %></td>
+                                <td>
+                                    <asp:LinkButton runat="server" CommandName="DownloadReimbursementDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action" CausesValidation="false">
+                                        <i class="far fa-eye"></i> View / Download
+                                    </asp:LinkButton>
+                                </td>
+                            </tr>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                                </tbody>
+                            </table>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                    <asp:Label ID="lblNoReimbursementDocuments" runat="server" Text="No documents uploaded." CssClass="hrms-muted-text" Visible="false" />
                 </div>
             </div>
 

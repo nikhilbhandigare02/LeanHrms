@@ -37,6 +37,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("@p_email_id", file.EmailId));
                 mysqlParameters.Add(DataClass.GetParameter("@p_inserted_by", UserId));
                 mysqlParameters.Add(DataClass.GetParameter("@p_webPath", webPath));
+                mysqlParameters.Add(DataClass.GetParameter("@p_DocType", "EmpDoc"));
 
                 listdata = getDrtolistParam.getdatafromreder<userDocumentsDO>(
                     DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_saveUserDocument")

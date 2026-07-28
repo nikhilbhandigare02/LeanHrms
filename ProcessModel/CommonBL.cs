@@ -417,7 +417,7 @@ namespace ProcessModel
             {
                 getDrtolist getDrtolistParam = new getDrtolist();
                 List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
-                dropDownData = getDrtolistParam.getdatafromreder<DropDownData>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_get_employee_dropdown_salarySlip"));
+                dropDownData = getDrtolistParam.getdatafromreder<DropDownData>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_get_attendance_employee_dropdown"));
             }
             catch (Exception ex)
             {

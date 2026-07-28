@@ -48,6 +48,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="CommonDO.cs" />
     <Compile Include="EmployeeOnboardingDO.cs" />
+    <Compile Include="EmpAttendanceDO.cs" />
     <Compile Include="EmployeeLeaveListDO.cs" />
     <Compile Include="HolidayListDO.cs" />
     <Compile Include="HomeDO.cs" />

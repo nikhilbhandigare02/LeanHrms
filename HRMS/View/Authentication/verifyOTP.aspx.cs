@@ -39,7 +39,9 @@ namespace HRMS.View.Authentication
                         div_otp.Visible = true;
                         string status = "Success";
                                        string remark = "OTP generated successfully on your registered Email-ID";
-                                      ClientScript.RegisterStartupScript(
+                        //string remark = "OTP has been sent successfully to your registered Email ID.<br/><small>If you don't find it in your Inbox, please check your Spam/Junk folder.</small>";
+
+                        ClientScript.RegisterStartupScript(
                                          this.GetType(),
                                           "ShowRequiredFieldsScript",
                                           $"showDataSavedMessage('{status}', '{remark}');",

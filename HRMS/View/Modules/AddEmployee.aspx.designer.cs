@@ -231,6 +231,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl employeePhotoPreviewState;
 
         /// <summary>
+        /// imgEmployeePhotoThumbnail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Image imgEmployeePhotoThumbnail;
+
+        /// <summary>
         /// lblEmployeePhotoFileName control.
         /// </summary>
         /// <remarks>

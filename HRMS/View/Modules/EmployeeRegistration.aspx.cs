@@ -77,6 +77,25 @@ namespace HRMS.View.Modules
             BindLookup(ddlAttendancePolicy, "Attendance Policy");
             BindLookup(ddlWorkLocation, "Work Location");
             BindTextBox(txtEmployeeCode, "txtEmployeeCode"); //Sagar 10-07-2026
+            ListItem item = ddlNationality.Items.FindByText("Indian");
+            if (item != null)
+            {
+                ddlNationality.ClearSelection();
+                item.Selected = true;
+            }
+
+            ListItem item1 = ddlEmployeeStatus.Items.FindByText("Working");
+            if (item1 != null)
+            {
+                ddlEmployeeStatus.ClearSelection();
+                item1.Selected = true;
+            }
+            ListItem item2 = ddlEmployeeSubStatus.Items.FindByText("Active");
+            if (item2 != null)
+            {
+                ddlEmployeeSubStatus.ClearSelection();
+                item2.Selected = true;
+            }
         }
 
         private void BindDocumentUploadRows()
@@ -334,6 +353,7 @@ namespace HRMS.View.Modules
 
             DateTime now = DateTime.Now;
             string basePath1 = Path.Combine(
+                "EmployeeDocument",
                 now.Year.ToString(),
                 now.Month.ToString("00"),
                 employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;

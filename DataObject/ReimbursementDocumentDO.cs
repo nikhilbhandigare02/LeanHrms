@@ -2,7 +2,7 @@ using System;
 
 namespace DataObject
 {
-    public class ReimbursementOwnerDO
+    public class ReimbursementOwnerDO  ///new
     {
         public int ReimbursementId { get; set; }
         public int UserId { get; set; }

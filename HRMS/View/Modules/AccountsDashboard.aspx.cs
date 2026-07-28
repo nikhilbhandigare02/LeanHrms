@@ -171,10 +171,6 @@ namespace HRMS.View.Modules
                 rptEmployeeSalary.DataBind();
 
                 lblNoSalaryData.Visible = list.Count == 0;
-
-                int activeEmployeeCount;
-                int.TryParse(litActiveEmployeeCount.Text, out activeEmployeeCount);
-                litSalaryCountRatio.Text = list.Count + "/" + activeEmployeeCount;
             }
             catch (Exception ex)
             {

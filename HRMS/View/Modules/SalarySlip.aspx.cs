@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using iText.Html2pdf;
+using iText.Kernel.Pdf;
 using ListItem = System.Web.UI.WebControls.ListItem;
 
 namespace HRMS.View.Modules
@@ -187,33 +189,65 @@ namespace HRMS.View.Modules
                     return;
                 }
 
-                byte[] pdfBytes = GeneratePdfFromHtml(html);
+                int userIdInt = Convert.ToInt32(Session["userId"]);
+                string userDob = new SalarySlipBL().GetUserDob(userIdInt);
+                string password = employeeCode + userDob;
+
+                byte[] pdfBytes = GeneratePdfFromHtml(html, password);
                 string fileName = "SalarySlip_" + employeeCode + "_" + MonthName(month) + "_" + year + ".pdf";
 
                 Response.Clear();
                 Response.ContentType = "application/pdf";
                 Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
                 Response.BinaryWrite(pdfBytes);
-                Response.End();
-            }
-            catch (System.Threading.ThreadAbortException)
-            {
-                // Raised by Response.End(); expected, safe to ignore.
+                HttpContext.Current.ApplicationInstance.CompleteRequest();
             }
             catch (Exception ex)
             {
-                new CommonBL().fnStoreErrorLog("SalarySlip", "gvSlips_RowCommand", ex.Message + " Strace=" + ex.StackTrace, UserId);
-                ClientScript.RegisterStartupScript(GetType(), "Error",
-                    "showUserSavedMessage('Error', 'Unable to download salary slip.');", true);
+                if (!(ex is System.Threading.ThreadAbortException))
+                {
+                    new CommonBL().fnStoreErrorLog("SalarySlip", "gvSlips_RowCommand", ex.Message + " Strace=" + ex.StackTrace, UserId);
+                    ClientScript.RegisterStartupScript(GetType(), "Error",
+                        "showUserSavedMessage('Error', 'Unable to download salary slip.');", true);
+                }
             }
         }
 
-        // Renders the salary-slip HTML returned by the SP into a PDF.
-        private byte[] GeneratePdfFromHtml(string html)
+        // Renders the salary-slip HTML returned by the SP into a PDF with password protection.
+        private byte[] GeneratePdfFromHtml(string html, string password)
         {
             using (MemoryStream ms = new MemoryStream())
             {
                 HtmlConverter.ConvertToPdf(html, ms);
+
+                if (!string.IsNullOrWhiteSpace(password))
+                {
+                    byte[] pdfBytes = ms.ToArray();
+                    using (MemoryStream protectedMs = new MemoryStream())
+                    {
+                        using (MemoryStream inputStream = new MemoryStream(pdfBytes))
+                        using (PdfReader reader = new PdfReader(inputStream))
+                        {
+                            WriterProperties writerProperties = new WriterProperties()
+                                .SetStandardEncryption(
+                                    System.Text.Encoding.UTF8.GetBytes(password),
+                                    System.Text.Encoding.UTF8.GetBytes(password),
+                                    EncryptionConstants.ALLOW_PRINTING,
+                                    EncryptionConstants.ENCRYPTION_AES_256 | EncryptionConstants.DO_NOT_ENCRYPT_METADATA
+                                );
+
+                            using (PdfWriter writer = new PdfWriter(protectedMs, writerProperties))
+                            {
+                                using (PdfDocument pdfDoc = new PdfDocument(reader, writer))
+                                {
+                                    pdfDoc.Close();
+                                }
+                            }
+                        }
+                        return protectedMs.ToArray();
+                    }
+                }
+
                 return ms.ToArray();
             }
         }

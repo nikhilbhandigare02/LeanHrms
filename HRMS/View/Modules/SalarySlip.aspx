@@ -147,6 +147,9 @@
 
                     <!-- Results grid -->
                     <asp:Panel ID="pnlResults" runat="server" Visible="false">
+                        <div class="alert alert-info" style="margin-top: 20px; padding: 12px 16px; border-radius: 8px; font-size: 13px; background-color: #EFF6FF; border-color: #BFDBFE; color: #1E40AF;">
+                            <i class="fa fa-info-circle"></i>&nbsp;<strong>Password Hint:</strong> PDF password is your Employee Code + Date of Birth (in ddMMyyyy format). Example: EMP00101011990
+                        </div>
                         <div class="ss-grid-wrap">
                             <asp:GridView ID="gvSlips" runat="server" AutoGenerateColumns="false" CssClass="ss-grid"
                                 GridLines="None" Width="100%" OnRowCommand="gvSlips_RowCommand">
@@ -168,7 +171,8 @@
                                         <ItemTemplate>
                                             <asp:LinkButton ID="lnkDownload" runat="server" CssClass="ss-dl"
                                                 CommandName="DownloadSlip"
-                                                CommandArgument='<%# string.Format("{0}|{1}|{2}", Eval("employeecode"), Eval("Year"), Eval("Month")) %>'>
+                                                CommandArgument='<%# string.Format("{0}|{1}|{2}", Eval("employeecode"), Eval("Year"), Eval("Month")) %>'
+                                                title="Password: Employee Code + Date of Birth (ddMMyyyy)">
                                                 <i class="fa fa-download"></i>&nbsp;Download
                                             </asp:LinkButton>
                                         </ItemTemplate>

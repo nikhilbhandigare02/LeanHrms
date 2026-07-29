@@ -1004,5 +1004,47 @@ namespace ProcessModel
         }
 
 
+        public string GetUserDob(int userId)
+        {
+            string dob = string.Empty;
+
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["Sqlconnection"].ConnectionString;
+
+                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlCommand cmd = new MySqlCommand("Sp_GetEmployeeCodeForSalary", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+
+                    con.Open();
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            if (dr["dob"] != DBNull.Value)
+                            {
+                                DateTime dobDate = Convert.ToDateTime(dr["dob"]);
+                                dob = dobDate.ToString("ddMMyyyy");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "SalarySlipBL",
+                    "GetUserDob",
+                    "Exception Message=" + ex.Message + " StackTrace=" + ex.StackTrace,
+                    UserId.ToString());
+            }
+
+            return dob;
+        }
     }
 }

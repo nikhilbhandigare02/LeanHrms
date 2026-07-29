@@ -88,7 +88,7 @@
                             <div class="form-group mb-4">
                                 <label for="input-roles">User Role</label>
                                 <div class="mb-3 position-relative">
-                                    <asp:DropDownList ID="ddlrole" runat="server" CssClass="form-control" AutoPostBack="true">
+                                    <asp:DropDownList ID="ddlrole" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlrole_SelectedIndexChanged">
                                         <asp:ListItem Text="Please select" Value=""></asp:ListItem>
                                     </asp:DropDownList>
                                     <asp:RequiredFieldValidator ID="rfv_ddlrole" runat="server" ControlToValidate="ddlrole" InitialValue="0" ErrorMessage="User Role is required" ForeColor="Red" Display="Dynamic" ValidationGroup="SaveValidationGroup" />

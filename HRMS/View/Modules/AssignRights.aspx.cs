@@ -41,6 +41,74 @@ namespace HRMS.View.Modules
                 BindMenu("Bindmenu","");
             }
         }
+
+        protected void ddlrole_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // Clear all checkboxes first
+                foreach (ListItem item in cbxMenu.Items)
+                {
+                    item.Selected = false;
+                }
+                foreach (ListItem item in cbx_submenu.Items)
+                {
+                    item.Selected = false;
+                }
+                lbl_submenu.Visible = false;
+                SubmenuToParentMenuMap.Clear();
+
+                int roleId;
+                if (int.TryParse(ddlrole.SelectedValue, out roleId) && roleId > 0)
+                {
+                    assignRightsBL assignrights = new assignRightsBL();
+                    List<rightsDO> assignedRights = assignrights.GetAssignedRightsForCheckbox(roleId);
+
+                    if (assignedRights != null && assignedRights.Count > 0)
+                    {
+                        // Auto-select menus
+                        foreach (rightsDO right in assignedRights)
+                        {
+                            if (right.menuid > 0)
+                            {
+                                foreach (ListItem item in cbxMenu.Items)
+                                {
+                                    if (item.Value == right.menuid.ToString())
+                                    {
+                                        item.Selected = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Trigger menu selection to load submenus
+                        cbxMenu_SelectedIndexChanged(sender, e);
+
+                        // Auto-select submenus
+                        foreach (rightsDO right in assignedRights)
+                        {
+                            if (right.submenuid > 0)
+                            {
+                                foreach (ListItem item in cbx_submenu.Items)
+                                {
+                                    if (item.Value == right.submenuid.ToString())
+                                    {
+                                        item.Selected = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AssignRights", "ddlrole_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
         public void BindRoles()
         {
             List<DropDownData> list1 = new List<DropDownData>();

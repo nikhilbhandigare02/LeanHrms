@@ -25,7 +25,6 @@ namespace HRMS.View.Modules
         private bool _contactSectionComplete;
         private bool _educationSectionComplete;
         private bool _workExperienceSectionComplete;
-        private bool _certificationSectionComplete;
 
         private string OriginalOfficialEmail
         {
@@ -499,7 +498,6 @@ namespace HRMS.View.Modules
             SetSectionStatus("bankSectionStatus", _bankSectionComplete);
             SetSectionStatus("educationSectionStatus", _educationSectionComplete);
             SetSectionStatus("workExperienceSectionStatus", _workExperienceSectionComplete);
-            SetSectionStatus("certificationSectionStatus", _certificationSectionComplete);
         }
 
         private bool HasContactSectionData(UserDetailsDO userDetails)
@@ -554,29 +552,6 @@ namespace HRMS.View.Modules
             statusControl.InnerHtml = isComplete
                 ? "<i class='fas fa-check-circle'></i> Completed"
                 : "<i class='far fa-clock'></i> Pending";
-        }
-
-        private bool HasCertificationSectionData(UserDetailsDO userDetails)
-        {
-            if (userDetails == null)
-            {
-                return false;
-            }
-
-            bool hasCertificationFields = HasAnyText(
-                userDetails.CertificationName,
-                userDetails.CertificationAuthority,
-                userDetails.CertificateNumber,
-                FormatDate(userDetails.IssueDate),
-                FormatDate(userDetails.ExpiryDate),
-                userDetails.CertificationFile);
-
-            bool hasMeaningfulRenewalValue =
-                !string.IsNullOrWhiteSpace(userDetails.RenewalRequired) &&
-                !string.Equals(userDetails.RenewalRequired.Trim(), "No", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(userDetails.RenewalRequired.Trim(), "0", StringComparison.OrdinalIgnoreCase);
-
-            return hasCertificationFields || hasMeaningfulRenewalValue;
         }
 
         private Control FindControlRecursive(Control parent, string controlId)
@@ -644,7 +619,7 @@ namespace HRMS.View.Modules
             System.Text.StringBuilder html = new System.Text.StringBuilder();
             foreach (EmployeeEducationDetailsDO education in educationList)
             {
-                string certificateUrl = BuildCertificationViewUrl(education.CertificateFile);
+                string certificateUrl = BuildEducationViewUrl(education.CertificateFile);
                 bool isBase64Image = IsBase64ImageContent(education.CertificateFile);
                 bool isBase64Pdf = IsBase64PdfContent(education.CertificateFile);
                 string certificateCell = string.IsNullOrWhiteSpace(education.CertificateFile)
@@ -1372,6 +1347,12 @@ namespace HRMS.View.Modules
             return int.TryParse(ValueOf(value), out parsedValue) ? parsedValue : 0;
         }
 
+        private long ParseUiLong(string value)
+        {
+            long parsedValue;
+            return long.TryParse(ValueOf(value), out parsedValue) ? parsedValue : 0;
+        }
+
         private string GetEmployeePhotoValue()
         {
             if (fileEmployeePhoto != null &&
@@ -1813,20 +1794,15 @@ namespace HRMS.View.Modules
                         SetText(txtYearOfPassing, userDetails.YearOfPassing);
                         SetText(txtPercentageCgpa, userDetails.PercentageCgpa);
                         BindDocumentLink(lnkEducationCertificate, fileEducationCertificate, userDetails.EducationCertificateFile);
-                        SetText(txtCertificationName, userDetails.CertificationName);
-                        SetText(txtCertificationAuthority, userDetails.CertificationAuthority);
-                        SetText(txtCertificateNumber, userDetails.CertificateNumber);
-                        SetText(txtIssueDate, FormatDateForInput(userDetails.IssueDate));
-                        SetText(txtExpiryDate, FormatDateForInput(userDetails.ExpiryDate));
-                        SetText(txtRenewalRequired, userDetails.RenewalRequired);
-                        SetLabelText(lblCertificationName, userDetails.CertificationName);
-                        SetLabelText(lblCertificationAuthority, userDetails.CertificationAuthority);
-                        SetLabelText(lblCertificateNumber, userDetails.CertificateNumber);
-                        SetLabelText(lblCertificationIssueDate, FormatDate(userDetails.IssueDate));
-                        SetLabelText(lblCertificationExpiryDate, FormatDate(userDetails.ExpiryDate));
-                        SetLabelText(lblRenewalRequired, string.IsNullOrWhiteSpace(userDetails.RenewalRequired) ? "No" : userDetails.RenewalRequired);
-                        BindCertificationFile(userDetails.CertificationFile);
-                        _certificationSectionComplete = HasCertificationSectionData(userDetails);
+                        _educationSectionComplete = HasAnyText(
+                            userDetails.QualificationLevel,
+                            userDetails.DegreeName,
+                            userDetails.Specialization,
+                            userDetails.University,
+                            userDetails.InstituteName,
+                            userDetails.YearOfPassing,
+                            userDetails.PercentageCgpa,
+                            userDetails.EducationCertificateFile);
                         ClearAssetForm();
 
                         if (userDetails.reporting_manager != null)
@@ -1923,6 +1899,9 @@ namespace HRMS.View.Modules
             Func<int, int, int, int> pickInt = (a, b, c) =>
                 a > 0 ? a : (b > 0 ? b : (c > 0 ? c : 0));
 
+            Func<long, long, long, long> pickLong = (a, b, c) =>
+                a > 0 ? a : (b > 0 ? b : (c > 0 ? c : 0));
+
             result.EmployeeCode = pickString(result.EmployeeCode, primary != null ? primary.EmployeeCode : null, mergedBase != null ? mergedBase.EmployeeCode : null);
             result.Username = pickString(result.Username, primary != null ? primary.Username : null, mergedBase != null ? mergedBase.Username : null);
             result.user_fullname = pickString(result.user_fullname, primary != null ? primary.user_fullname : null, mergedBase != null ? mergedBase.user_fullname : null);
@@ -1935,8 +1914,8 @@ namespace HRMS.View.Modules
             result.CompanyId = pickInt(result.CompanyId, primary != null ? primary.CompanyId : 0, mergedBase != null ? mergedBase.CompanyId : 0);
             result.company_name = pickString(result.company_name, primary != null ? primary.company_name : null, mergedBase != null ? mergedBase.company_name : null);
 
-            result.ESIC_no = pickInt(result.ESIC_no, primary != null ? primary.ESIC_no : 0, mergedBase != null ? mergedBase.ESIC_no : 0);
-            result.PF_no = pickInt(result.PF_no, primary != null ? primary.PF_no : 0, mergedBase != null ? mergedBase.PF_no : 0);
+            result.ESIC_no = pickLong(result.ESIC_no, primary != null ? primary.ESIC_no : 0, mergedBase != null ? mergedBase.ESIC_no : 0);
+            result.PF_no = pickLong(result.PF_no, primary != null ? primary.PF_no : 0, mergedBase != null ? mergedBase.PF_no : 0);
             result.department = pickString(result.department, primary != null ? primary.department : null, mergedBase != null ? mergedBase.department : null);
             result.branch = pickString(result.branch, primary != null ? primary.branch : null, mergedBase != null ? mergedBase.branch : null);
             result.division = pickString(result.division, primary != null ? primary.division : null, mergedBase != null ? mergedBase.division : null);
@@ -2169,62 +2148,12 @@ namespace HRMS.View.Modules
             }
         }
 
-        private void BindCertificationFile(string filePath)
-        {
-            string url = BuildCertificationViewUrl(filePath);
-            bool hasFile = !string.IsNullOrWhiteSpace(url);
-            bool isBase64Image = IsBase64ImageContent(filePath);
-            bool isBase64Pdf = IsBase64PdfContent(filePath);
-            string normalizedFilePath = Convert.ToString(filePath ?? string.Empty).Trim();
-
-            if (lnkCertificationFile != null)
-            {
-                lnkCertificationFile.NavigateUrl = url;
-                lnkCertificationFile.Visible = hasFile;
-                lnkCertificationFile.Attributes["data-file-url"] = url;
-                lnkCertificationFile.Attributes["data-file-type"] = isBase64Pdf ? "pdf" : "image";
-
-                if (isBase64Image || isBase64Pdf)
-                {
-                    lnkCertificationFile.Target = string.Empty;
-                    lnkCertificationFile.Attributes["onclick"] = "return openCertificationFileModal(this);";
-                }
-                else
-                {
-                    lnkCertificationFile.Target = "_blank";
-                    lnkCertificationFile.Attributes.Remove("onclick");
-                }
-            }
-
-            if (lblCertificationFileName != null)
-            {
-                lblCertificationFileName.Text = hasFile ? GetFriendlyDocumentFileName(normalizedFilePath, isBase64Pdf ? "Certificate.pdf" : "Certificate.png") : "-";
-            }
-
-            if (lblCertificationFileMeta != null)
-            {
-                lblCertificationFileMeta.Text = hasFile
-                    ? (isBase64Pdf ? "PDF  .  File available in employee record" : "Image  .  File available in employee record")
-                    : "-";
-            }
-
-            if (lblCertificationNoFile != null)
-            {
-                lblCertificationNoFile.Visible = !hasFile;
-            }
-        }
-
-        private string BuildCertificationViewUrl(string filePath)
+        private string BuildEducationViewUrl(string filePath)
         {
             string value = Convert.ToString(filePath ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(value))
             {
                 return string.Empty;
-            }
-
-            if (IsBase64PdfContent(value))
-            {
-                return BuildBase64PdfUrl(value);
             }
 
             if (IsBase64ImageContent(value))
@@ -2416,8 +2345,8 @@ namespace HRMS.View.Modules
 
                     user.company_id = Convert.ToInt32(ddlcompany.SelectedValue);
 
-                    user.ESIC_no = string.IsNullOrWhiteSpace(txtESICNo.Text) ? 0 : Convert.ToInt32(txtESICNo.Text);
-                    user.PF_no = string.IsNullOrWhiteSpace(txtPFNo.Text) ? 0 : Convert.ToInt32(txtPFNo.Text);
+                    user.ESIC_no = string.IsNullOrWhiteSpace(txtESICNo.Text) ? 0 : Convert.ToInt64(txtESICNo.Text);
+                    user.PF_no = string.IsNullOrWhiteSpace(txtPFNo.Text) ? 0 : Convert.ToInt64(txtPFNo.Text);
                     user.branch = txtbranch.Text;
                     user.department = txtdept.Text;
                     user.division = string.Empty;
@@ -2519,8 +2448,8 @@ namespace HRMS.View.Modules
                     user.EmergencyContactRelationship = ValueOf(txtEmergencyContactRelationship);
 
                     user.company_id = Convert.ToInt32(ddlcompany.SelectedValue);
-                    user.ESIC_no = ParseUiInt(ValueOf(txtESICNo));
-                    user.PF_no = ParseUiInt(ValueOf(txtPFNo));
+                    user.ESIC_no = ParseUiLong(ValueOf(txtESICNo));
+                    user.PF_no = ParseUiLong(ValueOf(txtPFNo));
                     user.branch = txtbranch.Text;
                     user.department = txtdept.Text;
                     user.division = string.Empty;

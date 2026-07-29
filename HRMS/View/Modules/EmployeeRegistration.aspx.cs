@@ -445,6 +445,7 @@ namespace HRMS.View.Modules
                 EmployeeCategory = SelectedValueOf(ddlEmployeeCategory),
               
                 JoiningDate = ParseDate(ValueOf(txtJoiningDate)),
+                PfNo = ValueOf(txtPFNumber),
                 //ConfirmationDate = ParseDate(ValueOf(txtConfirmationDate)),
                 //ProbationEndDate = ParseDate(ValueOf(txtProbationEndDate)),
                 RetirementDate = null,

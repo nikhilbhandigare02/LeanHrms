@@ -86,9 +86,11 @@ namespace Lean.View.Layout
             }
         }
 
-        private static void EnsureOnboardingMenu(List<MenuData> menuDataList)
+        private static void EnsureOnboardingMenu(List<MenuData> menuDataList,int roleID)
         {
-            if (menuDataList == null)
+             
+
+            if (menuDataList == null || roleID == 6)
             {
                 return;
             }
@@ -280,6 +282,7 @@ namespace Lean.View.Layout
                 MenuDO menuDO = new MenuDO();
                 menuDO.type = "GetMenuListDynamic";
                 menuDO.userId = Convert.ToString(Session["userid"]);
+                int roleId = Convert.ToInt32(Session["roleid"]);
                 List<MenuData> menuDataList = userBAL.GetMenuHierarchy(menuDO);
                 menuDataList = menuDataList
                     .Where(x =>
@@ -295,7 +298,7 @@ namespace Lean.View.Layout
                     .ToList();
 
                 MoveRemunerationFormToOnboarding(menuDataList);
-                EnsureOnboardingMenu(menuDataList);
+                EnsureOnboardingMenu(menuDataList, roleId);
 
                 foreach (var menu in menuDataList)
                 {

@@ -68,6 +68,7 @@ namespace DataObject
         public string AssetCondition { get; set; }
         public string AssetStatus { get; set; }
         public int InsertedBy { get; set; }
+        public string PfNo { get; set; }
     }
 
     public class EmployeeOnboardingResponseDO

@@ -42,13 +42,13 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Literal litActiveEmployeeCount;
 
         /// <summary>
-        /// litSalaryCountRatio control.
+        /// litSalaryGridCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSalaryCountRatio;
+        protected global::System.Web.UI.WebControls.Literal litSalaryGridCount;
 
         /// <summary>
         /// lblSearchBy control.
@@ -285,31 +285,22 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Label lblnoreimbdata;
 
         /// <summary>
-        /// litReimbDocsCount control.
+        /// hdnReimbDocsUserId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litReimbDocsCount;
+        protected global::System.Web.UI.WebControls.HiddenField hdnReimbDocsUserId;
 
         /// <summary>
-        /// rptReimbDocsModal control.
+        /// hdnReimbDocsNumber control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptReimbDocsModal;
-
-        /// <summary>
-        /// reimbDocsEmptyState control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl reimbDocsEmptyState;
+        protected global::System.Web.UI.WebControls.HiddenField hdnReimbDocsNumber;
 
         /// <summary>
         /// lblNoReimbDocs control.
@@ -321,12 +312,12 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Label lblNoReimbDocs;
 
         /// <summary>
-        /// hdnOpenReimbDocsModal control.
+        /// rptReimbDocs control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnOpenReimbDocsModal;
+        protected global::System.Web.UI.WebControls.Repeater rptReimbDocs;
     }
 }

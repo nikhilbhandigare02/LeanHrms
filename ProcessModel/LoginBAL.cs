@@ -36,6 +36,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_Result", MySqlDbType.VarChar, 100));
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_Remark", MySqlDbType.VarChar, 200));
                 mysqlParameters.Add(DataClass.GetOutputParameter("p_PassResetFlag", MySqlDbType.VarChar, 100));
+                mysqlParameters.Add(DataClass.GetOutputParameter("p_roleId", MySqlDbType.VarChar, 100));
 
                 lstLoginDetails = (from ii in getDrtolistParam.getdatafromreder<LoginDO>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, "alpha_hrms", "sp_authentication"))
                                    select ii).FirstOrDefault();

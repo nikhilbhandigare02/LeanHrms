@@ -129,6 +129,7 @@ namespace HRMS.View.Authentication
 
                         Session["userId"] = Convert.ToInt32(un);
                         Session["userrole"] = login.UserRole;
+                        Session["roleid"] = login.roleId;
                         int sessionCompanyId = loginBAL.GetCompanyIdByUserId(Convert.ToInt32(un));
                         Session["company_id"] = sessionCompanyId;
 

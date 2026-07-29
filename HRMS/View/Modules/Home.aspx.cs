@@ -23,6 +23,7 @@ namespace HRMS.View.Modules
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
+            int roleId = Convert.ToInt32(Session["roleid"]);
             if (!IsPostBack)
             {
                 eventDate.Attributes["min"] = DateTime.Today.ToString("yyyy-MM-dd");
@@ -49,6 +50,13 @@ namespace HRMS.View.Modules
                 BindUserName();
                 BindBirthdays();
                 BindBanner();
+
+                if (roleId == 6)
+                {
+                    btnaddNews.Visible = false;
+                    btnsendmail.Visible = false;
+                    btnAddEvent.Visible = false;
+                }
             }
         }
         public void BindUserName()

@@ -18,5 +18,6 @@ namespace DataObject
         public string passresetflag { get; set; }
 
         public string UserRole { get; set; }
+        public int roleId { get; set; }
     }
 }

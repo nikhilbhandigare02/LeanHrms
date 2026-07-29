@@ -53,12 +53,17 @@ namespace HRMS.View.Modules
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            int roleId = Convert.ToInt32(Session["roleid"]);
             if (Session["userId"] == null)
             {
                 Response.Redirect("~/view/authentication/login.aspx", false);
                 return;
             }
-
+            if (roleId == 6)
+            {
+                Response.Redirect("~/view/Modules/Home.aspx", false);
+                return;
+            }
             if (!IsPostBack)
             {
                 ApprovalOptions = GetApprovalOptionList();

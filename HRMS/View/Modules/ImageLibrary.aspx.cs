@@ -17,6 +17,7 @@ namespace HRMS.View.Modules
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
+            int roleId = Convert.ToInt32(Session["roleid"]);
 
             if (!IsPostBack)
             {
@@ -25,7 +26,12 @@ namespace HRMS.View.Modules
                     Response.Redirect("~/view/authentication/login.aspx", false);
                     return;
                 }
-
+                if (roleId == 6)
+                {
+                    Toast("Error", "You do not have rights here");
+                    Response.Redirect("~/view/Modules/Home.aspx", false);
+                    return;
+                }
                 BindImages();
             }
         }

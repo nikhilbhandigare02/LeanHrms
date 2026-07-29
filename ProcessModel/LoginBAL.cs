@@ -209,25 +209,62 @@ namespace ProcessModel
             }
         }
 
+        //public List<LoginBO> forgetPassBal(LoginBO login)
+        //{
+        //    List<LoginBO> listdata = new List<LoginBO>();
+        //    try
+        //    {
+        //        getDrtolist getDrtolistParam = new getDrtolist();
+        //        List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+        //        mysqlParameters.Add(DataClass.GetParameter("@p_userId", login.UserId));
+        //        mysqlParameters.Add(DataClass.GetParameter("@p_password", login.Password));
+        //        listdata = getDrtolistParam.getdatafromreder<LoginBO>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_forgetpass"));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        CommonBL errorlog = new CommonBL();
+        //        errorlog.fnStoreErrorLog("LoginBAL", "forgetPassBal", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+        //    }
+        //    return listdata;
+        //}
+
         public List<LoginBO> forgetPassBal(LoginBO login)
         {
             List<LoginBO> listdata = new List<LoginBO>();
+
             try
             {
-                getDrtolist getDrtolistParam = new getDrtolist();
-                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
-                mysqlParameters.Add(DataClass.GetParameter("@p_userId", login.UserId));
-                mysqlParameters.Add(DataClass.GetParameter("@p_password", login.Password));
-                listdata = getDrtolistParam.getdatafromreder<LoginBO>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_forgetpass"));
+                string connectionString = ConfigurationManager.ConnectionStrings["Sqlconnection"].ConnectionString;
+
+                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlCommand cmd = new MySqlCommand("sp_forgetpass", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@p_userId", login.UserId);
+                    cmd.Parameters.AddWithValue("@p_password", login.Password);
+
+                    con.Open();
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        getDrtolist mapper = new getDrtolist();
+                        listdata = mapper.getdatafromreder<LoginBO>(reader);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("LoginBAL", "forgetPassBal", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog(
+                    "LoginBAL",
+                    "forgetPassBal",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace,
+                    UserId);
             }
+
             return listdata;
         }
-
         public List<LoginBO> GetUserIdByUsername(LoginBO login)
         {
             List<LoginBO> listdata = new List<LoginBO>();

@@ -1783,6 +1783,7 @@
                                 <asp:ListItem Text="6 Months" Value="6" Selected="True"></asp:ListItem>
                             </asp:DropDownList>
                         </div>
+                        <div class="field-block"><label>PF Number</label><asp:TextBox ID="txtPFNo" runat="server" CssClass="form-control" placeholder="Enter PF number" /></div>
                         <div class="field-block"><label>Confirmation Date</label><asp:TextBox ID="txtConfirmationDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
                         <div class="field-block"><label>Probation End Date</label><asp:TextBox ID="txtProbationEndDate" runat="server" CssClass="form-control" TextMode="Date" /></div>
                         <div class="field-block"><label class="required-label">Employee Status</label><asp:DropDownList ID="txtEmployeeStatus" runat="server" CssClass="form-control custom-dropdown" /></div>
@@ -1972,84 +1973,6 @@
                 </div>
             </details>
 
-            <details class="update-section">
-                <summary>
-                    <span class="section-icon"><i class="fas fa-award"></i></span>
-                    <span class="section-title">Professional Certifications</span>
-                    <span class="section-owner">Employee</span>
-                    <span id="certificationSectionStatus" runat="server" class="section-status pending"><i class="far fa-clock"></i> Pending</span>
-                    <i class="fas fa-chevron-down section-chevron"></i>
-                </summary>
-                <div class="section-body">
-                    <asp:TextBox ID="txtCertificationName" runat="server" CssClass="form-control" style="display:none;" />
-                    <asp:TextBox ID="txtCertificationAuthority" runat="server" CssClass="form-control" style="display:none;" />
-                    <asp:TextBox ID="txtCertificateNumber" runat="server" CssClass="form-control" style="display:none;" />
-                    <asp:TextBox ID="txtIssueDate" runat="server" CssClass="form-control" style="display:none;" />
-                    <asp:TextBox ID="txtExpiryDate" runat="server" CssClass="form-control" style="display:none;" />
-                    <asp:TextBox ID="txtRenewalRequired" runat="server" CssClass="form-control" style="display:none;" />
-                    <input id="fileCertification" runat="server" type="file" class="form-control" style="display:none;" />
-
-                    <div class="certification-view-card">
-                        <div class="certification-view-grid">
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="far fa-id-badge"></i></span>
-                                <span class="certification-view-label">Certification Name</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblCertificationName" runat="server" CssClass="certification-view-value" />
-                            </div>
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="fas fa-university"></i></span>
-                                <span class="certification-view-label">Certification Authority</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblCertificationAuthority" runat="server" CssClass="certification-view-value" />
-                            </div>
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="fas fa-hashtag"></i></span>
-                                <span class="certification-view-label">Certificate Number</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblCertificateNumber" runat="server" CssClass="certification-view-value" />
-                            </div>
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="far fa-calendar-alt"></i></span>
-                                <span class="certification-view-label">Issue Date</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblCertificationIssueDate" runat="server" CssClass="certification-view-value" />
-                            </div>
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="far fa-calendar"></i></span>
-                                <span class="certification-view-label">Expiry Date</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblCertificationExpiryDate" runat="server" CssClass="certification-view-value" />
-                            </div>
-                            <div class="certification-view-item">
-                                <span class="certification-view-icon"><i class="fas fa-sync-alt"></i></span>
-                                <span class="certification-view-label">Renewal Required</span>
-                                <span class="certification-view-colon">:</span>
-                                <asp:Label ID="lblRenewalRequired" runat="server" CssClass="certification-view-pill" />
-                            </div>
-                        </div>
-
-                        <div class="certification-file-panel">
-                            <div class="certification-file-card">
-                                <div class="certification-file-info">
-                                    <div class="certification-file-icon"><i class="far fa-file-pdf"></i></div>
-                                    <div class="certification-file-meta">
-                                        <div class="certification-file-label">Certificate File</div>
-                                        <asp:Label ID="lblCertificationFileName" runat="server" CssClass="certification-file-name" />
-                                        <div class="certification-file-submeta"><asp:Label ID="lblCertificationFileMeta" runat="server" /></div>
-                                    </div>
-                                </div>
-                                <asp:HyperLink ID="lnkCertificationFile" runat="server" CssClass="certification-file-button" Target="_blank" Visible="false">
-                                    <i class="far fa-eye"></i> View Certificate
-                                </asp:HyperLink>
-                                <asp:Label ID="lblCertificationNoFile" runat="server" CssClass="certification-empty-file" Visible="false" Text="No certificate uploaded." />
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-            </details>
 
             <details class="update-section">
                 <summary>
@@ -2333,7 +2256,6 @@
             <asp:Label runat="server" ID="lblpass">Password</asp:Label>
             <asp:TextBox ID="txt_password" runat="server" TextMode="Password" />
             <asp:TextBox ID="txtESICNo" runat="server" Text="0" />
-            <asp:TextBox ID="txtPFNo" runat="server" Text="0" />
         </div>
 
         <div class="employee-update-actions">

@@ -1121,6 +1121,7 @@
                         <div class="form-group"><label class="is-required">Employee Category</label><asp:DropDownList ID="ddlEmployeeCategory" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="employeeCategoryRequiredMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Joining Date</label><input id="txtJoiningDate" runat="server" class="form-control-modern" type="date" /><span id="joiningDateRequiredMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Probation Period</label><asp:DropDownList ID="ddlProbationPeriod" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="probationPeriodRequiredMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label>PF Number</label><input id="txtPFNumber" runat="server" class="form-control-modern" placeholder="Enter PF number" />
 <%--                        <div class="form-group"><label>Confirmation Date</label><input id="txtConfirmationDate" runat="server" class="form-control-modern" type="date" disabled /></div>
                         <div class="form-group"><label>Probation End Date</label><input id="txtProbationEndDate" runat="server" class="form-control-modern" type="date" disabled /></div>--%>
                       <div class="form-group">

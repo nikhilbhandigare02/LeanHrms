@@ -70,9 +70,9 @@ namespace DataObject
         public Int32 company_id { get; set; }
         public string company_name { get; set; }
 
-        public int ESIC_no { get; set; }
+        public long ESIC_no { get; set; }
 
-        public int PF_no { get; set; }
+        public long PF_no { get; set; }
 
         public string department { get; set; }
 
@@ -105,6 +105,7 @@ namespace DataObject
         public DateTime? PassportExpiryDate { get; set; }
         public string EmployeePhoto { get; set; }
         public string EmployeeStatus { get; set; }
+        public string EmployeeSubStatus { get; set; }
         public int NoticePeriod { get; set; }
         public DateTime? ExitDate { get; set; }
         public string SeparationReason { get; set; }

@@ -282,6 +282,9 @@ namespace HRMS.View.Modules
             Func<int, int, int, int> pickInt = (a, b, c) =>
                 a > 0 ? a : (b > 0 ? b : (c > 0 ? c : 0));
 
+            Func<long, long, long, long> pickLong = (a, b, c) =>
+                a > 0 ? a : (b > 0 ? b : (c > 0 ? c : 0));
+
             result.EmployeeCode = pickString(result.EmployeeCode, primary != null ? primary.EmployeeCode : null, mergedBase != null ? mergedBase.EmployeeCode : null);
             result.Username = pickString(result.Username, primary != null ? primary.Username : null, mergedBase != null ? mergedBase.Username : null);
             result.user_fullname = pickString(result.user_fullname, primary != null ? primary.user_fullname : null, mergedBase != null ? mergedBase.user_fullname : null);
@@ -294,8 +297,8 @@ namespace HRMS.View.Modules
             result.CompanyId = pickInt(result.CompanyId, primary != null ? primary.CompanyId : 0, mergedBase != null ? mergedBase.CompanyId : 0);
             result.company_name = pickString(result.company_name, primary != null ? primary.company_name : null, mergedBase != null ? mergedBase.company_name : null);
 
-            result.ESIC_no = pickInt(result.ESIC_no, primary != null ? primary.ESIC_no : 0, mergedBase != null ? mergedBase.ESIC_no : 0);
-            result.PF_no = pickInt(result.PF_no, primary != null ? primary.PF_no : 0, mergedBase != null ? mergedBase.PF_no : 0);
+            result.ESIC_no = pickLong(result.ESIC_no, primary != null ? primary.ESIC_no : 0, mergedBase != null ? mergedBase.ESIC_no : 0);
+            result.PF_no = pickLong(result.PF_no, primary != null ? primary.PF_no : 0, mergedBase != null ? mergedBase.PF_no : 0);
             result.department = pickString(result.department, primary != null ? primary.department : null, mergedBase != null ? mergedBase.department : null);
             result.branch = pickString(result.branch, primary != null ? primary.branch : null, mergedBase != null ? mergedBase.branch : null);
             result.division = pickString(result.division, primary != null ? primary.division : null, mergedBase != null ? mergedBase.division : null);

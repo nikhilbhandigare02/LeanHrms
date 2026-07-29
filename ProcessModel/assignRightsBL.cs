@@ -150,5 +150,53 @@ private string DBName = ConfigurationManager.AppSettings["DBName"];
             }
             return result;
         }
+
+        public List<rightsDO> GetAssignedRightsForCheckbox(int roleId)
+        {
+            List<rightsDO> listdata = new List<rightsDO>();
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(MySqlconnection))
+                {
+                    conn.Open();
+
+                    using (MySqlCommand cmd = new MySqlCommand("Sp_getassignrightsforcheckbox", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@p_type", "getrightdata");
+                        cmd.Parameters.AddWithValue("@p_role", roleId);
+
+                        using (MySqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                rightsDO obj = new rightsDO
+                                {
+                                    userrightid = dr["userrightid"] != DBNull.Value ? dr["userrightid"].ToString() : string.Empty,
+                                    roleid = dr["roleid"] != DBNull.Value ? Convert.ToInt32(dr["roleid"]) : 0,
+                                    roledescription = dr["roledescription"] != DBNull.Value ? dr["roledescription"].ToString() : string.Empty,
+                                    menuid = dr["menuid"] != DBNull.Value ? Convert.ToInt32(dr["menuid"]) : 0,
+                                    menu = dr["menu"] != DBNull.Value ? dr["menu"].ToString() : string.Empty,
+                                    submenuid = dr["submenuid"] != DBNull.Value ? Convert.ToInt32(dr["submenuid"]) : 0,
+                                    submenu = dr["submenu"] != DBNull.Value ? dr["submenu"].ToString() : string.Empty
+                                };
+
+                                listdata.Add(obj);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("assignRightsBL", "GetAssignedRightsForCheckbox",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+            }
+
+            return listdata;
+        }
     }
 }

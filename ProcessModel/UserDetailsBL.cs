@@ -2206,6 +2206,7 @@ namespace ProcessModel
                 object passportExpiryVal = getVal((IDataRecord)dr, new[] { "passport_expiry_date" });
                 object employeePhotoVal = getVal((IDataRecord)dr, new[] { "employee_photo", "EmployeePhoto" });
                 object employeeStatusVal = getVal((IDataRecord)dr, new[] { "employee_status" });
+                object employeeSubStatusVal = getVal((IDataRecord)dr, new[] { "employee_sub_status" });
                 object noticePeriodVal = getVal((IDataRecord)dr, new[] { "notice_period" });
                 object exitDateVal = getVal((IDataRecord)dr, new[] { "exit_date" });
                 object separationReasonVal = getVal((IDataRecord)dr, new[] { "separation_reason" });
@@ -2308,8 +2309,8 @@ namespace ProcessModel
                     company_id = companyVal != null && int.TryParse(Convert.ToString(companyVal), out var companyIdParsed) ? companyIdParsed : 0,
                     CompanyId = companyVal != null && int.TryParse(Convert.ToString(companyVal), out var companyIdParsed2) ? companyIdParsed2 : 0,
                     company_name = companyNameVal != null ? Convert.ToString(companyNameVal) : string.Empty,
-                    ESIC_no = esicVal != null ? Convert.ToInt32(esicVal) : 0,
-                    PF_no = pfVal != null ? Convert.ToInt32(pfVal) : 0,
+                    ESIC_no = esicVal != null && long.TryParse(Convert.ToString(esicVal), out var esicParsed) ? esicParsed : 0,
+                    PF_no = pfVal != null && long.TryParse(Convert.ToString(pfVal), out var pfParsed) ? pfParsed : 0,
                     department = deptVal != null ? Convert.ToString(deptVal) : string.Empty,
                     branch = branchVal != null ? Convert.ToString(branchVal) : string.Empty,
                     division = divVal != null ? Convert.ToString(divVal) : string.Empty,
@@ -2336,6 +2337,7 @@ namespace ProcessModel
                     PassportExpiryDate = passportExpiryVal != null ? Convert.ToDateTime(passportExpiryVal) : (DateTime?)null,
                     EmployeePhoto = employeePhotoVal != null ? Convert.ToString(employeePhotoVal) : string.Empty,
                     EmployeeStatus = employeeStatusVal != null ? Convert.ToString(employeeStatusVal) : string.Empty,
+                    EmployeeSubStatus = employeeSubStatusVal != null ? Convert.ToString(employeeSubStatusVal) : string.Empty,
                     NoticePeriod = noticePeriodVal != null && int.TryParse(Convert.ToString(noticePeriodVal), out var noticeParsed) ? noticeParsed : 0,
                     ExitDate = exitDateVal != null ? Convert.ToDateTime(exitDateVal) : (DateTime?)null,
                     SeparationReason = separationReasonVal != null ? Convert.ToString(separationReasonVal) : string.Empty,

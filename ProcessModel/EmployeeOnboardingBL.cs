@@ -184,7 +184,7 @@ namespace ProcessModel
                     // cmd.Parameters.AddWithValue("@p_tax_regime", employee.TaxRegime);
                     // cmd.Parameters.AddWithValue("@p_tds_applicable", employee.TdsApplicable);
                     cmd.Parameters.AddWithValue("@p_inserted_by", employee.InsertedBy);
-                    cmd.Parameters.AddWithValue("@p_PF_no", employee.InsertedBy);
+                    cmd.Parameters.AddWithValue("@p_PF_no", employee.PfNo);
 
                     con.Open();
                     using (MySqlDataReader dr = cmd.ExecuteReader())

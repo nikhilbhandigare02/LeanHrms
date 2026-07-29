@@ -266,7 +266,7 @@ namespace HRMS.View.Modules
                     now.Year.ToString(),
                     now.Month.ToString("00"),
                     employeeCode ?? string.Empty) + Path.DirectorySeparatorChar;
-
+                /////////////////////// my changes////////
                 if (!Directory.Exists(basePath))
                 {
                     Directory.CreateDirectory(basePath);
@@ -642,7 +642,7 @@ namespace HRMS.View.Modules
                 html.Append("<td>").Append(HttpUtility.HtmlEncode(FormatCellValue(education.YearOfPassing))).Append("</td>");
                 html.Append("<td>").Append(HttpUtility.HtmlEncode(FormatCellValue(education.PercentageCgpa))).Append("</td>");
                 html.Append("<td>").Append(certificateCell).Append("</td>");
-                html.Append("</tr>");
+                html.Append("</tr>")    ;
             }
 
             return html.ToString();

@@ -254,7 +254,7 @@
                 dateFormat: "d-m-Y",
                 allowInput: true
             });
-            
+
             <%--flatpickr("#<%= txtEffectiveToDate.ClientID %>", {
                 dateFormat: "d-m-Y",
                 allowInput: true
@@ -274,24 +274,24 @@
                 }
                 return false;
             }
-            
+
             // Check decimal places limit when typing
             if (allowDecimal) {
                 var input = evt.target || evt.srcElement;
                 var value = input.value;
                 var decimalIndex = value.indexOf('.');
-                
+
                 if (decimalIndex !== -1) {
                     var cursorPosition = input.selectionStart;
                     var decimalPlaces = value.length - decimalIndex - 1;
-                    
+
                     // If cursor is after decimal and already 2 decimal places, disallow
                     if (cursorPosition > decimalIndex && decimalPlaces >= 2) {
                         return false;
                     }
                 }
             }
-            
+
             return true;
         }
 
@@ -303,7 +303,7 @@
             evt.preventDefault();
             clipboardData = evt.clipboardData || window.clipboardData;
             pastedData = clipboardData.getData('Text');
-            
+
             if (allowDecimal) {
                 // Allow numbers with up to specified decimal places
                 var regex = new RegExp('^\\d*\\.?\\d{0,' + decimalLimit + '}$');
@@ -315,7 +315,7 @@
                     return false;
                 }
             }
-            
+
             var input = evt.target || evt.srcElement;
             input.value = pastedData;
             return false;
@@ -325,19 +325,19 @@
         function limitDecimalPlaces(input, limit) {
             var value = input.value;
             var decimalIndex = value.indexOf('.');
-            
+
             if (decimalIndex !== -1) {
                 var integerPart = value.substring(0, decimalIndex);
                 var decimalPart = value.substring(decimalIndex + 1, decimalIndex + 1 + limit);
                 input.value = integerPart + '.' + decimalPart;
             }
         }
-        
+
         // Initialize on page load
         $(document).ready(function () {
             initializeDatePickers();
         });
-        
+
         // Re-initialize after UpdatePanel partial postback
         var prm = Sys.WebForms.PageRequestManager.getInstance();
         prm.add_endRequest(function () {

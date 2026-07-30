@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿using DataObject;
+﻿using DataObject;
 using ProcessModel;
 using System;
 using System.Collections.Generic;
@@ -67,7 +67,7 @@ namespace HRMS.View.Modules
             {
                 // In view mode, everything is non-editable
                 txtEffectiveFromDate.ReadOnly = true;
-               // txtEffectiveToDate.ReadOnly = true;
+                // txtEffectiveToDate.ReadOnly = true;
                 ddlStatus.Enabled = false;
                 ddlEmployeeCategory.Enabled = false;
                 txtGrossSalary.ReadOnly = true;
@@ -118,14 +118,14 @@ namespace HRMS.View.Modules
                 }
 
                 // Dates
-                                if (renum.EffectiveFromDate.HasValue)
-                                {
-                                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("dd-MM-yyyy");
-                                }
-                                //if (renum.EffectiveToDate.HasValue)
-                                //{
-                                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
-                                //}
+                if (renum.EffectiveFromDate.HasValue)
+                {
+                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("dd-MM-yyyy");
+                }
+                //if (renum.EffectiveToDate.HasValue)
+                //{
+                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
+                //}
 
                 // Employee category
                 if (!string.IsNullOrEmpty(renum.EmployeeCategory) && ddlEmployeeCategory.Items.FindByValue(renum.EmployeeCategory) != null)
@@ -385,7 +385,7 @@ namespace HRMS.View.Modules
                     ShowAlert("Effective from date is required!");
                     return;
                 }
-                
+
                 // Parse dates
                 DateTime effectiveFromDate;
                 if (!DateTime.TryParseExact(txtEffectiveFromDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out effectiveFromDate))
@@ -532,20 +532,20 @@ namespace HRMS.View.Modules
                     ShowAlert("Basic salary cannot exceed gross salary!");
                     return;
                 }
-                
+
                 // Validate Gross Salary = Total Earnings (already calculated, just recheck)
                 decimal totalEarnings = 0;
                 foreach (RepeaterItem item in rptEarnings.Items)
                 {
                     CheckBox chk = (CheckBox)item.FindControl("chkComponent");
                     TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
-                    
+
                     if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
                     {
                         totalEarnings += amount;
                     }
                 }
-                
+
                 if (Math.Abs(totalEarnings - gross) > 0.01m)
                 {
                     ShowAlert("Gross salary must equal total earnings!");

@@ -77,5 +77,8 @@ namespace DataObject
         public DateTime? InsertedDate { get; set; }
         public string StatusMessage { get; set; }
         public string Remarks { get; set; }
+
+        // Dynamic component values dictionary (component_code -> amount)
+        public Dictionary<string, decimal?> ComponentValues { get; set; }
     }
 }

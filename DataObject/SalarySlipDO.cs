@@ -143,6 +143,7 @@ namespace DataObject
         public int Id { get; set; }
         public string Text { get; set; }
         public string ComponentType { get; set; }
+        public string ComponentCode { get; set; }
     }
     public class AppraisalDO
     {

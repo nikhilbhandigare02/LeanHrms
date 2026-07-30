@@ -118,14 +118,14 @@ namespace HRMS.View.Modules
                 }
 
                 // Dates
-                                if (renum.EffectiveFromDate.HasValue)
-                                {
-                                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("yyyy-MM-dd");
-                                }
-                                //if (renum.EffectiveToDate.HasValue)
-                                //{
-                                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
-                                //}
+                if (renum.EffectiveFromDate.HasValue)
+                {
+                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("yyyy-MM-dd");
+                }
+                //if (renum.EffectiveToDate.HasValue)
+                //{
+                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
+                //}
 
                 // Employee category
                 if (!string.IsNullOrEmpty(renum.EmployeeCategory) && ddlEmployeeCategory.Items.FindByValue(renum.EmployeeCategory) != null)

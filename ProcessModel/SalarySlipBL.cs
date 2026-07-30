@@ -1004,20 +1004,20 @@ namespace ProcessModel
         }
 
 
-        public string GetUserDob(int userId)
+        public string GetUserDob(string employeeCode)
         {
             string dob = string.Empty;
 
             try
             {
-                string connectionString = ConfigurationManager.ConnectionStrings["Sqlconnection"].ConnectionString;
+                string connectionString = ConfigurationManager.ConnectionStrings["MySqlconnection"].ConnectionString;
 
                 using (MySqlConnection con = new MySqlConnection(connectionString))
                 using (MySqlCommand cmd = new MySqlCommand("Sp_GetEmployeeCodeForSalary", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    cmd.Parameters.AddWithValue("@p_emp_code", employeeCode);
 
                     con.Open();
 

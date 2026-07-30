@@ -140,6 +140,7 @@ namespace HRMS.View.Modules
                 // Keep selection for the per-row PDF download.
                 ViewState["ss_empcode"] = employeeCode;
                 ViewState["ss_year"] = yearInt;
+                ViewState["ss_userid"] = employeeValue;
 
                 ShowResults(true);
             }
@@ -189,8 +190,8 @@ namespace HRMS.View.Modules
                     return;
                 }
 
-                int userIdInt = Convert.ToInt32(Session["userId"]);
-                string userDob = new SalarySlipBL().GetUserDob(userIdInt);
+                // Get DOB using employee code instead of user ID
+                string userDob = new SalarySlipBL().GetUserDob(employeeCode);
                 string password = employeeCode + userDob;
 
                 byte[] pdfBytes = GeneratePdfFromHtml(html, password);

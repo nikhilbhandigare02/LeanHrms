@@ -1144,8 +1144,9 @@
                             <asp:DropDownList ID="ddlSeparationReason" runat="server" CssClass="form-select-modern" Enabled="false" Visible="false"></asp:DropDownList>
 
                    <%-- </div>--%>
-               </div>
-                    <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="2">Save</button></div>
+                    </div>
+                    <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="2">Save</button>
+                    </div>
          
                 </section>
 

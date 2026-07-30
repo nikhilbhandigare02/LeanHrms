@@ -57,16 +57,11 @@ namespace HRMS.View.Modules
 
                 if (salaryList != null && salaryList.Count > 0)
                 {
-                    salaryAmount.InnerText = "*****";
-                    salaryAmount.Attributes["data-value"] =
-                        "₹" + salaryList[0].TotalSalaryDisbursed.ToString("N2");
-                    salaryAmount.Attributes["data-hidden"] = "true";
+                    salaryAmount.InnerText = "₹" + salaryList[0].TotalSalaryDisbursed.ToString("N2");
                 }
                 else
                 {
-                    salaryAmount.InnerText = "*****";
-                    salaryAmount.Attributes["data-value"] = "₹0.00";
-                    salaryAmount.Attributes["data-hidden"] = "true";
+                    salaryAmount.InnerText = "₹0.00";
                 }
             }
             catch (Exception ex)
@@ -92,16 +87,11 @@ namespace HRMS.View.Modules
 
                 if (reimbList != null && reimbList.Count > 0)
                 {
-                    reimbAmount.InnerText = "*****";
-                    reimbAmount.Attributes["data-value"] =
-                        "₹" + reimbList[0].TotalReimbursement.ToString("N2");
-                    reimbAmount.Attributes["data-hidden"] = "true";
+                    reimbAmount.InnerText = "₹" + reimbList[0].TotalReimbursement.ToString("N2");
                 }
                 else
                 {
-                    reimbAmount.InnerText = "*****";
-                    reimbAmount.Attributes["data-value"] = "₹0.00";
-                    reimbAmount.Attributes["data-hidden"] = "true";
+                    reimbAmount.InnerText = "₹0.00";
                 }
             }
             catch (Exception ex)

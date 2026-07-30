@@ -71,21 +71,6 @@
             gap: 10px;
         }
 
-        .stat-card .eye-btn {
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            color: rgba(255,255,255,0.85);
-            font-size: 1.1rem;
-            line-height: 1;
-            transition: color 0.2s;
-        }
-
-            .stat-card .eye-btn:hover {
-                color: #fff;
-            }
-
         .paid-status {
             display: inline-flex;
             align-items: center;
@@ -260,18 +245,7 @@
         <div class="col-md-4">
             <div class="stat-card">
                 <div class="amount-row">
-                    <%--                    <h3 id="salaryAmount" data-value="&#8377;1,25,400" data-hidden="true">*****</h3>--%>
-                    <h3 id="salaryAmount" runat="server" data-hidden="true">*****
-                    </h3>
-                    <%--<button type="button" class="eye-btn" onclick="toggleAmount('salaryAmount', this)" title="Show/Hide">
-                        <i class="mdi mdi-eye"></i>
-                    </button>--%>
-                    <button type="button"
-                        class="eye-btn"
-                        onclick="toggleAmount('<%= salaryAmount.ClientID %>', this)"
-                        title="Show/Hide">
-                        <i class="mdi mdi-eye"></i>
-                    </button>
+                    <h3 id="salaryAmount" runat="server"></h3>
                 </div>
                 <p>Total Salary Disbursed</p>
             </div>
@@ -279,18 +253,7 @@
         <div class="col-md-4">
             <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                 <div class="amount-row">
-                    <%--                    <h3 id="reimbAmount" data-value="&#8377;12,500" data-hidden="true">*****</h3>--%>
-                    <h3 id="reimbAmount" runat="server" data-hidden="true">*****
-                    </h3>
-                    <%--   <button type="button" class="eye-btn" onclick="toggleAmount('reimbAmount', this)" title="Show/Hide">
-                        <i class="mdi mdi-eye"></i>
-                    </button>--%>
-                    <button type="button"
-                        class="eye-btn"
-                        onclick="toggleAmount('<%= reimbAmount.ClientID %>', this)"
-                        title="Show/Hide">
-                        <i class="mdi mdi-eye"></i>
-                    </button>
+                    <h3 id="reimbAmount" runat="server"></h3>
                 </div>
                 <p>Total Reimbursements</p>
             </div>
@@ -811,26 +774,6 @@
         }
     </script>
 
-    <script>
-        function toggleAmount(id, btn) {
-            var el = document.getElementById(id);
-            console.log("Element:", el);
-            console.log("Data Value:", el.getAttribute("data-value"));
-            var icon = btn.querySelector('i');
-            var isHidden = el.getAttribute('data-hidden') === 'true';
-            if (isHidden) {
-                el.innerHTML = el.getAttribute('data-value');
-                el.setAttribute('data-hidden', 'false');
-                icon.classList.remove('mdi-eye');
-                icon.classList.add('mdi-eye-off');
-            } else {
-                el.innerHTML = '*****';
-                el.setAttribute('data-hidden', 'true');
-                icon.classList.remove('mdi-eye-off');
-                icon.classList.add('mdi-eye');
-            }
-        }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>

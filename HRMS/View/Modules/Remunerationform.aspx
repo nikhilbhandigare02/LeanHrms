@@ -1,8 +1,6 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/View/Layout/Site1.Master" AutoEventWireup="true" CodeBehind="Remunerationform.aspx.cs" Inherits="HRMS.View.Modules.Remunerationform" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <style>
         .payroll-wrap {
@@ -140,7 +138,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Effective From Date <span class="required">*</span></label>
-                                <asp:TextBox ID="txtEffectiveFromDate" runat="server" CssClass="form-control" placeholder="dd-mm-yyyy"></asp:TextBox>
+                                <asp:TextBox ID="txtEffectiveFromDate" runat="server" CssClass="form-control" TextMode="Date"></asp:TextBox>
                             </div>
                         </div>
                      <%--   <div class="col-md-6">
@@ -248,18 +246,6 @@
     </asp:UpdatePanel>
     
     <script type="text/javascript">
-        // Initialize date pickers
-        function initializeDatePickers() {
-            flatpickr("#<%= txtEffectiveFromDate.ClientID %>", {
-                dateFormat: "d-m-Y",
-                allowInput: true
-            });
-
-            <%--flatpickr("#<%= txtEffectiveToDate.ClientID %>", {
-                dateFormat: "d-m-Y",
-                allowInput: true
-            });--%>
-        }
 
         // Allow only numeric keys (digits, backspace, delete, tab, enter, decimal point)
         function isNumberKey(evt, allowDecimal) {
@@ -332,16 +318,5 @@
                 input.value = integerPart + '.' + decimalPart;
             }
         }
-
-        // Initialize on page load
-        $(document).ready(function () {
-            initializeDatePickers();
-        });
-
-        // Re-initialize after UpdatePanel partial postback
-        var prm = Sys.WebForms.PageRequestManager.getInstance();
-        prm.add_endRequest(function () {
-            initializeDatePickers();
-        });
     </script>
 </asp:Content>

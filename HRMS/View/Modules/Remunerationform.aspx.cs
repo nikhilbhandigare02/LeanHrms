@@ -118,14 +118,14 @@ namespace HRMS.View.Modules
                 }
 
                 // Dates
-                if (renum.EffectiveFromDate.HasValue)
-                {
-                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("dd-MM-yyyy");
-                }
-                //if (renum.EffectiveToDate.HasValue)
-                //{
-                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
-                //}
+                                if (renum.EffectiveFromDate.HasValue)
+                                {
+                                    txtEffectiveFromDate.Text = renum.EffectiveFromDate.Value.ToString("yyyy-MM-dd");
+                                }
+                                //if (renum.EffectiveToDate.HasValue)
+                                //{
+                                //    txtEffectiveToDate.Text = renum.EffectiveToDate.Value.ToString("dd-MM-yyyy");
+                                //}
 
                 // Employee category
                 if (!string.IsNullOrEmpty(renum.EmployeeCategory) && ddlEmployeeCategory.Items.FindByValue(renum.EmployeeCategory) != null)
@@ -193,6 +193,8 @@ namespace HRMS.View.Modules
                     else
                     {
                         if (compName.Contains("pf"))
+                            amount = renum.PF;
+                        else if (compName.Contains("Provident Fund"))
                             amount = renum.PF;
                         else if (compName.Contains("esi"))
                             amount = renum.ESI;
@@ -388,9 +390,9 @@ namespace HRMS.View.Modules
 
                 // Parse dates
                 DateTime effectiveFromDate;
-                if (!DateTime.TryParseExact(txtEffectiveFromDate.Text, "d-M-yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out effectiveFromDate))
+                if (!DateTime.TryParseExact(txtEffectiveFromDate.Text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out effectiveFromDate))
                 {
-                    ShowAlert("Invalid date format! Please use dd-mm-yyyy.");
+                    ShowAlert("Invalid date! Please select a valid date.");
                     return;
                 }
 
@@ -489,6 +491,8 @@ namespace HRMS.View.Modules
                         string compName = hfName.Value.ToLower().Trim();
                         if (compName.Contains("pf"))
                             pf = amount;
+                        else if (compName.Contains("Provident Fund"))
+                            esi = amount;
                         else if (compName.Contains("esi"))
                             esi = amount;
                         else if (compName.Contains("professional tax"))

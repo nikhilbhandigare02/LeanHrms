@@ -48,7 +48,7 @@ namespace HRMS.View.Modules
                 int reportingManagerId = Convert.ToInt32(Session["userId"]);
                 HandoverprocessBL handoverBL = new HandoverprocessBL();
                 var resignations = handoverBL.GetEmployeeResignationDetails(reportingManagerId)
-                    .Where(x => x.EmployeeResignationId > 0)
+                    .Where(x => x.EmployeeResignationId > 0 && x.hr_status.ToLower() == "accept")
                     .OrderByDescending(x => x.EmployeeResignationId)
                     .Select(x => new HandOverDO
                     {
@@ -105,7 +105,7 @@ namespace HRMS.View.Modules
                 {
                     gvHandover.DataSource = null;
                     gvHandover.DataBind();
-                    gvHandover.Visible = false;
+                    gvHandover.Visible = true;
                     ddlPageSelector.Visible = false;
                     UpdatePageInfoLabel(0, 0);
                 }
@@ -194,7 +194,7 @@ namespace HRMS.View.Modules
             {
                 int reportingManagerId = Convert.ToInt32(Session["userId"]);
                 handovers = new HandoverprocessBL().GetEmployeeResignationDetails(reportingManagerId)
-                    .Where(x => x.EmployeeResignationId > 0)
+                    .Where(x => x.EmployeeResignationId > 0 && x.hr_status.ToLower() == "accept")
                     .Select(x => new HandOverDO
                     {
                         EmployeeResignationId = x.EmployeeResignationId,
@@ -258,7 +258,7 @@ namespace HRMS.View.Modules
                 {
                     int reportingManagerId = Convert.ToInt32(Session["userId"]);
                     createdet = new HandoverprocessBL().GetEmployeeResignationDetails(reportingManagerId)
-                        .Where(x => x.EmployeeResignationId > 0)
+                        .Where(x => x.EmployeeResignationId > 0 && x.hr_status.ToLower() == "accept")
                         .Select(x => new HandOverDO
                         {
                             EmployeeResignationId = x.EmployeeResignationId,
@@ -399,6 +399,27 @@ namespace HRMS.View.Modules
 
                 Response.Redirect(
                     $"ViewHandoverProcess.aspx?rid={resignationId}&uid={userId}",
+                    false
+                );
+            }
+            else if (e.CommandName == "ExitClearance")
+            {
+                // Split CommandArgument to get both IDs
+                string[] args = e.CommandArgument.ToString().Split('|');
+                int resignationId = Convert.ToInt32(args[0]);
+                int userId = Convert.ToInt32(args[1]);
+
+                if (resignationId <= 0)
+                {
+                    ScriptManager.RegisterStartupScript(
+                        this, GetType(),
+                        "noClearance",
+                        "showUserSavedMessage('Error', 'No resignation request found for this user.');", true);
+                    return;
+                }
+
+                Response.Redirect(
+                    $"ExitClearance.aspx?resignation_id={resignationId}&user_id={userId}",
                     false
                 );
             }

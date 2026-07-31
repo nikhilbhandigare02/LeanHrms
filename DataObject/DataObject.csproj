@@ -49,6 +49,7 @@
     <Compile Include="CommonDO.cs" />
     <Compile Include="EmployeeOnboardingDO.cs" />
     <Compile Include="EmpAttendanceDO.cs" />
+    <Compile Include="ExitClearanceMasterDO.cs" />
     <Compile Include="ReimbursementDocumentDO.cs" />
     <Compile Include="EmployeeLeaveListDO.cs" />
     <Compile Include="HolidayListDO.cs" />

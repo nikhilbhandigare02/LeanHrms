@@ -107,6 +107,7 @@
     <Compile Include="DataClass.cs" />
     <Compile Include="EmployeeOnboardingBL.cs" />
     <Compile Include="EmployeeLeaveBL.cs" />
+    <Compile Include="ExitClearanceBL.cs" />
     <Compile Include="HandoverprocessBL.cs" />
     <Compile Include="HolidayListBL.cs" />
     <Compile Include="HomeBL.cs" />

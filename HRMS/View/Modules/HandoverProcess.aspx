@@ -64,13 +64,20 @@
                                     </asp:TemplateField>--%>
                                     <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
-                                            <asp:LinkButton
+                                            <%--<asp:LinkButton
                                                 ID="lnkOpen"
                                                 runat="server"
                                                 Text="Open"
                                                 CommandName="Open"
+                                                CommandArgument='<%# Eval("EmployeeResignationId") + "|" + Eval("UserId") %>'--%>
+                                                <%--CssClass="btn btn-sm btn-primary" />--%>
+                                            <asp:LinkButton
+                                                ID="lnkExitClearance"
+                                                runat="server"
+                                                Text="Exit Clearance"
+                                                CommandName="ExitClearance"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") + "|" + Eval("UserId") %>'
-                                                CssClass="btn btn-sm btn-primary" />
+                                                CssClass="btn btn-sm btn-success ml-1" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 

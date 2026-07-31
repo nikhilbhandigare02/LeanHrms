@@ -105,9 +105,21 @@
             background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
+        .resignation-page .btn-primary.action-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
         .resignation-page .action-btn:hover {
             transform: translateY(-1px);
             filter: brightness(1.03);
+        }
+
+        .resignation-page .action-btn.icon-only {
+            min-width: 34px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            font-size: 13px;
         }
 
         .resignation-page .action-btn.disabled,
@@ -353,25 +365,36 @@
                                             <asp:LinkButton ID="lnkAccept" runat="server"
                                                 CommandName="Accept"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") %>'
+                                                ToolTip="Accept"
                                                 Enabled='<%# !Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject") %>'
                                                 CssClass='<%# (!Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-success btn-sm action-btn" : "btn btn-secondary btn-sm action-btn disabled" %>'>
-                    Accept
+                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-success btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                <i class="fas fa-check"></i>
                                             </asp:LinkButton>
 
                                             <asp:LinkButton ID="lnkReject" runat="server"
                                                 CommandName="Reject"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") %>'
+                                                ToolTip="Reject"
                                                 Enabled='<%# !Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject") %>'
                                                 CssClass='<%# (!Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
                                                     && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-danger btn-sm action-btn" : "btn btn-secondary btn-sm action-btn disabled" %>'>
-                    Reject
+                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-danger btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                <i class="fas fa-times"></i>
+                                            </asp:LinkButton>
+
+                                            <asp:LinkButton ID="lnkUpdate" runat="server"
+                                                CommandName="UpdateReview"
+                                                CommandArgument='<%# Eval("EmployeeResignationId") %>'
+                                                ToolTip="Update"
+                                                Enabled='<%# Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept") %>'
+                                                CssClass='<%# Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept") ? "btn btn-primary btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                <i class="fas fa-pen"></i>
                                             </asp:LinkButton>
                                             </div>
                                         </ItemTemplate>

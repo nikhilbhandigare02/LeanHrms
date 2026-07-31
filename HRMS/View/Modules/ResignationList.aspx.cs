@@ -1002,6 +1002,12 @@ ul{margin:4px 0 14px 18px;padding:0;}
                 }
                 hfResignationId.Value = resignationId.ToString();
 
+                if (e.CommandName == "UpdateReview")
+                {
+                    Response.Redirect("~/View/Modules/ResignationHRReview.aspx?ResignationId=" + resignationId, false);
+                    return;
+                }
+
                 var resignations = Session["ResignationListData"] as List<ResignationDO>;
                 if (resignations != null)
                 {
@@ -1035,9 +1041,8 @@ ul{margin:4px 0 14px 18px;padding:0;}
 
                 if (e.CommandName == "Accept")
                 {
-                    ScriptManager.RegisterStartupScript(
-                        this, GetType(),
-                        "openModal", "openResignationModal('Accepted');", true);
+                    Response.Redirect("~/View/Modules/ResignationHRReview.aspx?ResignationId=" + resignationId, false);
+                    return;
                 }
 
                 if (e.CommandName == "Reject")

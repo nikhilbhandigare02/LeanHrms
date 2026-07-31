@@ -582,6 +582,261 @@ namespace ProcessModel
             p.AddWithValue("@p_updated_by", updatedBy);
         }
 
+        public HRReviewDO GetHRReviewDetails(int resignationId)
+        {
+            var model = new HRReviewDO { ResignationId = resignationId };
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return model;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("Sp_GetHRReview", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_employee_resignation_id", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        // Result set 1: employee_resignation + userm (aliases as returned by sp_GetHRReview)
+                        if (dr.Read())
+                        {
+                            model.ResignationId = GetIntSafe(dr, "ResignationId");
+                            model.EmployeeId = GetIntSafe(dr, "UserId");
+                            model.EmployeeCode = GetStringSafe(dr, "EmployeeCode");
+                            model.EmployeeName = GetStringSafe(dr, "EmployeeName");
+                            model.Department = GetStringSafe(dr, "Department");
+                            model.Designation = GetStringSafe(dr, "DesignationId");
+                            model.ReportingManager = GetStringSafe(dr, "ReportingManager");
+                            model.DateOfJoining = GetNullableDateSafe(dr, "DateOfJoining");
+                            model.ResignationDate = GetDateSafe(dr, "ResignationDate");
+                            model.ProposedLastWorkingDate = GetDateSafe(dr, "ProposedLastWorkingDate");
+                            model.Reason = GetStringSafe(dr, "Reason");
+                            model.ResignationStatus = GetStringSafe(dr, "ResignationStatus");
+                        }
+
+                        // Result set 2: tbl_hr_review (PascalCase columns)
+                        if (dr.NextResult() && dr.Read())
+                        {
+                            model.HRReviewId = GetIntSafe(dr, "HRReviewId");
+                            model.NoticePeriodRequired = GetStringSafe(dr, "NoticePeriodRequired");
+                            model.NoticeDays = GetIntSafe(dr, "NoticeDays");
+                            model.BuyoutApplicable = GetStringSafe(dr, "BuyoutApplicable");
+                            model.RevisedLastWorkingDate = GetNullableDateSafe(dr, "RevisedLastWorkingDate");
+                            model.HRRemarks = GetStringSafe(dr, "HRRemarks");
+                            model.Status = GetStringSafe(dr, "Status");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetHRReviewDetails",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return model;
+        }
+
+        public HRReviewDO GetHRReviewById(int resignationId)
+        {
+            HRReviewDO model = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return model;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("get_hr_review_by_id", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_ResignationId", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model = new HRReviewDO
+                            {
+                                HRReviewId = GetIntSafe(dr, "HRReviewId"),
+                                ResignationId = GetIntSafe(dr, "ResignationId"),
+                                NoticePeriodRequired = GetStringSafe(dr, "NoticePeriodRequired"),
+                                NoticeDays = GetIntSafe(dr, "NoticeDays"),
+                                BuyoutApplicable = GetStringSafe(dr, "BuyoutApplicable"),
+                                RevisedLastWorkingDate = GetNullableDateSafe(dr, "RevisedLastWorkingDate"),
+                                HRRemarks = GetStringSafe(dr, "HRRemarks"),
+                                Status = GetStringSafe(dr, "Status")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetHRReviewById",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return model;
+        }
+
+        public HRReviewResponseDO UpdateHRReview(HRReviewDO model, int updatedBy)
+        {
+            var response = new HRReviewResponseDO { Success = false, ResponseMsg = "Unable to update HR review." };
+
+            if (model == null || model.HRReviewId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                response.ResponseMsg = "Invalid HR review request.";
+                return response;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_UpdateHRReview", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_HRReviewId", model.HRReviewId);
+                    cmd.Parameters.AddWithValue("@p_NoticePeriodRequired", model.NoticePeriodRequired ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_NoticeDays", model.NoticeDays.HasValue ? (object)model.NoticeDays.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_BuyoutApplicable", model.BuyoutApplicable ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_RevisedLastWorkingDate", model.RevisedLastWorkingDate.HasValue ? (object)model.RevisedLastWorkingDate.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_HRRemarks", model.HRRemarks ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_UpdatedBy", updatedBy);
+
+                    var outSuccess = new MySqlParameter("@p_Success", MySqlDbType.Byte) { Direction = ParameterDirection.Output };
+                    var outMsg = new MySqlParameter("@p_ResponseMsg", MySqlDbType.VarChar, 200) { Direction = ParameterDirection.Output };
+
+                    cmd.Parameters.Add(outSuccess);
+                    cmd.Parameters.Add(outMsg);
+
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+
+                    response.Success = outSuccess.Value != DBNull.Value && Convert.ToInt32(outSuccess.Value) == 1;
+                    response.ResponseMsg = outMsg.Value != DBNull.Value
+                        ? Convert.ToString(outMsg.Value)
+                        : (response.Success ? "HR Review updated successfully." : "Failed to update HR review.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "UpdateHRReview",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                response.Success = false;
+                response.ResponseMsg = "Error occurred while updating HR Review.";
+            }
+
+            return response;
+        }
+
+        public HRReviewResponseDO SaveHRReviewAndAccept(HRReviewDO model, int updatedBy)
+        {
+            HRReviewResponseDO response = new HRReviewResponseDO
+            {
+                Success = false,
+                ResponseMsg = "Unable to save HR Review."
+            };
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                {
+                    con.Open();
+
+                    using (MySqlCommand cmd = new MySqlCommand("sp_SaveHRReview", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("p_ResignationId", model.ResignationId);
+                        cmd.Parameters.AddWithValue("p_NoticePeriodRequired", model.NoticePeriodRequired);
+                        cmd.Parameters.AddWithValue("p_NoticeDays",
+                            model.NoticeDays.HasValue ? (object)model.NoticeDays.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("p_BuyoutApplicable", model.BuyoutApplicable);
+                        cmd.Parameters.AddWithValue("p_RevisedLastWorkingDate",
+                            model.RevisedLastWorkingDate.HasValue
+                                ? (object)model.RevisedLastWorkingDate.Value
+                                : DBNull.Value);
+                        cmd.Parameters.AddWithValue("p_HRRemarks", model.HRRemarks);
+                        cmd.Parameters.AddWithValue("p_UpdatedBy", updatedBy);
+
+                        MySqlParameter pHRReviewId = new MySqlParameter("p_HRReviewId", MySqlDbType.Int32);
+                        pHRReviewId.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(pHRReviewId);
+
+                        MySqlParameter pSuccess = new MySqlParameter("p_Success", MySqlDbType.Byte);
+                        pSuccess.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(pSuccess);
+
+                        MySqlParameter pResponse = new MySqlParameter("p_ResponseMsg", MySqlDbType.VarChar, 200);
+                        pResponse.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(pResponse);
+
+                        cmd.ExecuteNonQuery();
+
+                        response.HRReviewId = pHRReviewId.Value != DBNull.Value
+                            ? Convert.ToInt32(pHRReviewId.Value)
+                            : 0;
+
+                        response.Success = pSuccess.Value != DBNull.Value &&
+                                           Convert.ToInt32(pSuccess.Value) == 1;
+
+                        response.ResponseMsg = pResponse.Value != DBNull.Value
+                            ? pResponse.Value.ToString()
+                            : "";
+
+                        if (!response.Success)
+                            return response;
+                    }
+
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "SaveHRReviewAndAccept",
+                    "Exception Message=" + ex.Message +
+                    " StackTrace=" + ex.StackTrace,
+                    UserId);
+
+                response.Success = false;
+                response.ResponseMsg = "Error occurred while saving HR Review.";
+            }
+
+            return response;
+        }
+
         private ResignationActionResponseDO ReadResignationActionResponse(IDataReader dr, bool isSuccessFallback)
         {
             var response = new ResignationActionResponseDO

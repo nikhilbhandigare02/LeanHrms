@@ -1094,7 +1094,7 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" readonly="readonly" disabled="disabled" /><span id="employeeCodeDuplicateMessage" class="validation-message" aria-readonly="true" ></span></div>
-                        <div class="form-group"><label class="is-required">Username</label><input id="txtUsername" runat="server" class="form-control-modern" placeholder="Enter username" /><span id="usernameDuplicateMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label class="is-required">Username</label><input id="txtUsername" runat="server" class="form-control-modern" placeholder="Auto-generated" readonly="readonly" disabled="disabled" /><span id="usernameDuplicateMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">First Name</label><input id="txtFirstName" runat="server" class="form-control-modern" placeholder="Enter first name" /><span id="firstNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label>Middle Name</label><input id="txtMiddleName" runat="server" class="form-control-modern" placeholder="Enter middle name" /><span id="middleNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Last Name</label><input id="txtLastName" runat="server" class="form-control-modern" placeholder="Enter last name" /><span id="lastNameValidationMessage" class="validation-message"></span></div>
@@ -1818,9 +1818,50 @@
                 }
             }
 
+            function generateUsername() {
+                if (!employeeUsername || !firstName || !lastName || !employeeCode) {
+                    return;
+                }
+
+                var firstNameValue = (firstName.value || '').trim();
+                var lastNameValue = (lastName.value || '').trim();
+                var employeeCodeValue = (employeeCode.value || '').trim();
+
+                if (!firstNameValue || !lastNameValue || !employeeCodeValue) {
+                    employeeUsername.value = '';
+                    return;
+                }
+
+                // Capitalize first letter of first name
+                var firstNameCapitalized = firstNameValue.charAt(0).toUpperCase() + firstNameValue.slice(1).toLowerCase();
+
+                // Capitalize first letter of last name for initial
+                var lastNameInitial = lastNameValue.charAt(0).toUpperCase();
+
+                // Get last numbers from employee code
+                var codeNumbers = employeeCodeValue.match(/\d+$/);
+                var codeSuffix = codeNumbers ? codeNumbers[0] : '';
+
+                // Format: Firstname + Lastname_initial + employee_code_last_numbers
+                var username = firstNameCapitalized + lastNameInitial + codeSuffix;
+
+                employeeUsername.value = username;
+            }
+
             if (overtimeEligible) {
                 overtimeEligible.addEventListener('change', syncOvertimeRateState);
                 syncOvertimeRateState();
+            }
+
+            // Auto-generate username when first name, last name, or employee code changes
+            if (firstName) {
+                firstName.addEventListener('input', generateUsername);
+            }
+            if (lastName) {
+                lastName.addEventListener('input', generateUsername);
+            }
+            if (employeeCode) {
+                employeeCode.addEventListener('input', generateUsername);
             }
 
             getEmployeeRegistrationRequiredFields().forEach(function (field) {

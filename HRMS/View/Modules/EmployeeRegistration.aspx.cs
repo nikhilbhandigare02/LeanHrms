@@ -497,11 +497,18 @@ namespace HRMS.View.Modules
                 ValueOf(txtLastName)
             }).Replace("  ", " ").Trim();
 
+            // Auto-generate username if not provided (field is disabled)
+            string generatedUsername = ValueOf(txtUsername);
+            if (string.IsNullOrWhiteSpace(generatedUsername))
+            {
+                generatedUsername = GenerateUsernameFromFields();
+            }
+
             return new EmployeeOnboardingDO
             {
                 UserId = ParseInt(Request.QueryString["user_id"]),
                 EmployeeCode = ValueOf(txtEmployeeCode),
-                Username = ValueOf(txtUsername),
+                Username = generatedUsername,
                 FullName = fullName,
                 Email = ValueOf(txtEmail),
                 Contact = ValueOf(txtMobileNumber),
@@ -648,6 +655,31 @@ namespace HRMS.View.Modules
         {
             decimal parsed;
             return decimal.TryParse(Convert.ToString(value), out parsed) ? parsed : 0;
+        }
+
+        private string GenerateUsernameFromFields()
+        {
+            string firstName = ValueOf(txtFirstName)?.Trim();
+            string lastName = ValueOf(txtLastName)?.Trim();
+            string employeeCode = ValueOf(txtEmployeeCode)?.Trim();
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(employeeCode))
+            {
+                return string.Empty;
+            }
+
+            // Capitalize first letter of first name, lowercase the rest
+            string firstNameCapitalized = char.ToUpper(firstName[0]) + firstName.Substring(1).ToLower();
+
+            // Capitalize first letter of last name for initial
+            string lastNameInitial = char.ToUpper(lastName[0]).ToString();
+
+            // Get last numbers from employee code
+            var match = System.Text.RegularExpressions.Regex.Match(employeeCode, @"\d+$");
+            string codeSuffix = match.Success ? match.Value : string.Empty;
+
+            // Format: Firstname + Lastname_initial + employee_code_last_numbers
+            return firstNameCapitalized + lastNameInitial + codeSuffix;
         }
     }
 }

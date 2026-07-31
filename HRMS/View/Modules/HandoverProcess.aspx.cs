@@ -48,8 +48,14 @@ namespace HRMS.View.Modules
                 int reportingManagerId = Convert.ToInt32(Session["userId"]);
                 HandoverprocessBL handoverBL = new HandoverprocessBL();
                 var resignations = handoverBL.GetEmployeeResignationDetails(reportingManagerId)
-                    .Where(x => x.EmployeeResignationId > 0 && x.hr_status.ToLower() == "accept")
-                    .OrderByDescending(x => x.EmployeeResignationId)
+.Where(x =>
+    x.EmployeeResignationId > 0 &&
+    (
+        x.hr_status.Equals("Accept", StringComparison.OrdinalIgnoreCase) ||
+        x.hr_status.Equals("Accepted", StringComparison.OrdinalIgnoreCase) ||
+        x.hr_status.Equals("Approve", StringComparison.OrdinalIgnoreCase) ||
+        x.hr_status.Equals("Approved", StringComparison.OrdinalIgnoreCase)
+    )).OrderByDescending(x => x.EmployeeResignationId)
                     .Select(x => new HandOverDO
                     {
                         EmployeeResignationId = x.EmployeeResignationId,

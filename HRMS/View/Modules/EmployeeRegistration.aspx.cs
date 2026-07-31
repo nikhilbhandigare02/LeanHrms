@@ -104,6 +104,52 @@ namespace HRMS.View.Modules
             rptDocumentUpload.DataBind();
         }
 
+        // Document types that stay optional; everything else bound into
+        // rptDocumentUpload is treated as mandatory.
+        private static readonly string[] OptionalDocumentTypes =
+        {
+            "Past Company Experience Letter",
+            "Past Company Salary Slip",
+            "Relieving Letter"
+        };
+
+        private static bool IsDocumentMandatory(string documentTypeName)
+        {
+            if (string.IsNullOrWhiteSpace(documentTypeName))
+            {
+                return true;
+            }
+
+            foreach (string optional in OptionalDocumentTypes)
+            {
+                if (string.Equals(optional, documentTypeName.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected void rptDocumentUpload_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem)
+            {
+                return;
+            }
+
+            Label lblDocumentType = e.Item.FindControl("lblDocumentType") as Label;
+            if (lblDocumentType == null)
+            {
+                return;
+            }
+
+            if (IsDocumentMandatory(lblDocumentType.Text))
+            {
+                lblDocumentType.CssClass = (lblDocumentType.CssClass + " is-required").Trim();
+            }
+        }
+
 
         private void BindTextBox(HtmlInputText txt,string textBoxType)
         {
@@ -151,7 +197,7 @@ namespace HRMS.View.Modules
         {
             try
             {
-                MandatoryFieldError validationError = ValidateMandatoryFields();
+                MandatoryFieldError validationError = ValidateMandatoryFields() ?? ValidateMandatoryDocuments();
                 if (validationError != null)
                 {
                     string encodedMessage = HttpUtility.JavaScriptStringEncode(validationError.Message);
@@ -335,6 +381,29 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return FieldError(txtBiometricId.ClientID, "biometricIdRequiredMessage", "Biometric ID is required.");
             if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return FieldError(txtOvertimeRate.ClientID, "overtimeRateRequiredMessage", "Overtime Rate is required.");
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return FieldError(ddlWorkLocation.ClientID, "workLocationRequiredMessage", "Work Location is required.");
+
+            return null;
+        }
+
+        private MandatoryFieldError ValidateMandatoryDocuments()
+        {
+            foreach (RepeaterItem item in rptDocumentUpload.Items)
+            {
+                Label lblDocumentType = item.FindControl("lblDocumentType") as Label;
+                FileUpload fuDocument = item.FindControl("fuDocument") as FileUpload;
+                Label lblDocumentValidationMessage = item.FindControl("lblDocumentValidationMessage") as Label;
+
+                if (lblDocumentType == null || fuDocument == null)
+                {
+                    continue;
+                }
+
+                if (IsDocumentMandatory(lblDocumentType.Text) && !fuDocument.HasFile)
+                {
+                    string messageId = lblDocumentValidationMessage != null ? lblDocumentValidationMessage.ClientID : null;
+                    return FieldError(fuDocument.ClientID, messageId, "This document is mandatory.");
+                }
+            }
 
             return null;
         }

@@ -1207,7 +1207,7 @@
 
                 <section class="wizard-step collapsed pending" data-step="6">
                     <div class="card-heading">
-                        <div><span class="accordion-number">5</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee (optional).</p></div>
+                        <div><span class="accordion-number">5</span><h2>Document Upload</h2><p>Upload KYC and other supporting documents for the employee.</p></div>
                         <span class="registration-section-status"><i class="far fa-clock"></i> Pending</span>
                         <i class="fas fa-chevron-down registration-chevron"></i>
                         <span class="step-pill">Step 5 of 5</span>
@@ -1217,14 +1217,17 @@
                         <table class="asset-table">
                             <thead><tr><th>Document Type</th><th>File</th></tr></thead>
                             <tbody>
-                                <asp:Repeater ID="rptDocumentUpload" runat="server">
+                                <asp:Repeater ID="rptDocumentUpload" runat="server" OnItemDataBound="rptDocumentUpload_ItemDataBound">
                                     <ItemTemplate>
                                         <tr>
                                             <td>
-                                                <%# Eval("Text") %>
+                                                <asp:Label ID="lblDocumentType" runat="server" CssClass="doc-type-label" Text='<%# Eval("Text") %>'></asp:Label>
                                                 <asp:HiddenField ID="hdnDocumentTypeId" runat="server" Value='<%# Eval("Id") %>' />
+                                                <asp:Label ID="lblDocumentValidationMessage" runat="server" CssClass="validation-message doc-name-validation-message"></asp:Label>
                                             </td>
-                                            <td><asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern document-upload-input" Accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,image/*,application/pdf" /></td>
+                                            <td>
+                                                <asp:FileUpload ID="fuDocument" runat="server" CssClass="form-control-modern document-upload-input" Accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,image/*,application/pdf" />
+                                            </td>
                                         </tr>
                                     </ItemTemplate>
                                 </asp:Repeater>
@@ -1384,6 +1387,9 @@
         function bindDocumentUploadValidation() {
             document.querySelectorAll('.document-upload-input').forEach(function (input) {
                 input.addEventListener('change', function () {
+                    var row = input.closest('tr');
+                    var msgElement = row ? row.querySelector('.doc-name-validation-message') : null;
+
                     var file = input.files && input.files[0];
                     if (!file) {
                         return;
@@ -1399,6 +1405,13 @@
                     if (file.size > MAX_DOCUMENT_UPLOAD_SIZE) {
                         input.value = '';
                         showDocumentUploadError('File size must be 3 MB or less.');
+                        return;
+                    }
+
+                    input.classList.remove('validation-error');
+                    if (msgElement) {
+                        msgElement.textContent = '';
+                        msgElement.style.display = '';
                     }
                 });
             });
@@ -1499,8 +1512,60 @@
             return true;
         }
 
+        function validateDocumentUploads(section) {
+            var rows = document.querySelectorAll('table.asset-table tbody tr');
+            var firstInvalid = null;
+            var missingNames = [];
+
+            rows.forEach(function (row) {
+                var fileInput = row.querySelector('input[type="file"]');
+                var label = row.querySelector('.doc-type-label');
+                var msgElement = row.querySelector('.doc-name-validation-message');
+                if (!fileInput || !label) {
+                    return;
+                }
+
+                if (section && row.closest('.wizard-step') !== section) {
+                    return;
+                }
+
+                var isMandatory = label.classList.contains('is-required');
+                var hasFile = fileInput.files && fileInput.files.length > 0;
+                var isMissing = isMandatory && !hasFile;
+
+                fileInput.classList.toggle('validation-error', isMissing);
+                if (msgElement) {
+                    msgElement.textContent = isMissing ? 'This document is mandatory.' : '';
+                    msgElement.style.display = isMissing ? 'block' : '';
+                }
+
+                if (isMissing) {
+                    missingNames.push(label.textContent.trim());
+                    if (!firstInvalid) {
+                        firstInvalid = fileInput;
+                    }
+                }
+            });
+
+            if (!firstInvalid) {
+                return true;
+            }
+
+            var invalidSection = firstInvalid.closest('.wizard-step');
+            if (invalidSection) {
+                document.querySelectorAll('.wizard-step').forEach(function (panel) {
+                    panel.classList.toggle('collapsed', panel !== invalidSection);
+                });
+            }
+
+            firstInvalid.focus();
+            showMandatoryFieldMessage(missingNames[0]);
+
+            return false;
+        }
+
         function validateEmployeeRegistration() {
-            return validateEmployeeFields() && validateEmployeeDuplicatesBeforeSubmit();
+            return validateEmployeeFields() && validateDocumentUploads() && validateEmployeeDuplicatesBeforeSubmit();
         }
 
         var employeeDuplicateState = {};

@@ -167,7 +167,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">Gross Salary <span class="required">*</span></label>
-                                <asp:TextBox ID="txtGrossSalary" runat="server" ReadOnly="true" CssClass="form-control numeric-input" AutoPostBack="true" OnTextChanged="txtGrossSalary_TextChanged" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                                <asp:TextBox ID="txtGrossSalary" runat="server" ReadOnly="true" CssClass="form-control numeric-input"></asp:TextBox>
                             </div>
                         </div>
                     </div>
@@ -193,6 +193,7 @@
                     <div class="components-column">
                         <div class="sec-card">
                             <div class="sec-head">Earnings Components</div>
+                            <div id="remunerationEarningsContainer">
                             <asp:Repeater ID="rptEarnings" runat="server">
                                 <HeaderTemplate>
                                     <div class="component-grid">
@@ -201,15 +202,16 @@
                                     <div class="component-item">
                                         <asp:HiddenField ID="hfComponentId" runat="server" Value='<%# Eval("Id") %>' />
                                         <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
-                                        <asp:CheckBox ID="chkComponent" runat="server" AutoPostBack="true" OnCheckedChanged="chkComponent_CheckedChanged" />
+                                        <asp:CheckBox ID="chkComponent" runat="server" onclick="toggleRemunerationComponent(this)" />
                                         <label><%# Eval("Text") %></label>
-                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2); recalculateRemunerationTotals();"></asp:TextBox>
                                     </div>
                                 </ItemTemplate>
                                 <FooterTemplate>
                                     </div>
                                 </FooterTemplate>
                             </asp:Repeater>
+                            </div>
                         </div>
                     </div>
 
@@ -217,6 +219,7 @@
                     <div class="components-column">
                         <div class="sec-card">
                             <div class="sec-head">Deductions Components</div>
+                            <div id="remunerationDeductionsContainer">
                             <asp:Repeater ID="rptDeductions" runat="server">
                                 <HeaderTemplate>
                                     <div class="component-grid">
@@ -225,15 +228,16 @@
                                     <div class="component-item">
                                         <asp:HiddenField ID="hfComponentId" runat="server" Value='<%# Eval("Id") %>' />
                                         <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
-                                        <asp:CheckBox ID="chkComponent" runat="server" AutoPostBack="true" OnCheckedChanged="chkComponent_CheckedChanged" />
+                                        <asp:CheckBox ID="chkComponent" runat="server" onclick="toggleRemunerationComponent(this)" />
                                         <label><%# Eval("Text") %></label>
-                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" Enabled="false" AutoPostBack="true" OnTextChanged="CalculateGrossSalary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                                        <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control numeric-input" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2); recalculateRemunerationTotals();"></asp:TextBox>
                                     </div>
                                 </ItemTemplate>
                                 <FooterTemplate>
                                     </div>
                                 </FooterTemplate>
                             </asp:Repeater>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -317,6 +321,65 @@
                 var decimalPart = value.substring(decimalIndex + 1, decimalIndex + 1 + limit);
                 input.value = integerPart + '.' + decimalPart;
             }
+        }
+
+        // Component checking/typing is handled entirely client-side (no more
+        // AutoPostBack per checkbox/amount field) so editing amounts no
+        // longer triggers a full page/UpdatePanel re-render on every change.
+        // The actual values are simply read from the DOM by the server at Save.
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeRemunerationComponentStates();
+            recalculateRemunerationTotals();
+        });
+
+        function initializeRemunerationComponentStates() {
+            document.querySelectorAll('#remunerationEarningsContainer .numeric-input, #remunerationDeductionsContainer .numeric-input').forEach(function (input) {
+                var row = input.closest('.component-item');
+                var checkbox = row ? row.querySelector('input[type="checkbox"]') : null;
+                input.disabled = !(checkbox && checkbox.checked);
+            });
+        }
+
+        function toggleRemunerationComponent(checkbox) {
+            var row = checkbox.closest('.component-item');
+            var input = row ? row.querySelector('.numeric-input') : null;
+            if (input) {
+                input.disabled = !checkbox.checked;
+                if (!checkbox.checked) {
+                    input.value = '';
+                }
+            }
+            recalculateRemunerationTotals();
+        }
+
+        function sumEnabledRemunerationAmounts(containerId, excludeNames) {
+            var total = 0;
+            document.querySelectorAll('#' + containerId + ' .component-item').forEach(function (row) {
+                var input = row.querySelector('.numeric-input');
+                if (!input || input.disabled) {
+                    return;
+                }
+                if (excludeNames) {
+                    var label = row.querySelector('label');
+                    var name = label ? label.textContent.toLowerCase() : '';
+                    if (excludeNames.some(function (n) { return name.indexOf(n) !== -1; })) {
+                        return;
+                    }
+                }
+                total += parseFloat(input.value) || 0;
+            });
+            return total;
+        }
+
+        function recalculateRemunerationTotals() {
+            var totalEarnings = sumEnabledRemunerationAmounts('remunerationEarningsContainer');
+            // "Exceed paid leave"-style deductions are excluded from the net
+            // monthly figure, matching the server's original CalculateGrossSalary logic.
+            var totalDeductions = sumEnabledRemunerationAmounts('remunerationDeductionsContainer', ['exceed', 'paid leave']);
+
+            document.getElementById('<%= txtGrossSalary.ClientID %>').value = totalEarnings.toFixed(2);
+            document.getElementById('<%= txtMonthlySalary.ClientID %>').value = (totalEarnings - totalDeductions).toFixed(2);
+            document.getElementById('<%= txtAnnualSalary.ClientID %>').value = (totalEarnings * 12).toFixed(2);
         }
     </script>
 </asp:Content>

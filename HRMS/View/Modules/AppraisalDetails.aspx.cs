@@ -544,17 +544,6 @@ namespace HRMS.View.Modules
             Response.Redirect("AddAppraisalForm.aspx");
         }
 
-        protected void btnEdit_Click(object sender, EventArgs e)
-        {
-            LinkButton btn = (LinkButton)sender;
-
-            int appraisalId = Convert.ToInt32(btn.CommandArgument);
-
-            Session["Appraisal_ID"] = appraisalId;
-            Session["Appraisal_Mode"] = "Edit";
-
-            Response.Redirect("AddAppraisalForm.aspx");
-        }
 
         protected void btnDelete_Click(object sender, EventArgs e)
         {

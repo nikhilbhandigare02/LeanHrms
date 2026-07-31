@@ -3,6 +3,7 @@ using ProcessModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -38,6 +39,14 @@ namespace HRMS.View.Authentication
 
                 if (!string.IsNullOrEmpty(oldpassword) && !string.IsNullOrEmpty(newpassword) && !string.IsNullOrEmpty(confirmPassword))
                 {
+                    string policyError = GetPasswordPolicyError(newpassword);
+                    if (!string.IsNullOrEmpty(policyError))
+                    {
+                        divAlert.Visible = true;
+                        lblErrorMessager.Text = policyError;
+                        return;
+                    }
+
                     if (newpassword == confirmPassword)
                     {
                         int userId = GetUserIdByUsername(username);
@@ -100,6 +109,32 @@ namespace HRMS.View.Authentication
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("changePassword", "btnchange_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+
+        private static string GetPasswordPolicyError(string password)
+        {
+            if (password.Length < 8)
+            {
+                return "Password must be at least 8 characters long.";
+            }
+            if (!Regex.IsMatch(password, "[A-Z]"))
+            {
+                return "Password must contain at least 1 uppercase letter.";
+            }
+            if (!Regex.IsMatch(password, "[a-z]"))
+            {
+                return "Password must contain at least 1 lowercase letter.";
+            }
+            if (!Regex.IsMatch(password, "[0-9]"))
+            {
+                return "Password must contain at least 1 number.";
+            }
+            if (!Regex.IsMatch(password, @"[^A-Za-z0-9]"))
+            {
+                return "Password must contain at least 1 special character.";
+            }
+
+            return null;
         }
 
         public void GetUserName()

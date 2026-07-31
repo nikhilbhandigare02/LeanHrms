@@ -250,19 +250,6 @@
 
                             </asp:LinkButton>
 
-                            <asp:LinkButton ID="btnEdit"
-                                runat="server"
-                                CssClass="action-btn view-btn"
-                                Style="background: #e6f7ff; color: #1890ff;"
-                                CommandName="Edit"
-                                ToolTip="Edit"
-                                CommandArgument='<%# Eval("appraisal_id") %>'
-                                OnClick="btnEdit_Click">
-
-                                <i class='bx bx-edit'></i>
-
-                            </asp:LinkButton>
-
                             <asp:LinkButton ID="btnDelete"
                                 runat="server"
                                 CssClass="action-btn delete-btn"

@@ -176,17 +176,17 @@
 
                 <div class="field-block">
                     <label for="txtAppraisalCTC">New CTC</label>
-                    <asp:TextBox ID="txtAppraisalCTC" runat="server" CssClass="form-control numeric-input" placeholder="Enter New CTC" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                    <asp:TextBox ID="txtAppraisalCTC" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated from components"></asp:TextBox>
                 </div>
 
                 <div class="field-block">
                     <label for="txtGrossSalary">Gross Salary</label>
-                    <asp:TextBox ID="txtGrossSalary" runat="server" CssClass="form-control numeric-input" placeholder="Enter Gross Salary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                    <asp:TextBox ID="txtGrossSalary" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated from components"></asp:TextBox>
                 </div>
 
                 <div class="field-block">
                     <label for="txtNetSalary">Net Salary</label>
-                    <asp:TextBox ID="txtNetSalary" runat="server" CssClass="form-control numeric-input" placeholder="Enter Net Salary" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                    <asp:TextBox ID="txtNetSalary" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated from components"></asp:TextBox>
                 </div>
 
                 <div class="field-block">
@@ -196,12 +196,56 @@
 
                 <div class="field-block">
                     <label for="txtIncrementAmount">Increment Amount</label>
-                    <asp:TextBox ID="txtIncrementAmount" runat="server" CssClass="form-control numeric-input" placeholder="Enter Increment Amount" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                    <asp:TextBox ID="txtIncrementAmount" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated"></asp:TextBox>
                 </div>
 
                 <div class="field-block">
                     <label for="txtIncrementPercentage">Increment Percentage</label>
-                    <asp:TextBox ID="txtIncrementPercentage" runat="server" CssClass="form-control numeric-input" placeholder="Enter Increment Percentage" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2)"></asp:TextBox>
+                    <asp:TextBox ID="txtIncrementPercentage" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated"></asp:TextBox>
+                </div>
+
+                <div class="field-block">
+                    <label for="txtIncrementAmountMonthly">Increment Amount Monthly</label>
+                    <asp:TextBox ID="txtIncrementAmountMonthly" runat="server" CssClass="form-control" ReadOnly="true" placeholder="Auto-calculated"></asp:TextBox>
+                </div>
+            </div>
+        </div>
+
+        <div class="sec-card">
+            <h3 class="sec-head">Salary Components <span style="font-weight:400; font-size:12px; color:var(--hrms-muted);">(auto-scaled from the employee's current active remuneration by the CTC increment ratio &mdash; adjust before saving if needed)</span></h3>
+
+            <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:320px;">
+                    <h4 style="font-size:14px; font-weight:700; margin-bottom:10px; color:#213855;">Earnings</h4>
+                    <div id="appraisalEarningsContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <asp:Repeater ID="rptAppraisalEarnings" runat="server" OnItemDataBound="rptAppraisalEarnings_ItemDataBound">
+                            <ItemTemplate>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <asp:HiddenField ID="hfComponentId" runat="server" Value='<%# Eval("Id") %>' />
+                                    <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
+                                    <asp:CheckBox ID="chkComponent" runat="server" onclick="toggleAppraisalComponent(this)" />
+                                    <label style="flex:1; font-size:13px; margin:0;"><%# Eval("Text") %></label>
+                                    <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control appraisal-amount-input" Style="width:110px; min-height:34px;" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2); recalculateAppraisalTotals();" />
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:320px;">
+                    <h4 style="font-size:14px; font-weight:700; margin-bottom:10px; color:#213855;">Deductions</h4>
+                    <div id="appraisalDeductionsContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <asp:Repeater ID="rptAppraisalDeductions" runat="server" OnItemDataBound="rptAppraisalDeductions_ItemDataBound">
+                            <ItemTemplate>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <asp:HiddenField ID="hfComponentId" runat="server" Value='<%# Eval("Id") %>' />
+                                    <asp:HiddenField ID="hfComponentName" runat="server" Value='<%# Eval("Text") %>' />
+                                    <asp:CheckBox ID="chkComponent" runat="server" onclick="toggleAppraisalComponent(this)" />
+                                    <label style="flex:1; font-size:13px; margin:0;"><%# Eval("Text") %></label>
+                                    <asp:TextBox ID="txtComponentAmount" runat="server" CssClass="form-control appraisal-amount-input" Style="width:110px; min-height:34px;" onkeypress="return isNumberKey(event, true)" onpaste="return validateNumberPaste(event, true)" oninput="limitDecimalPlaces(this, 2); recalculateAppraisalTotals();" />
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
                 </div>
             </div>
 
@@ -216,6 +260,9 @@
     <asp:HiddenField ID="hdnIsEdit" runat="server" Value="0" />
     <asp:HiddenField ID="hdnIsView" runat="server" Value="0" />
     <asp:HiddenField ID="hdnUserId" runat="server" Value="0" />
+    <asp:HiddenField ID="hdnActiveRemunerationId" runat="server" Value="0" />
+    <asp:HiddenField ID="hdnEmployeeCategory" runat="server" Value="" />
+    <asp:HiddenField ID="hdnRemunerationStatus" runat="server" Value="" />
 
     <script>
         // Initialize Flatpickr date pickers
@@ -303,10 +350,93 @@
             }
         }
 
-        // Initialize on page load
+        // Initialize on page load. Gross/Net/New CTC only get auto-recomputed
+        // in fresh Add mode, where components were just prefilled from the
+        // employee's active remuneration. In Edit/View mode these fields must
+        // keep showing the actually-saved historical appraisal values instead
+        // - recomputing from the (possibly unrelated, since it reflects
+        // whatever is CURRENTLY active) remuneration components would silently
+        // clobber the correct saved figures for anything but the very latest appraisal.
         document.addEventListener('DOMContentLoaded', function () {
             initializeDatePickers();
+            initializeAppraisalComponentStates();
+
+            var isEdit = document.getElementById('<%= hdnIsEdit.ClientID %>').value === '1';
+            var isView = document.getElementById('<%= hdnIsView.ClientID %>').value === '1';
+            if (!isEdit && !isView) {
+                updateGrossNetCtc();
+            }
         });
+
+        // The disabled/enabled state of each amount input is purely a client-side
+        // concern (server-side Enabled=false would cause ASP.NET to silently
+        // discard posted values even after JS re-enables the field). Derive it
+        // fresh from each row's checkbox on every load.
+        function initializeAppraisalComponentStates() {
+            document.querySelectorAll('.appraisal-amount-input').forEach(function (input) {
+                var row = input.parentElement;
+                var checkbox = row ? row.querySelector('input[type="checkbox"]') : null;
+                input.disabled = !(checkbox && checkbox.checked);
+            });
+        }
+
+        function toggleAppraisalComponent(checkbox) {
+            var row = checkbox.parentElement;
+            var input = row.querySelector('.appraisal-amount-input');
+            if (input) {
+                input.disabled = !checkbox.checked;
+                if (!checkbox.checked) {
+                    input.value = '';
+                } else if (!input.value) {
+                    var original = parseFloat(input.getAttribute('data-original-amount')) || 0;
+                    if (original > 0) {
+                        input.value = original.toFixed(2);
+                    }
+                }
+            }
+            recalculateAppraisalTotals();
+        }
+
+        function sumEnabledAmounts(containerId) {
+            var total = 0;
+            document.querySelectorAll('#' + containerId + ' .appraisal-amount-input').forEach(function (input) {
+                if (!input.disabled) {
+                    total += parseFloat(input.value) || 0;
+                }
+            });
+            return total;
+        }
+
+        function recalculateAppraisalTotals() {
+            var newCtc = updateGrossNetCtc();
+            updateIncrementFields(newCtc);
+        }
+
+        // Gross/Net/New CTC reflect whatever is currently checked, always.
+        function updateGrossNetCtc() {
+            var totalEarnings = sumEnabledAmounts('appraisalEarningsContainer');
+            var totalDeductions = sumEnabledAmounts('appraisalDeductionsContainer');
+
+            document.getElementById('<%= txtGrossSalary.ClientID %>').value = totalEarnings.toFixed(2);
+            document.getElementById('<%= txtNetSalary.ClientID %>').value = (totalEarnings - totalDeductions).toFixed(2);
+
+            var newCtc = totalEarnings * 12;
+            document.getElementById('<%= txtAppraisalCTC.ClientID %>').value = newCtc.toFixed(2);
+            return newCtc;
+        }
+
+        // Increment fields are only meant to reflect an actual, deliberate
+        // change the user made - not fire the moment an employee is selected
+        // and their existing components get prefilled.
+        function updateIncrementFields(newCtc) {
+            var oldCtc = parseFloat(document.getElementById('<%= txtCTCOld.ClientID %>').value) || 0;
+            var incrementAmount = newCtc - oldCtc;
+
+            document.getElementById('<%= txtIncrementAmount.ClientID %>').value = incrementAmount.toFixed(2);
+            document.getElementById('<%= txtIncrementPercentage.ClientID %>').value =
+                oldCtc > 0 ? ((incrementAmount / oldCtc) * 100).toFixed(2) : '0.00';
+            document.getElementById('<%= txtIncrementAmountMonthly.ClientID %>').value = (incrementAmount / 12).toFixed(2);
+        }
     </script>
 </asp:Content>
 

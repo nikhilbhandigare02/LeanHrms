@@ -2,6 +2,7 @@ using DataObject;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 
@@ -9,6 +10,23 @@ namespace ProcessModel
 {
     public class AppraisalBL
     {
+        // Sp_Get_Appraisal_Details / sp_get_appraisal_details_by_id return dates
+        // pre-formatted as "dd-MM-yyyy" strings (via MySQL's DATE_FORMAT). Parsing
+        // them with Convert.ToDateTime() uses the server's current culture (often
+        // MM-dd-yyyy), which throws FormatException for any day > 12 - e.g. "31-07-2026".
+        private static DateTime ParseDdMmYyyy(object val)
+        {
+            string text = Convert.ToString(val);
+            DateTime parsed;
+            if (DateTime.TryParseExact(text, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+            // Fall back for any caller that isn't going through DATE_FORMAT.
+            DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed);
+            return parsed;
+        }
+
         public ResponseDO SaveAppraisalDetails(AppraisalDetailsDO appraisal)
         {
             ResponseDO response = new ResponseDO();
@@ -98,10 +116,10 @@ namespace ProcessModel
                                         item.employee_name = Convert.ToString(val);
                                         break;
                                     case "appraisal_effective_date":
-                                        item.appraisal_effective_date = Convert.ToDateTime(val);
+                                        item.appraisal_effective_date = ParseDdMmYyyy(val);
                                         break;
                                     case "salary_revision_date":
-                                        item.salary_revision_date = Convert.ToDateTime(val);
+                                        item.salary_revision_date = ParseDdMmYyyy(val);
                                         break;
                                     case "appraisal_ctc":
                                         item.appraisal_ctc = Convert.ToDecimal(val);
@@ -179,10 +197,10 @@ namespace ProcessModel
                                     result.employee_name = Convert.ToString(val);
                                     break;
                                 case "appraisal_effective_date":
-                                    result.appraisal_effective_date = Convert.ToDateTime(val);
+                                    result.appraisal_effective_date = ParseDdMmYyyy(val);
                                     break;
                                 case "salary_revision_date":
-                                    result.salary_revision_date = Convert.ToDateTime(val);
+                                    result.salary_revision_date = ParseDdMmYyyy(val);
                                     break;
                                 case "appraisal_ctc":
                                     result.appraisal_ctc = Convert.ToDecimal(val);

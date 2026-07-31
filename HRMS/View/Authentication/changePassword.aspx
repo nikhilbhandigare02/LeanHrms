@@ -41,6 +41,31 @@
             cursor: pointer;
             color: #aaa;
         }
+
+        .password-policy-checklist {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+            font-size: 12px;
+        }
+
+            .password-policy-checklist li {
+                color: #6c757d;
+                margin-bottom: 3px;
+            }
+
+                .password-policy-checklist li i {
+                    font-size: 8px;
+                    margin-right: 6px;
+                }
+
+                .password-policy-checklist li.valid {
+                    color: #198754;
+                }
+
+                    .password-policy-checklist li.valid i:before {
+                        content: "\f00c";
+                    }
     </style>
 </head>
 <body>
@@ -85,11 +110,18 @@
                                     </div>
                                     <br />
                                    <div class="password-container">
-                                        <asp:TextBox ID="txtnewpass" runat="server" CssClass="form-control" AutoCompleteType="Disabled" TextMode="Password" placeholder="New Password"></asp:TextBox>
+                                        <asp:TextBox ID="txtnewpass" runat="server" CssClass="form-control" AutoCompleteType="Disabled" TextMode="Password" placeholder="New Password" onkeyup="updatePasswordPolicyChecklist(this.value)"></asp:TextBox>
                                        <span class="password-toggle-icon" onclick="togglePasswordVisibility('<%= txtnewpass.ClientID %>', this)">
     <i class="fa fa-eye-slash"></i>
 </span>
                                     </div>
+                                    <ul class="password-policy-checklist" id="passwordPolicyChecklist">
+                                        <li id="pwRuleLength"><i class="fa fa-circle"></i> At least 8 characters</li>
+                                        <li id="pwRuleUpper"><i class="fa fa-circle"></i> At least 1 uppercase letter</li>
+                                        <li id="pwRuleLower"><i class="fa fa-circle"></i> At least 1 lowercase letter</li>
+                                        <li id="pwRuleNumber"><i class="fa fa-circle"></i> At least 1 number</li>
+                                        <li id="pwRuleSymbol"><i class="fa fa-circle"></i> At least 1 special character</li>
+                                    </ul>
                                     <br />
                                     <div class="password-container">
                                         <asp:TextBox ID="txtconfirmpass" runat="server" CssClass="form-control" AutoCompleteType="Disabled" TextMode="Password" placeholder="Confirm password"></asp:TextBox>
@@ -99,7 +131,7 @@
                                         </div>
                                     <br />
                                     <div class="mt-3 d-grid">
-                                        <asp:Button ID="loginButton" runat="server" Text="Change Password" CssClass="btn btn-primary waves-effect waves-light" OnClick="btnchange_Click" />
+                                        <asp:Button ID="loginButton" runat="server" Text="Change Password" CssClass="btn btn-primary waves-effect waves-light" OnClick="btnchange_Click" OnClientClick="return validateChangePasswordForm();" />
                                         <%--<asp:Button ID="cancelBtn" runat="server" Text="Cancel " CssClass="btn btn-primary waves-effect waves-light" OnClick="cancelBtn_Click" />--%>
                                     </div>
                                     <div class="mt-4 text-center">
@@ -129,6 +161,53 @@
     </script>
 
     <script>
+        function getPasswordPolicyChecks(password) {
+            return {
+                pwRuleLength: password.length >= 8,
+                pwRuleUpper: /[A-Z]/.test(password),
+                pwRuleLower: /[a-z]/.test(password),
+                pwRuleNumber: /[0-9]/.test(password),
+                pwRuleSymbol: /[^A-Za-z0-9]/.test(password)
+            };
+        }
+
+        function updatePasswordPolicyChecklist(password) {
+            var checks = getPasswordPolicyChecks(password);
+            var isValid = true;
+
+            Object.keys(checks).forEach(function (id) {
+                var item = document.getElementById(id);
+                if (item) {
+                    item.classList.toggle('valid', checks[id]);
+                }
+                if (!checks[id]) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        function validateChangePasswordForm() {
+            var newPasswordInput = document.getElementById('<%= txtnewpass.ClientID %>');
+            var confirmPasswordInput = document.getElementById('<%= txtconfirmpass.ClientID %>');
+
+            var isPolicyValid = updatePasswordPolicyChecklist(newPasswordInput.value);
+            if (!isPolicyValid) {
+                showChangePassMessage('Error', 'Password does not meet the required policy.');
+                newPasswordInput.focus();
+                return false;
+            }
+
+            if (newPasswordInput.value !== confirmPasswordInput.value) {
+                showChangePassMessage('Error', 'Passwords do not match.');
+                confirmPasswordInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
         function togglePasswordVisibility(inputId, iconSpan) {
             var textbox = document.getElementById(inputId);
             var icon = iconSpan.querySelector('i');

@@ -194,7 +194,7 @@ namespace HRMS.View.Modules
                     {
                         if (compName.Contains("pf"))
                             amount = renum.PF;
-                        else if (compName.Contains("Provident Fund"))
+                        else if (compName.Contains("provident fund"))
                             amount = renum.PF;
                         else if (compName.Contains("esi"))
                             amount = renum.ESI;
@@ -212,17 +212,19 @@ namespace HRMS.View.Modules
                             amount = renum.OtherDeductions;
                     }
 
+                    // Never gate this on txt.Enabled: ASP.NET silently discards
+                    // posted values for any control rendered server-side with
+                    // Enabled=false, even after client JS removes the disabled
+                    // attribute. Checked/disabled state is purely client-side now.
                     if (amount.HasValue && amount.Value > 0)
                     {
                         chk.Checked = true;
-                        txt.Enabled = true;
                         txt.Text = amount.Value.ToString("F2");
                     }
                     else
                     {
                         chk.Checked = false;
-                        txt.Enabled = false;
-                        txt.Text = "0.00";
+                        txt.Text = string.Empty;
                     }
                 }
             }
@@ -296,35 +298,9 @@ namespace HRMS.View.Modules
             rptDeductions.DataBind();
         }
 
-        protected void chkComponent_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox chk = (CheckBox)sender;
-            RepeaterItem item = (RepeaterItem)chk.NamingContainer;
-            TextBox txtAmount = (TextBox)item.FindControl("txtComponentAmount");
-
-            if (chk.Checked)
-            {
-                txtAmount.Enabled = true;
-            }
-            else
-            {
-                txtAmount.Enabled = false;
-                txtAmount.Text = "0";
-                CalculateGrossSalary(sender, e);
-            }
-            UpdatePanel1.Update();
-        }
-
-        protected void txtGrossSalary_TextChanged(object sender, EventArgs e)
-        {
-            if (decimal.TryParse(txtGrossSalary.Text, out decimal gross))
-            {
-                txtMonthlySalary.Text = gross.ToString("F2");
-                txtAnnualSalary.Text = (gross * 12).ToString("F2");
-            }
-            UpdatePanel1.Update();
-        }
-
+        // Called directly (not as a postback event handler - components are no
+        // longer AutoPostBack) to precompute Gross/Monthly/Annual once existing
+        // remuneration data has been loaded into the repeaters for edit/view mode.
         protected void CalculateGrossSalary(object sender, EventArgs e)
         {
             decimal totalEarnings = 0;

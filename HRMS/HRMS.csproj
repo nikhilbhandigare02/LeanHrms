@@ -1765,6 +1765,7 @@
     <Content Include="View\Modules\ImageLibrary.aspx" />
     <Content Include="View\Modules\Remunerationdetails.aspx" />
     <Content Include="View\Modules\Remunerationform.aspx" />
+    <Content Include="View\Modules\ResignationHRReview.aspx" />
     <Content Include="View\Modules\ResignationList.aspx" />
     <Content Include="View\Modules\SalarySlip.aspx" />
     <Content Include="View\Modules\SalaryCalculation.aspx" />
@@ -2051,6 +2052,13 @@
     </Compile>
     <Compile Include="View\Modules\Remunerationform.aspx.designer.cs">
       <DependentUpon>Remunerationform.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\ResignationHRReview.aspx.cs">
+      <DependentUpon>ResignationHRReview.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\ResignationHRReview.aspx.designer.cs">
+      <DependentUpon>ResignationHRReview.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\ResignationList.aspx.cs">
       <DependentUpon>ResignationList.aspx</DependentUpon>

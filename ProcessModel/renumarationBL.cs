@@ -396,100 +396,7 @@ namespace ProcessModel
                     {
                         if (dr.Read())
                         {
-                            // First get all values to avoid calling Read multiple times
-                            int? renumId = ReadInt(dr, "remuneration_id");
-                            int? userId = ReadInt(dr, "user_id");
-                            int? insertedBy = ReadInt(dr, "inserted_by");
-
-                            decimal? basic = ReadDecimal(dr, "basic_salary");
-                            decimal? hra = ReadDecimal(dr, "hra");
-                            decimal? conveyance = ReadDecimal(dr, "conveyance_allowance");
-                            decimal? medical = ReadDecimal(dr, "medical_allowance");
-                            decimal? special = ReadDecimal(dr, "special_allowance");
-                            decimal? education = ReadDecimal(dr, "education_allowance");
-                            decimal? travel = ReadDecimal(dr, "travel_allowance");
-                            decimal? uniform = ReadDecimal(dr, "uniform_allowance");
-                            decimal? telephone = ReadDecimal(dr, "telephone_allowance");
-                            decimal? food = ReadDecimal(dr, "food_allowance");
-                            decimal? shift = ReadDecimal(dr, "shift_allowance");
-                            decimal? incentive = ReadDecimal(dr, "incentive");
-                            decimal? bonus = ReadDecimal(dr, "bonus");
-                            decimal? otherAllow = ReadDecimal(dr, "other_allowance");
-
-                            decimal? pf = ReadDecimal(dr, "pf");
-                            decimal? esi = ReadDecimal(dr, "esi");
-                            decimal? pt = ReadDecimal(dr, "professional_tax");
-                            decimal? tds = ReadDecimal(dr, "tds");
-                            decimal? lwf = ReadDecimal(dr, "labour_welfare_fund");
-                            decimal? loan = ReadDecimal(dr, "loan_deduction");
-                            decimal? advance = ReadDecimal(dr, "advance_recovery");
-                            decimal? otherDed = ReadDecimal(dr, "other_deductions");
-
-                            renum = new renumarationDO
-                            {
-                                RenumerationId = renumId ?? 0,
-                                SalaryStructureID = ReadString(dr, "salary_structure_id"),
-                                UserId = userId ?? 0,
-                                Status = ReadString(dr, "status"),
-                                EffectiveFromDate = ReadDateTime(dr, "effective_from_date"),
-                                EffectiveToDate = ReadDateTime(dr, "effective_to_date"),
-                                EmployeeCategory = ReadString(dr, "employee_category"),
-                                CTCAmount = ReadDecimal(dr, "ctc_amount"),
-                                GrossSalary = ReadDecimal(dr, "gross_salary"),
-                                MonthlySalary = ReadDecimal(dr, "monthly_salary"),
-                                AnnualSalary = ReadDecimal(dr, "annual_salary"),
-
-                                // Earnings components
-                                BasicSalary = basic,
-                                IsBasicSalaryEnabled = basic > 0,
-                                HRA = hra,
-                                IsHRAEnabled = hra > 0,
-                                ConveyanceAllowance = conveyance,
-                                IsConveyanceAllowanceEnabled = conveyance > 0,
-                                MedicalAllowance = medical,
-                                IsMedicalAllowanceEnabled = medical > 0,
-                                SpecialAllowance = special,
-                                IsSpecialAllowanceEnabled = special > 0,
-                                EducationAllowance = education,
-                                IsEducationAllowanceEnabled = education > 0,
-                                TravelAllowance = travel,
-                                IsTravelAllowanceEnabled = travel > 0,
-                                UniformAllowance = uniform,
-                                IsUniformAllowanceEnabled = uniform > 0,
-                                TelephoneAllowance = telephone,
-                                IsTelephoneAllowanceEnabled = telephone > 0,
-                                FoodAllowance = food,
-                                IsFoodAllowanceEnabled = food > 0,
-                                ShiftAllowance = shift,
-                                IsShiftAllowanceEnabled = shift > 0,
-                                Incentive = incentive,
-                                IsIncentiveEnabled = incentive > 0,
-                                Bonus = bonus,
-                                IsBonusEnabled = bonus > 0,
-                                OtherAllowance = otherAllow,
-                                IsOtherAllowanceEnabled = otherAllow > 0,
-
-                                // Deductions components
-                                PF = pf,
-                                IsPFEnabled = pf > 0,
-                                ESI = esi,
-                                IsESIEnabled = esi > 0,
-                                ProfessionalTax = pt,
-                                IsProfessionalTaxEnabled = pt > 0,
-                                TDS = tds,
-                                IsTDSEnabled = tds > 0,
-                                LabourWelfareFund = lwf,
-                                IsLabourWelfareFundEnabled = lwf > 0,
-                                LoanDeduction = loan,
-                                IsLoanDeductionEnabled = loan > 0,
-                                AdvanceRecovery = advance,
-                                IsAdvanceRecoveryEnabled = advance > 0,
-                                OtherDeductions = otherDed,
-                                IsOtherDeductionsEnabled = otherDed > 0,
-
-                                InsertedBy = insertedBy,
-                                InsertedDate = ReadDateTime(dr, "inserted_date")
-                            };
+                            renum = MapReaderToRenumarationDO(dr);
                         }
                     }
                 }
@@ -501,6 +408,136 @@ namespace ProcessModel
             }
 
             return renum;
+        }
+
+        // Currently active (is_active = 1) remuneration row for a user, so a
+        // new appraisal can prefill/scale the salary component breakdown
+        // instead of only patching gross_salary/ctc_amount in place.
+        public renumarationDO GetActiveRemunerationByUserId(int userId)
+        {
+            renumarationDO renum = null;
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(MySqlconnection))
+                using (MySqlCommand cmd = new MySqlCommand("sp_get_active_remuneration_by_user_id", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_user_id", userId);
+                    con.Open();
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            renum = MapReaderToRenumarationDO(dr);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("renumarationBL", "GetActiveRemunerationByUserId", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, Convert.ToString(HttpContext.Current.Session["userId"]));
+            }
+
+            return renum;
+        }
+
+        private renumarationDO MapReaderToRenumarationDO(MySqlDataReader dr)
+        {
+            // First get all values to avoid calling Read multiple times
+            int? renumId = ReadInt(dr, "remuneration_id");
+            int? userId = ReadInt(dr, "user_id");
+            int? insertedBy = ReadInt(dr, "inserted_by");
+
+            decimal? basic = ReadDecimal(dr, "basic_salary");
+            decimal? hra = ReadDecimal(dr, "hra");
+            decimal? conveyance = ReadDecimal(dr, "conveyance_allowance");
+            decimal? medical = ReadDecimal(dr, "medical_allowance");
+            decimal? special = ReadDecimal(dr, "special_allowance");
+            decimal? education = ReadDecimal(dr, "education_allowance");
+            decimal? travel = ReadDecimal(dr, "travel_allowance");
+            decimal? uniform = ReadDecimal(dr, "uniform_allowance");
+            decimal? telephone = ReadDecimal(dr, "telephone_allowance");
+            decimal? food = ReadDecimal(dr, "food_allowance");
+            decimal? shift = ReadDecimal(dr, "shift_allowance");
+            decimal? incentive = ReadDecimal(dr, "incentive");
+            decimal? bonus = ReadDecimal(dr, "bonus");
+            decimal? otherAllow = ReadDecimal(dr, "other_allowance");
+
+            decimal? pf = ReadDecimal(dr, "pf");
+            decimal? esi = ReadDecimal(dr, "esi");
+            decimal? pt = ReadDecimal(dr, "professional_tax");
+            decimal? tds = ReadDecimal(dr, "tds");
+            decimal? lwf = ReadDecimal(dr, "labour_welfare_fund");
+            decimal? loan = ReadDecimal(dr, "loan_deduction");
+            decimal? advance = ReadDecimal(dr, "advance_recovery");
+            decimal? otherDed = ReadDecimal(dr, "other_deductions");
+
+            return new renumarationDO
+            {
+                RenumerationId = renumId ?? 0,
+                SalaryStructureID = ReadString(dr, "salary_structure_id"),
+                UserId = userId ?? 0,
+                Status = ReadString(dr, "status"),
+                EffectiveFromDate = ReadDateTime(dr, "effective_from_date"),
+                EffectiveToDate = ReadDateTime(dr, "effective_to_date"),
+                EmployeeCategory = ReadString(dr, "employee_category"),
+                CTCAmount = ReadDecimal(dr, "ctc_amount"),
+                GrossSalary = ReadDecimal(dr, "gross_salary"),
+                MonthlySalary = ReadDecimal(dr, "monthly_salary"),
+                AnnualSalary = ReadDecimal(dr, "annual_salary"),
+
+                // Earnings components
+                BasicSalary = basic,
+                IsBasicSalaryEnabled = basic > 0,
+                HRA = hra,
+                IsHRAEnabled = hra > 0,
+                ConveyanceAllowance = conveyance,
+                IsConveyanceAllowanceEnabled = conveyance > 0,
+                MedicalAllowance = medical,
+                IsMedicalAllowanceEnabled = medical > 0,
+                SpecialAllowance = special,
+                IsSpecialAllowanceEnabled = special > 0,
+                EducationAllowance = education,
+                IsEducationAllowanceEnabled = education > 0,
+                TravelAllowance = travel,
+                IsTravelAllowanceEnabled = travel > 0,
+                UniformAllowance = uniform,
+                IsUniformAllowanceEnabled = uniform > 0,
+                TelephoneAllowance = telephone,
+                IsTelephoneAllowanceEnabled = telephone > 0,
+                FoodAllowance = food,
+                IsFoodAllowanceEnabled = food > 0,
+                ShiftAllowance = shift,
+                IsShiftAllowanceEnabled = shift > 0,
+                Incentive = incentive,
+                IsIncentiveEnabled = incentive > 0,
+                Bonus = bonus,
+                IsBonusEnabled = bonus > 0,
+                OtherAllowance = otherAllow,
+                IsOtherAllowanceEnabled = otherAllow > 0,
+
+                // Deductions components
+                PF = pf,
+                IsPFEnabled = pf > 0,
+                ESI = esi,
+                IsESIEnabled = esi > 0,
+                ProfessionalTax = pt,
+                IsProfessionalTaxEnabled = pt > 0,
+                TDS = tds,
+                IsTDSEnabled = tds > 0,
+                LabourWelfareFund = lwf,
+                IsLabourWelfareFundEnabled = lwf > 0,
+                LoanDeduction = loan,
+                IsLoanDeductionEnabled = loan > 0,
+                AdvanceRecovery = advance,
+                IsAdvanceRecoveryEnabled = advance > 0,
+                OtherDeductions = otherDed,
+                IsOtherDeductionsEnabled = otherDed > 0,
+
+                InsertedBy = insertedBy,
+                InsertedDate = ReadDateTime(dr, "inserted_date")
+            };
         }
 
         public (string Status, string Message) DeactivateRemuneration(int remunerationId)

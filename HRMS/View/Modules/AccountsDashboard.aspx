@@ -224,9 +224,9 @@
                         <i class="mdi mdi-calendar-month-outline"></i>
                         <span id="bannerToday"></span>
                     </span>
-                    <button type="button" class="banner-refresh" title="Refresh dashboard" onclick="location.reload();">
+                  <%--  <button type="button" class="banner-refresh" title="Refresh dashboard" onclick="location.reload();">
                         <i class="mdi mdi-refresh"></i>
-                    </button>
+                    </button>--%>
                 </div>
             </div>
         </div>

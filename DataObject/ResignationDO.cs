@@ -51,6 +51,41 @@ namespace DataObject
         public string Error { get; set; }
     }
 
+    public class HRReviewDO
+    {
+        // Employee / Resignation info (read-only on the HR Review page)
+        public int ResignationId { get; set; }
+        public int EmployeeId { get; set; }
+        public string EmployeeCode { get; set; }
+        public string EmployeeName { get; set; }
+        public string Department { get; set; }
+        public string Designation { get; set; }
+        public string ReportingManager { get; set; }
+        public DateTime? DateOfJoining { get; set; }
+        public DateTime ResignationDate { get; set; }
+        public DateTime ProposedLastWorkingDate { get; set; }
+        public string Reason { get; set; }
+        public string ResignationStatus { get; set; }
+
+        // HR Review section
+        public int HRReviewId { get; set; }
+        public string NoticePeriodRequired { get; set; }
+        public int? NoticeDays { get; set; }
+        public string BuyoutApplicable { get; set; }
+        public DateTime? RevisedLastWorkingDate { get; set; }
+        public string HRRemarks { get; set; }
+        public string Status { get; set; }
+    }
+
+    public class HRReviewResponseDO
+    {
+        public int HRReviewId { get; set; }
+
+        public bool Success { get; set; }
+        public string ResponseMsg { get; set; }
+
+    }
+
     public class HandOverDO
     {
         public int EmployeeResignationId { get; set; }

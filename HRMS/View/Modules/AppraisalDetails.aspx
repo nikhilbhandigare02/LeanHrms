@@ -184,6 +184,13 @@
                 <span class="bx bx-search-alt"></span>
             </div>
 
+            <asp:HyperLink ID="hlAppraisalHistory"
+                runat="server"
+                Text="Appraisal History"
+                CssClass="btn btn-outline-primary"
+                NavigateUrl="~/View/Modules/AppraisalHistory.aspx"
+                Style="margin-right: 10px;" />
+
             <asp:Button ID="btnAddNew"
                 runat="server"
                 Text="+ Add New Appraisal"

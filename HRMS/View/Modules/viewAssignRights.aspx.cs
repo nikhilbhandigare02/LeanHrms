@@ -211,7 +211,7 @@ namespace HRMS.View.Modules
                 gridview.Visible = false;
                 btn_advanceserach.Attributes["class"] = "btn btn-dark ms-2 light-border";
                 btn_advanceserach.Style["color"] = "white";
-                ddlPageSelector.Visible = false;
+                SetPaginationControlsVisible(false);
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ namespace HRMS.View.Modules
             try
             {
                 clearfileds();
-                ddlPageSelector.Visible = false;
+                SetPaginationControlsVisible(false);
                 Session["SearchResults"] = null;
             }
             catch (Exception ex)
@@ -320,21 +320,14 @@ namespace HRMS.View.Modules
                     List<rightsDO> displayedLeaveRequests = rights.GetRange(startRowIndex, endRowIndex - startRowIndex);
                     gridview.DataSource = displayedLeaveRequests;
                     gridview.DataBind();
-                    if (totalRecords > pageSize)
-                    {
-                        ddlPageSelector.Visible = true;
-                        UpdatePageInfoLabel(pageIndex, totalRecords);
-                    }
-                    else
-                    {
-                        ddlPageSelector.Visible = false;
-                    }
+                    UpdatePageInfoLabel(pageIndex, totalRecords);
+                    SetPaginationControlsVisible(totalRecords > pageSize);
                 }
                 else
                 {
                     gridview.DataSource = null;
                     gridview.DataBind();
-                    ddlPageSelector.Visible = false;
+                    SetPaginationControlsVisible(false);
                     UpdatePageInfoLabel(0, 0);
                 }
             }
@@ -364,27 +357,73 @@ namespace HRMS.View.Modules
                 return 0;
             }
         }
+        // lblPageInfo ("Showing X-Y of Z records") stays visible either way;
+        // only the Prev/Next + jump-to-page controls hide when there's a
+        // single page (or no results) to page through.
+        protected void SetPaginationControlsVisible(bool visible)
+        {
+            ddlPageSelector.Visible = visible;
+            btnPrevPage.Visible = visible;
+            btnNextPage.Visible = visible;
+        }
+
         protected void UpdatePageInfoLabel(int pageIndex, int pagecount)
         {
             try
             {
+                int pageSize = 10;
                 int currentPage = pageIndex + 1;
-                int totalPages = (int)Math.Ceiling((double)pagecount / 10);
+                int totalPages = (int)Math.Ceiling((double)pagecount / pageSize);
                 ddlPageSelector.Items.Clear();
                 for (int i = 1; i <= totalPages; i++)
                 {
-                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"{i}/{totalPages}", (i - 1).ToString()));
+                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"Page {i} of {totalPages}", (i - 1).ToString()));
                 }
                 if (ddlPageSelector.Items.Count > 0)
                 {
                     ddlPageSelector.SelectedValue = pageIndex.ToString();
                 }
+
+                if (pagecount > 0)
+                {
+                    int startRow = pageIndex * pageSize + 1;
+                    int endRow = Math.Min(startRow + pageSize - 1, pagecount);
+                    lblPageInfo.Text = $"Showing {startRow}-{endRow} of {pagecount} records";
+                }
+                else
+                {
+                    lblPageInfo.Text = "No records found";
+                }
+
+                btnPrevPage.Enabled = currentPage > 1;
+                btnNextPage.Enabled = currentPage < totalPages;
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("viewAssignRights", "UpdatePageInfoLabel", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+
+        protected void btnPrevPage_Click(object sender, EventArgs e)
+        {
+            int currentPageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+            if (currentPageIndex > 0)
+            {
+                Session["CurrentPageIndex"] = currentPageIndex - 1;
+            }
+            BindGridView();
+        }
+
+        protected void btnNextPage_Click(object sender, EventArgs e)
+        {
+            int currentPageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+            int maxPageIndex = ddlPageSelector.Items.Count > 0 ? ddlPageSelector.Items.Count - 1 : 0;
+            if (currentPageIndex < maxPageIndex)
+            {
+                Session["CurrentPageIndex"] = currentPageIndex + 1;
+            }
+            BindGridView();
         }
         protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
         {

@@ -167,6 +167,7 @@ namespace Lean.View.Layout
                         string.Equals(lastSegment, "AddEmployee.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AccountsDashboard.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "ImageLibrary.aspx", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(lastSegment, "AppraisalHistory.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AttendanceDetails.aspx", StringComparison.OrdinalIgnoreCase);
 
                     //bool isAddProjectViewMode = url.Contains("Addproject") && url.Contains("mode=view");
@@ -193,7 +194,7 @@ namespace Lean.View.Layout
                         if (roleId == 2)
                         {
                             // Redirect to LoginLogout.aspx with status and remark as query string parameters
-                            Response.Redirect("/View/Modules/LoginLogout.aspx?status=" + HttpUtility.UrlEncode(status) + "&remark=" + HttpUtility.UrlEncode(remark), false);
+                            Response.Redirect("/View/Modules/Home.aspx?status=" + HttpUtility.UrlEncode(status) + "&remark=" + HttpUtility.UrlEncode(remark), false);
                             return;
                         }
                         else

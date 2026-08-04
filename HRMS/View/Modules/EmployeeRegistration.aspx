@@ -859,6 +859,42 @@
             padding: 0 28px 24px;
         }
 
+        .btn-loader {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .btn-loader::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: btn-spinner 0.6s linear infinite;
+        }
+
+        @keyframes btn-spinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        input[type="submit"].btn-loading,
+        button.btn-loading {
+            cursor: wait;
+        }
+
         .wizard-actions {
             border-top: 1px solid #DDE7F3;
             justify-content: flex-end;
@@ -1094,7 +1130,7 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group"><label class="is-required">Employee Code</label><input id="txtEmployeeCode" runat="server" class="form-control-modern" placeholder="Enter employee code" readonly="readonly" disabled="disabled" /><span id="employeeCodeDuplicateMessage" class="validation-message" aria-readonly="true" ></span></div>
-                        <div class="form-group"><label class="is-required">Username</label><input id="txtUsername" runat="server" class="form-control-modern" placeholder="Auto-generated" readonly="readonly" disabled="disabled" /><span id="usernameDuplicateMessage" class="validation-message"></span></div>
+                        <div class="form-group"><label>Username</label><input id="txtUsername" runat="server" class="form-control-modern" placeholder="Auto-generated" readonly="readonly" disabled="disabled" /><span id="usernameDuplicateMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">First Name</label><input id="txtFirstName" runat="server" class="form-control-modern" placeholder="Enter first name" /><span id="firstNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label>Middle Name</label><input id="txtMiddleName" runat="server" class="form-control-modern" placeholder="Enter middle name" /><span id="middleNameValidationMessage" class="validation-message"></span></div>
                         <div class="form-group"><label class="is-required">Last Name</label><input id="txtLastName" runat="server" class="form-control-modern" placeholder="Enter last name" /><span id="lastNameValidationMessage" class="validation-message"></span></div>
@@ -1260,7 +1296,7 @@
                     </div>
                     <div class="action-right">
                         <button type="button" id="nextButton" class="btn-modern btn-primary-modern">Save &amp; Next</button>
-                        <asp:Button ID="submitButton" runat="server" ClientIDMode="Static" CssClass="btn-modern btn-primary-modern" Text="Submit Employee" OnClick="SubmitEmployee_Click" OnClientClick="return validateEmployeeRegistration();" />
+                        <asp:Button ID="submitButton" runat="server" CssClass="btn-modern btn-primary-modern" Text="Submit Employee" OnClick="SubmitEmployee_Click" OnClientClick="if(validateEmployeeRegistration()) { this.classList.add('btn-loader', 'btn-loading'); this.value = 'Submitting...'; return true; } else { return false; }" />
                     </div>
                 </div>
             </main>
@@ -1799,8 +1835,8 @@
 
                         current.classList.remove('pending', 'pending-neutral');
                         setSectionStatus(current, 'saved');
+                        openSection(next || current);
                     }
-                    openSection(next || current);
                 });
             });
 
@@ -2236,6 +2272,15 @@
                     wizardArea.style.display = 'block';
                     openSection(document.querySelector('.wizard-step[data-step="1"]'));
                 });
+            }
+
+            function showSubmitLoader() {
+                var submitButton = document.getElementById('<%= submitButton.ClientID %>');
+                if (submitButton) {
+                    submitButton.classList.add('btn-loader', 'btn-loading');
+                    submitButton.value = 'Submitting...';
+                }
+                return true;
             }
         })();
     </script>

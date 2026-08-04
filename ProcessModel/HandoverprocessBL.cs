@@ -177,6 +177,12 @@ namespace ProcessModel
             return (i < 0 || dr.IsDBNull(i)) ? (DateTime?)null : Convert.ToDateTime(dr.GetValue(i));
         }
 
+        private int? GetNullableIntSafe(IDataRecord dr, string col)
+        {
+            int i = GetOrdinalIgnoreCase(dr, col);
+            return (i < 0 || dr.IsDBNull(i)) ? (int?)null : Convert.ToInt32(dr.GetValue(i));
+        }
+
         private string NormalizeMySqlConnectionString(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -692,6 +698,97 @@ namespace ProcessModel
                 errorlog.fnStoreErrorLog(
                     "HandoverprocessBL",
                     "GetHRReviewById",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return model;
+        }
+
+        public int GetLatestResignationIdForUser(int userId)
+        {
+            int resignationId = 0;
+
+            if (userId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return resignationId;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_GetLatestResignationIdByUser", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_UserId", userId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            resignationId = GetIntSafe(dr, "ResignationId");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetLatestResignationIdForUser",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return resignationId;
+        }
+
+        public NoticePeriodDO GetNoticePeriodDetails(int resignationId)
+        {
+            NoticePeriodDO model = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return model;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_GetNoticePeriodDetails", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_ResignationId", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model = new NoticePeriodDO
+                            {
+                                NoticeStartDate = GetNullableDateSafe(dr, "NoticeStartDate"),
+                                NoticeEndDate = GetNullableDateSafe(dr, "NoticeEndDate"),
+                                RemainingDays = GetNullableIntSafe(dr, "RemainingDays"),
+                                LastWorkingDate = GetNullableDateSafe(dr, "LastWorkingDate"),
+                                AttendanceStatus = GetStringSafe(dr, "AttendanceStatus")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetNoticePeriodDetails",
                     "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
                     UserId
                 );

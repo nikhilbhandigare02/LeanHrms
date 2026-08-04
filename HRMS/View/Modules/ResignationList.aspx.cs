@@ -79,7 +79,7 @@ namespace HRMS.View.Modules
 
                 Session["ResignationListData"] = resignations;
 
-                ApplySorting(ref resignations); 
+                ApplySorting(ref resignations);
 
                 int totalRecords = resignations.Count;
                 int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
@@ -96,7 +96,7 @@ namespace HRMS.View.Modules
                 {
                     List<ResignationDO> displayedData = resignations.GetRange(startRowIndex, endRowIndex - startRowIndex);
 
-                    gvResignations.DataSource = displayedData; 
+                    gvResignations.DataSource = displayedData;
                     gvResignations.DataBind();
                     gvResignations.Visible = true;
 
@@ -171,7 +171,7 @@ namespace HRMS.View.Modules
                                 last_working_date = u.last_working_date,
                                 reason = u.reason,
                                 hr_status = u.hr_status,
-                                last_working_date_display=u.last_working_date_display
+                                last_working_date_display = u.last_working_date_display
                             }).ToList();
 
                             UserDetailsBL userBL = new UserDetailsBL();
@@ -1041,7 +1041,7 @@ ul{margin:4px 0 14px 18px;padding:0;}
 
                 if (e.CommandName == "Accept")
                 {
-                    Response.Redirect("~/View/Modules/ResignationHRReview.aspx?ResignationId=" + resignationId, false);
+                    Response.Redirect("~/View/Modules/ResignationHRReview.aspx?ResignationId=" + resignationId + "&mode=save", false);
                     return;
                 }
 

@@ -36,7 +36,10 @@ namespace HRMS.View.Modules
                 }
 
                 hfResignationId.Value = ResignationId.ToString();
-                BindHRReview(ResignationId);
+
+                // Check if this is save mode or update mode
+                string mode = Request.QueryString["mode"] ?? "update";
+                BindHRReview(ResignationId, mode);
             }
             else
             {
@@ -44,7 +47,7 @@ namespace HRMS.View.Modules
             }
         }
 
-        private void BindHRReview(int resignationId)
+        private void BindHRReview(int resignationId, string mode = "update")
         {
             try
             {
@@ -67,8 +70,27 @@ namespace HRMS.View.Modules
                 lblReviewStatus.Text = alreadyReviewed ? "HR review completed" : "HR review pending";
                 lblReviewStatus.CssClass = alreadyReviewed ? "badge bg-success" : "badge bg-warning text-dark";
 
-                if (existingReview != null)
+                // In save mode, don't populate existing review data - treat as new review
+                if (mode == "save" || existingReview == null)
                 {
+                    txtNoticeDays.Text = "0";
+                    txtRevisedLastWorkingDate.Text = model.ProposedLastWorkingDate == DateTime.MinValue
+                        ? string.Empty
+                        : model.ProposedLastWorkingDate.ToString("dd-MM-yyyy");
+
+                    hfHRReviewId.Value = "0";
+                    btnAcceptResignation.Text = "Accept";
+
+                    // Enable all fields for save mode
+                    ddlNoticePeriodRequired.Enabled = true;
+                    ddlBuyoutApplicable.Enabled = true;
+                    txtNoticeDays.Enabled = true;
+                    txtRevisedLastWorkingDate.Enabled = true;
+                    txtHRRemarks.Enabled = true;
+                }
+                else
+                {
+                    // Update mode - populate existing review data
                     ddlNoticePeriodRequired.SelectedValue = string.IsNullOrWhiteSpace(existingReview.NoticePeriodRequired) ? "" : existingReview.NoticePeriodRequired;
                     txtNoticeDays.Text = existingReview.NoticeDays.HasValue ? existingReview.NoticeDays.Value.ToString() : string.Empty;
                     ddlBuyoutApplicable.SelectedValue = string.IsNullOrWhiteSpace(existingReview.BuyoutApplicable) ? "" : existingReview.BuyoutApplicable;
@@ -81,16 +103,6 @@ namespace HRMS.View.Modules
 
                     hfHRReviewId.Value = existingReview.HRReviewId.ToString();
                     btnAcceptResignation.Text = "Update";
-                }
-                else
-                {
-                    txtNoticeDays.Text = "0";
-                    txtRevisedLastWorkingDate.Text = model.ProposedLastWorkingDate == DateTime.MinValue
-                        ? string.Empty
-                        : model.ProposedLastWorkingDate.ToString("dd-MM-yyyy");
-
-                    hfHRReviewId.Value = "0";
-                    btnAcceptResignation.Text = "Accept Resignation";
                 }
             }
             catch (Exception ex)

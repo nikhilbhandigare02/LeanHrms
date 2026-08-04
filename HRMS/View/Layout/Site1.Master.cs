@@ -143,6 +143,46 @@ namespace Lean.View.Layout
             upsertSubMenu("Attendance Details", "/View/Modules/AttendanceDetails.aspx");
         }
 
+        private static void EnsureResignationNoticeSubMenu(List<MenuData> menuDataList)
+        {
+            if (menuDataList == null)
+            {
+                return;
+            }
+
+            MenuData resignationMenu = menuDataList.FirstOrDefault(x => IsMenuName(x.Menu, "Resignation Details"));
+
+            if (resignationMenu == null)
+            {
+                resignationMenu = menuDataList.FirstOrDefault(x => x.SubMenus != null &&
+                    x.SubMenus.Any(s => (s.SubMenuLink ?? string.Empty).IndexOf("ResignationList.aspx", StringComparison.OrdinalIgnoreCase) >= 0));
+            }
+
+            if (resignationMenu == null)
+            {
+                return;
+            }
+
+            if (resignationMenu.SubMenus == null)
+            {
+                resignationMenu.SubMenus = new List<SubMenuData>();
+            }
+
+            SubMenuData existing = resignationMenu.SubMenus.FirstOrDefault(s => IsMenuName(s.SubMenu, "Notice"));
+            if (existing == null)
+            {
+                resignationMenu.SubMenus.Add(new SubMenuData
+                {
+                    SubMenu = "Notice",
+                    SubMenuLink = "/View/Modules/NoticePeriodList.aspx"
+                });
+            }
+            else
+            {
+                existing.SubMenuLink = "/View/Modules/NoticePeriodList.aspx";
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(Convert.ToString(Session["userid"])))
@@ -299,6 +339,7 @@ namespace Lean.View.Layout
 
                 MoveRemunerationFormToOnboarding(menuDataList);
                 EnsureOnboardingMenu(menuDataList, roleId);
+                EnsureResignationNoticeSubMenu(menuDataList);
 
                 foreach (var menu in menuDataList)
                 {

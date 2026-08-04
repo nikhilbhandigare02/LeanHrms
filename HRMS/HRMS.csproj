@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -1743,6 +1743,7 @@
     <Content Include="View\Modules\AppraisalDetails.aspx" />
     <Content Include="View\Modules\AttendanceDetails.aspx" />
     <Content Include="View\Modules\ExitClearance.aspx" />
+    <Content Include="View\Modules\ExitInterview.aspx" />
     <Content Include="View\Modules\ReimbursementDetails.aspx" />
     <Content Include="View\Modules\EmployeeRegistration.aspx" />
     <Content Include="View\Modules\EmployeeList.aspx" />
@@ -1762,6 +1763,8 @@
     <Content Include="View\Modules\Home.aspx" />
     <Content Include="View\Modules\HolidayList.aspx" />
     <Content Include="View\Modules\LeaveConfiguration.aspx" />
+    <Content Include="View\Modules\NoticePeriodList.aspx" />
+    <Content Include="View\Modules\NoticePeriodManagement.aspx" />
     <Content Include="View\Modules\ImageLibrary.aspx" />
     <Content Include="View\Modules\Remunerationdetails.aspx" />
     <Content Include="View\Modules\Remunerationform.aspx" />
@@ -1894,6 +1897,10 @@
     </Compile>
     <Compile Include="View\Modules\ExitClearance.aspx.cs">
       <DependentUpon>ExitClearance.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\ExitInterview.aspx.cs">
+      <DependentUpon>ExitInterview.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="View\Modules\ReimbursementDetails.aspx.cs">
@@ -2052,6 +2059,20 @@
     </Compile>
     <Compile Include="View\Modules\Remunerationform.aspx.designer.cs">
       <DependentUpon>Remunerationform.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\NoticePeriodList.aspx.cs">
+      <DependentUpon>NoticePeriodList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\NoticePeriodList.aspx.designer.cs">
+      <DependentUpon>NoticePeriodList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\NoticePeriodManagement.aspx.cs">
+      <DependentUpon>NoticePeriodManagement.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\NoticePeriodManagement.aspx.designer.cs">
+      <DependentUpon>NoticePeriodManagement.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\ResignationHRReview.aspx.cs">
       <DependentUpon>ResignationHRReview.aspx</DependentUpon>

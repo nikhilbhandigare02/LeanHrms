@@ -1741,6 +1741,7 @@
     <Content Include="View\Modules\AddEmployee.aspx" />
     <Content Include="View\Modules\AddReimbursementForm.aspx" />
     <Content Include="View\Modules\AppraisalDetails.aspx" />
+    <Content Include="View\Modules\AppraisalHistory.aspx" />
     <Content Include="View\Modules\AttendanceDetails.aspx" />
     <Content Include="View\Modules\ExitClearance.aspx" />
     <Content Include="View\Modules\ReimbursementDetails.aspx" />
@@ -1884,6 +1885,13 @@
     </Compile>
     <Compile Include="View\Modules\AppraisalDetails.aspx.designer.cs">
       <DependentUpon>AppraisalDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\AppraisalHistory.aspx.cs">
+      <DependentUpon>AppraisalHistory.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AppraisalHistory.aspx.designer.cs">
+      <DependentUpon>AppraisalHistory.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\AttendanceDetails.aspx.cs">
       <DependentUpon>AttendanceDetails.aspx</DependentUpon>

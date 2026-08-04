@@ -1841,7 +1841,9 @@ namespace HRMS.View.Modules
 
                         if (Request.QueryString["mode"] == "edit")
                         {
+                            txtEmployeeCode.ReadOnly = true;
                             txt_name.Enabled = true;
+                            txt_name.ReadOnly = true;
                             txt_fullname.Enabled = true;
                             txt_email.Enabled = true;
                             txt_contact.Enabled = true;

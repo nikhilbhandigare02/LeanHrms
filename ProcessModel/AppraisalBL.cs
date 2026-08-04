@@ -155,6 +155,100 @@ namespace ProcessModel
             return list;
         }
 
+        // For the AppraisalHistory.aspx page - returns every appraisal_details
+        // row (active and superseded/is_active=0) so admins can see the full
+        // increment trail per employee, filterable by employee and date range.
+        public List<AppraisalDetailsDO> GetAppraisalHistory(int userId, DateTime? fromDate, DateTime? toDate)
+        {
+            List<AppraisalDetailsDO> list = new List<AppraisalDetailsDO>();
+
+            try
+            {
+                List<MySqlParameter> parameters = new List<MySqlParameter>
+                {
+                    DataClass.GetParameter("p_user_id", userId),
+                    DataClass.GetParameter("p_from_date", (object)fromDate ?? DBNull.Value),
+                    DataClass.GetParameter("p_to_date", (object)toDate ?? DBNull.Value)
+                };
+
+                using (MySqlDataReader dr =
+                    DataClass.GetDataReaderFromSpWithParam(
+                        parameters,
+                        "",
+                        "sp_get_appraisal_history"))
+                {
+                    if (dr != null)
+                    {
+                        while (dr.Read())
+                        {
+                            AppraisalDetailsDO item = new AppraisalDetailsDO();
+
+                            for (int i = 0; i < dr.FieldCount; i++)
+                            {
+                                string colName = dr.GetName(i).ToLower();
+                                object val = dr[i];
+
+                                if (val == DBNull.Value)
+                                    continue;
+
+                                switch (colName)
+                                {
+                                    case "appraisal_id":
+                                        item.appraisal_id = Convert.ToInt32(val);
+                                        break;
+                                    case "user_id":
+                                        item.user_id = Convert.ToInt32(val);
+                                        break;
+                                    case "emp_code":
+                                        item.emp_code = Convert.ToString(val);
+                                        break;
+                                    case "employee_name":
+                                        item.employee_name = Convert.ToString(val);
+                                        break;
+                                    case "appraisal_effective_date":
+                                        item.appraisal_effective_date = ParseDdMmYyyy(val);
+                                        break;
+                                    case "salary_revision_date":
+                                        item.salary_revision_date = ParseDdMmYyyy(val);
+                                        break;
+                                    case "appraisal_ctc":
+                                        item.appraisal_ctc = Convert.ToDecimal(val);
+                                        break;
+                                    case "gross_salary":
+                                        item.gross_salary = Convert.ToDecimal(val);
+                                        break;
+                                    case "net_salary":
+                                        item.net_salary = Convert.ToDecimal(val);
+                                        break;
+                                    case "increament_amount":
+                                        item.increament_amount = Convert.ToDecimal(val);
+                                        break;
+                                    case "increament_percentage":
+                                        item.increament_percentage = Convert.ToDecimal(val);
+                                        break;
+                                    case "is_active":
+                                        item.is_active = Convert.ToInt32(val) == 1;
+                                        break;
+                                    case "inserted_date":
+                                        item.inserted_date_display = Convert.ToString(val);
+                                        break;
+                                }
+                            }
+
+                            list.Add(item);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("AppraisalBL", "GetAppraisalHistory", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, null);
+            }
+
+            return list;
+        }
+
         public AppraisalDetailsDO GetAppraisalDetailsById(int appraisalId)
         {
             List<MySqlParameter> param = new List<MySqlParameter>();

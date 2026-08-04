@@ -17,9 +17,64 @@
             margin-right: 20px;
         }
 
-        .pagination-container {
-            margin-top: 20px;
-            padding: 10px;
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            text-decoration: none;
+        }
+
+            .pagination-nav-btn:hover {
+                background: #2563eb;
+                border-color: #2563eb;
+                color: #fff;
+                text-decoration: none;
+            }
+
+            .pagination-nav-btn.aspNetDisabled {
+                opacity: 0.4;
+                pointer-events: none;
+                cursor: default;
+            }
+
+        .pagination-select {
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            padding: 6px 10px;
+            font-size: 13px;
+            color: #374151;
+            background: #fff;
         }
 
         .app-search .position-relative {
@@ -85,16 +140,6 @@
         }
     </style>
     <style>
-        .pagination-container {
-            display: flex;
-            align-items: center;
-        }
-
-            .pagination-container button,
-            .pagination-container select {
-                margin: 0;
-            }
-
         .custom-gridview {
             border-left: none;
             border-right: none;
@@ -240,10 +285,18 @@
                                     </Columns>
                                     <PagerStyle CssClass="gridview-pagination" />
                                 </asp:GridView>
-                                <div class="pagination-container" style="font-size: 14px; color: black;">
-                                    <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true" OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged"
-                                        Style="background-color: white; color: black; border: 1px solid #ddd; padding: 5px 10px; margin: 2px; margin-left: auto;">
-                                    </asp:DropDownList>
+                                <div class="pagination-bar">
+                                    <asp:Label ID="lblPageInfo" runat="server" CssClass="pagination-info" />
+                                    <div class="pagination-controls">
+                                        <asp:LinkButton ID="btnPrevPage" runat="server" CssClass="pagination-nav-btn" OnClick="btnPrevPage_Click" ToolTip="Previous page">
+                                            <i class="fa fa-chevron-left"></i>
+                                        </asp:LinkButton>
+                                        <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true" CssClass="pagination-select" OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged">
+                                        </asp:DropDownList>
+                                        <asp:LinkButton ID="btnNextPage" runat="server" CssClass="pagination-nav-btn" OnClick="btnNextPage_Click" ToolTip="Next page">
+                                            <i class="fa fa-chevron-right"></i>
+                                        </asp:LinkButton>
+                                    </div>
                                 </div>
                             </ContentTemplate>
                             <Triggers>

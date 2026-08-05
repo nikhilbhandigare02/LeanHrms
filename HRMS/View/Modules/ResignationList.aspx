@@ -557,18 +557,18 @@
         $(document).ready(function () {
 
             flatpickr("#<%= txtLastWorkingDate.ClientID %>", {
-                   dateFormat: "d-m-Y",
+                dateFormat: "d-m-Y",
                 allowInput: true,
                 minDate: "today"   // ✅ disables all past dates
-               });
+            });
 
 
 
-               // Click calendar icon to open datepicker
-               $('.input-group-text').on('click', function () {
-                   $(this).closest('.input-group').find('input').focus();
-               });
-           });
+            // Click calendar icon to open datepicker
+            $('.input-group-text').on('click', function () {
+                $(this).closest('.input-group').find('input').focus();
+            });
+        });
 
 
     </script>

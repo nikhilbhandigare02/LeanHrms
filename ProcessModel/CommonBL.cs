@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
+using System.Net;
+using System.Net.Mail;
 using DataObject;
 using MySql.Data.MySqlClient;
 
@@ -898,6 +900,56 @@ namespace ProcessModel
           errorlog.fnStoreErrorLog("CommonBL", "dropdownusername", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
       }
       return dropDownData;
+  }
+
+  public void SendEmail(string toMail, string ccMail, string subject, string body)
+  {
+      try
+      {
+          string Email = ConfigurationManager.AppSettings["SenderEmail"];
+          string Password = ConfigurationManager.AppSettings["SenderPassword"];
+          int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
+          string Host = ConfigurationManager.AppSettings["SenderHost"];
+
+          using (MailMessage mail = new MailMessage())
+          {
+              mail.From = new MailAddress(Email, "HRMS");
+
+              // TO
+              foreach (string email in toMail.Split(';'))
+              {
+                  if (!string.IsNullOrWhiteSpace(email))
+                      mail.To.Add(email.Trim());
+              }
+
+              // CC
+              if (!string.IsNullOrWhiteSpace(ccMail))
+              {
+                  foreach (string email in ccMail.Split(';'))
+                  {
+                      if (!string.IsNullOrWhiteSpace(email))
+                          mail.CC.Add(email.Trim());
+                  }
+              }
+
+              mail.Subject = subject;
+              mail.Body = body;
+              mail.IsBodyHtml = true;
+
+              using (SmtpClient smtp = new SmtpClient(Host, Port))
+              {
+                  smtp.UseDefaultCredentials = false;
+                  smtp.Credentials = new NetworkCredential(Email, Password);
+                  smtp.EnableSsl = true;
+
+                  smtp.Send(mail);
+              }
+          }
+      }
+      catch (Exception ex)
+      {
+          fnStoreErrorLog("CommonBL", "SendEmail", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+      }
   }
     }
 }

@@ -56,13 +56,12 @@ namespace HRMS.View.Modules
                 int totalRecords = list.Count;
                 int pageSize = 10;
 
-                // Get current page index from session, reset if out of range
+                // Get current page index from session, clamp if out of range
                 int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
-                if (pageIndex * pageSize >= totalRecords)
-                {
-                    pageIndex = 0;
-                    Session["CurrentPageIndex"] = 0;
-                }
+                int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                if (pageIndex >= totalPages) pageIndex = Math.Max(totalPages - 1, 0);
+                if (pageIndex < 0) pageIndex = 0;
+                Session["CurrentPageIndex"] = pageIndex;
 
                 hfPageIndexViewUser.Value = pageIndex.ToString();
 
@@ -84,7 +83,7 @@ namespace HRMS.View.Modules
                 bool hasData = displayedData.Count > 0;
                 gridview.Visible = hasData;
                 paginationContainer.Visible = hasData;
-                ddlPageSelector.Visible = hasData && totalRecords > pageSize;
+                paginationContainer.Visible = hasData && totalRecords > pageSize;
 
                 UpdatePageInfoLabel(pageIndex, totalRecords);
             }
@@ -93,7 +92,6 @@ namespace HRMS.View.Modules
                 // Hide grid and pagination on error
                 gridview.Visible = false;
                 paginationContainer.Visible = false;
-                ddlPageSelector.Visible = false;
 
                 // Log error
                 CommonBL errorlog = new CommonBL();
@@ -135,7 +133,7 @@ namespace HRMS.View.Modules
                 gridview.DataSource = null;
                 gridview.DataBind();
                 gridview.Visible = false;
-                ddlPageSelector.Visible = false;
+                paginationContainer.Visible = false;
             }
             catch (Exception ex)
             {
@@ -148,17 +146,23 @@ namespace HRMS.View.Modules
         {
             try
             {
-                int currentPage = pageIndex + 1;
-                int totalPages = (int)Math.Ceiling((double)pagecount / 10);
-                ddlPageSelector.Items.Clear();
-                for (int i = 1; i <= totalPages; i++)
+                int pageSize = 10;
+                int totalPages = Math.Max((int)Math.Ceiling((double)pagecount / pageSize), 1);
+
+                List<PagerItem> pages = new List<PagerItem>();
+                for (int i = 0; i < totalPages; i++)
                 {
-                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"{i}/{totalPages}", (i - 1).ToString()));
+                    pages.Add(new PagerItem { PageIndex = i, PageNumber = (i + 1).ToString(), IsActive = i == pageIndex });
                 }
-                if (ddlPageSelector.Items.Count > 0)
-                {
-                    ddlPageSelector.SelectedValue = pageIndex.ToString();
-                }
+
+                rptPageNumbers.DataSource = pages;
+                rptPageNumbers.DataBind();
+
+                lnkPrevPage.Enabled = pageIndex > 0;
+                lnkPrevPage.CssClass = lnkPrevPage.Enabled ? "page-btn" : "page-btn disabled";
+
+                lnkNextPage.Enabled = pageIndex < totalPages - 1;
+                lnkNextPage.CssClass = lnkNextPage.Enabled ? "page-btn" : "page-btn disabled";
             }
             catch (Exception ex)
             {
@@ -167,20 +171,64 @@ namespace HRMS.View.Modules
             }
         }
 
-        protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
+        protected void rptPageNumbers_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             try
             {
-                int selectedPageIndex = Convert.ToInt32(ddlPageSelector.SelectedValue);
-                Session["CurrentPageIndex"] = selectedPageIndex;
+                if (e.CommandName == "GoToPage")
+                {
+                    Session["CurrentPageIndex"] = Convert.ToInt32(e.CommandArgument);
+                    int? year = string.IsNullOrEmpty(ddlYear.SelectedValue) ? (int?)null : Convert.ToInt32(ddlYear.SelectedValue);
+                    BindGrid(year);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("useruploaddocuments", "rptPageNumbers_ItemCommand", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void lnkPrevPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                if (pageIndex > 0)
+                {
+                    Session["CurrentPageIndex"] = pageIndex - 1;
+                    int? year = string.IsNullOrEmpty(ddlYear.SelectedValue) ? (int?)null : Convert.ToInt32(ddlYear.SelectedValue);
+                    BindGrid(year);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("useruploaddocuments", "lnkPrevPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void lnkNextPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                Session["CurrentPageIndex"] = pageIndex + 1;
                 int? year = string.IsNullOrEmpty(ddlYear.SelectedValue) ? (int?)null : Convert.ToInt32(ddlYear.SelectedValue);
                 BindGrid(year);
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "ddlPageSelector_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("useruploaddocuments", "lnkNextPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+
+        private class PagerItem
+        {
+            public int PageIndex { get; set; }
+            public string PageNumber { get; set; }
+            public bool IsActive { get; set; }
         }
 
         protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)

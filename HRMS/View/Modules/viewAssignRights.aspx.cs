@@ -211,7 +211,7 @@ namespace HRMS.View.Modules
                 gridview.Visible = false;
                 btn_advanceserach.Attributes["class"] = "btn btn-dark ms-2 light-border";
                 btn_advanceserach.Style["color"] = "white";
-                SetPaginationControlsVisible(false);
+                pagerContainer.Visible = false;
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ namespace HRMS.View.Modules
             try
             {
                 clearfileds();
-                SetPaginationControlsVisible(false);
+                pagerContainer.Visible = false;
                 Session["SearchResults"] = null;
             }
             catch (Exception ex)
@@ -308,10 +308,15 @@ namespace HRMS.View.Modules
 
                 ApplySorting(ref rights);
                 int totalRecords = rights.Count;
+                int pageSize = 10;
                 int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+
+                int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                if (pageIndex >= totalPages) pageIndex = Math.Max(totalPages - 1, 0);
+                if (pageIndex < 0) pageIndex = 0;
+                Session["CurrentPageIndex"] = pageIndex;
                 hfPageIndexViewRights.Value = pageIndex.ToString();
 
-                int pageSize = 10;
                 int startRowIndex = pageIndex * pageSize;
                 int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
 
@@ -320,14 +325,14 @@ namespace HRMS.View.Modules
                     List<rightsDO> displayedLeaveRequests = rights.GetRange(startRowIndex, endRowIndex - startRowIndex);
                     gridview.DataSource = displayedLeaveRequests;
                     gridview.DataBind();
+                    pagerContainer.Visible = totalRecords > pageSize;
                     UpdatePageInfoLabel(pageIndex, totalRecords);
-                    SetPaginationControlsVisible(totalRecords > pageSize);
                 }
                 else
                 {
                     gridview.DataSource = null;
                     gridview.DataBind();
-                    SetPaginationControlsVisible(false);
+                    pagerContainer.Visible = false;
                     UpdatePageInfoLabel(0, 0);
                 }
             }
@@ -357,46 +362,27 @@ namespace HRMS.View.Modules
                 return 0;
             }
         }
-        // lblPageInfo ("Showing X-Y of Z records") stays visible either way;
-        // only the Prev/Next + jump-to-page controls hide when there's a
-        // single page (or no results) to page through.
-        protected void SetPaginationControlsVisible(bool visible)
-        {
-            ddlPageSelector.Visible = visible;
-            btnPrevPage.Visible = visible;
-            btnNextPage.Visible = visible;
-        }
-
         protected void UpdatePageInfoLabel(int pageIndex, int pagecount)
         {
             try
             {
                 int pageSize = 10;
-                int currentPage = pageIndex + 1;
-                int totalPages = (int)Math.Ceiling((double)pagecount / pageSize);
-                ddlPageSelector.Items.Clear();
-                for (int i = 1; i <= totalPages; i++)
+                int totalPages = Math.Max((int)Math.Ceiling((double)pagecount / pageSize), 1);
+
+                List<PagerItem> pages = new List<PagerItem>();
+                for (int i = 0; i < totalPages; i++)
                 {
-                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"Page {i} of {totalPages}", (i - 1).ToString()));
-                }
-                if (ddlPageSelector.Items.Count > 0)
-                {
-                    ddlPageSelector.SelectedValue = pageIndex.ToString();
+                    pages.Add(new PagerItem { PageIndex = i, PageNumber = (i + 1).ToString(), IsActive = i == pageIndex });
                 }
 
-                if (pagecount > 0)
-                {
-                    int startRow = pageIndex * pageSize + 1;
-                    int endRow = Math.Min(startRow + pageSize - 1, pagecount);
-                    lblPageInfo.Text = $"Showing {startRow}-{endRow} of {pagecount} records";
-                }
-                else
-                {
-                    lblPageInfo.Text = "No records found";
-                }
+                rptPageNumbers.DataSource = pages;
+                rptPageNumbers.DataBind();
 
-                btnPrevPage.Enabled = currentPage > 1;
-                btnNextPage.Enabled = currentPage < totalPages;
+                lnkPrevPage.Enabled = pageIndex > 0;
+                lnkPrevPage.CssClass = lnkPrevPage.Enabled ? "page-btn" : "page-btn disabled";
+
+                lnkNextPage.Enabled = pageIndex < totalPages - 1;
+                lnkNextPage.CssClass = lnkNextPage.Enabled ? "page-btn" : "page-btn disabled";
             }
             catch (Exception ex)
             {
@@ -404,40 +390,58 @@ namespace HRMS.View.Modules
                 errorlog.fnStoreErrorLog("viewAssignRights", "UpdatePageInfoLabel", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
         }
-
-        protected void btnPrevPage_Click(object sender, EventArgs e)
-        {
-            int currentPageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
-            if (currentPageIndex > 0)
-            {
-                Session["CurrentPageIndex"] = currentPageIndex - 1;
-            }
-            BindGridView();
-        }
-
-        protected void btnNextPage_Click(object sender, EventArgs e)
-        {
-            int currentPageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
-            int maxPageIndex = ddlPageSelector.Items.Count > 0 ? ddlPageSelector.Items.Count - 1 : 0;
-            if (currentPageIndex < maxPageIndex)
-            {
-                Session["CurrentPageIndex"] = currentPageIndex + 1;
-            }
-            BindGridView();
-        }
-        protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
+        protected void rptPageNumbers_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             try
             {
-                int selectedPageIndex = Convert.ToInt32(ddlPageSelector.SelectedValue);
-                Session["CurrentPageIndex"] = selectedPageIndex;
+                if (e.CommandName == "GoToPage")
+                {
+                    Session["CurrentPageIndex"] = Convert.ToInt32(e.CommandArgument);
+                    BindGridView();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("viewAssignRights", "rptPageNumbers_ItemCommand", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+        protected void lnkPrevPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                if (pageIndex > 0)
+                {
+                    Session["CurrentPageIndex"] = pageIndex - 1;
+                    BindGridView();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("viewAssignRights", "lnkPrevPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+        protected void lnkNextPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                Session["CurrentPageIndex"] = pageIndex + 1;
                 BindGridView();
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("viewAssignRights", "ddlPageSelector_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("viewAssignRights", "lnkNextPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+        private class PagerItem
+        {
+            public int PageIndex { get; set; }
+            public string PageNumber { get; set; }
+            public bool IsActive { get; set; }
         }
         protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)
         {

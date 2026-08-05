@@ -311,7 +311,7 @@ namespace HRMS.View.Modules
                 {
                     gridview.DataSource = null;
                     gridview.DataBind();
-                    ddlPageSelector.Visible = false;
+                    paginationContainer.Visible = false;
                     UpdatePageInfoLabel(0, 0);
 
                     advancedSearchFields.Visible = false;
@@ -325,10 +325,14 @@ namespace HRMS.View.Modules
 
                 var userDo = apiResult.UsersList.OrderByDescending(t => t.UserId).ToList();
                 int totalRecords = userDo.Count;
+                int pageSize = 10;
                 int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                if (pageIndex >= totalPages) pageIndex = Math.Max(totalPages - 1, 0);
+                if (pageIndex < 0) pageIndex = 0;
+                Session["CurrentPageIndex"] = pageIndex;
                 hfPageIndexViewUser.Value = pageIndex.ToString();
 
-                int pageSize = 10;
                 int startRowIndex = pageIndex * pageSize;
                 int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
 
@@ -340,7 +344,7 @@ namespace HRMS.View.Modules
                 advancedSearchFields.Visible = false;
                 gridview.Visible = true;
 
-                ddlPageSelector.Visible = (totalRecords > pageSize);
+                paginationContainer.Visible = (totalRecords > pageSize);
                 UpdatePageInfoLabel(pageIndex, totalRecords);
 
                 searchdata.Visible = false;
@@ -413,7 +417,7 @@ namespace HRMS.View.Modules
                 gridview.Visible = false;
                 btn_advanceserach.Attributes["class"] = "btn btn-dark ms-2 light-border";
                 btn_advanceserach.Style["color"] = "white";
-                ddlPageSelector.Visible = false;
+                paginationContainer.Visible = false;
                 btnsearchclear.Visible = false;
                 ddlcomp.Visible = false;
             }
@@ -458,7 +462,7 @@ namespace HRMS.View.Modules
             try
             {
                 clearfileds();
-                ddlPageSelector.Visible = false;
+                paginationContainer.Visible = false;
                 Session["AdvSearchResViewUser"] = null;
             }
 
@@ -641,10 +645,14 @@ namespace HRMS.View.Modules
                 ApplySorting(ref users); // existing sorting logic
 
                 int totalRecords = users.Count;
+                int pageSize = 10;
                 int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+                if (pageIndex >= totalPages) pageIndex = Math.Max(totalPages - 1, 0);
+                if (pageIndex < 0) pageIndex = 0;
+                Session["CurrentPageIndex"] = pageIndex;
                 hfPageIndexViewUser.Value = pageIndex.ToString();
 
-                int pageSize = 10;
                 int startRowIndex = pageIndex * pageSize;
                 int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
 
@@ -659,12 +667,11 @@ namespace HRMS.View.Modules
 
                     if (totalRecords > pageSize)
                     {
-                        ddlPageSelector.Visible = true;
+                        paginationContainer.Visible = true;
                         UpdatePageInfoLabel(pageIndex, totalRecords);
                     }
                     else
                     {
-                        ddlPageSelector.Visible = false;
                         paginationContainer.Visible = false;
                     }
                 }
@@ -673,7 +680,6 @@ namespace HRMS.View.Modules
                     gridview.DataSource = null;
                     gridview.DataBind();
                     gridview.Visible = false;
-                    ddlPageSelector.Visible = false;
                     paginationContainer.Visible = false;
                     UpdatePageInfoLabel(0, 0);
                 }
@@ -696,7 +702,7 @@ namespace HRMS.View.Modules
                 gridview.DataSource = null;
                 gridview.DataBind();
                 gridview.Visible = false;     // hide grid on clear
-                ddlPageSelector.Visible = false; // hide pagination dropdown
+                paginationContainer.Visible = false; // hide pagination container
             }
             catch (Exception ex)
             {
@@ -763,17 +769,23 @@ namespace HRMS.View.Modules
         {
             try
             {
-                int currentPage = pageIndex + 1;
-                int totalPages = (int)Math.Ceiling((double)pagecount / 10);
-                ddlPageSelector.Items.Clear();
-                for (int i = 1; i <= totalPages; i++)
+                int pageSize = 10;
+                int totalPages = Math.Max((int)Math.Ceiling((double)pagecount / pageSize), 1);
+
+                List<PagerItem> pages = new List<PagerItem>();
+                for (int i = 0; i < totalPages; i++)
                 {
-                    ddlPageSelector.Items.Add(new System.Web.UI.WebControls.ListItem($"{i}/{totalPages}", (i - 1).ToString()));
+                    pages.Add(new PagerItem { PageIndex = i, PageNumber = (i + 1).ToString(), IsActive = i == pageIndex });
                 }
-                if (ddlPageSelector.Items.Count > 0)
-                {
-                    ddlPageSelector.SelectedValue = pageIndex.ToString();
-                }
+
+                rptPageNumbers.DataSource = pages;
+                rptPageNumbers.DataBind();
+
+                lnkPrevPage.Enabled = pageIndex > 0;
+                lnkPrevPage.CssClass = lnkPrevPage.Enabled ? "page-btn" : "page-btn disabled";
+
+                lnkNextPage.Enabled = pageIndex < totalPages - 1;
+                lnkNextPage.CssClass = lnkNextPage.Enabled ? "page-btn" : "page-btn disabled";
             }
             catch (Exception ex)
             {
@@ -781,13 +793,10 @@ namespace HRMS.View.Modules
                 errorlog.fnStoreErrorLog("useruploaddocuments", "UpdatePageInfoLabel", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
         }
-        protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
+        private void RebindGridForCurrentPage()
         {
             try
             {
-                int selectedPageIndex = Convert.ToInt32(ddlPageSelector.SelectedValue);
-                Session["CurrentPageIndex"] = selectedPageIndex;
-
                 if (Session["AdvSearchResViewUser"] != null)
                 {
                     List<UserDetailsDO> searchResults = (List<UserDetailsDO>)Session["AdvSearchResViewUser"];
@@ -795,14 +804,20 @@ namespace HRMS.View.Modules
                     ApplySorting(ref searchResults);
 
                     int totalRecords = searchResults.Count;
-                    int pageIndex = selectedPageIndex;
+                    int pageSize = gridview.PageSize;
+                    int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                    int totalPages = pageSize > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 0;
+                    if (pageIndex >= totalPages) pageIndex = Math.Max(totalPages - 1, 0);
+                    if (pageIndex < 0) pageIndex = 0;
+                    Session["CurrentPageIndex"] = pageIndex;
                     hfPageIndexViewUser.Value = pageIndex.ToString();
 
-                    int pageSize = gridview.PageSize;
                     int startRowIndex = pageIndex * pageSize;
                     int endRowIndex = Math.Min(startRowIndex + pageSize, totalRecords);
 
-                    List<UserDetailsDO> displayedUsers = searchResults.GetRange(startRowIndex, endRowIndex - startRowIndex);
+                    List<UserDetailsDO> displayedUsers = totalRecords > 0
+                        ? searchResults.GetRange(startRowIndex, endRowIndex - startRowIndex)
+                        : new List<UserDetailsDO>();
                     gridview.DataSource = displayedUsers;
                     gridview.DataBind();
 
@@ -819,8 +834,61 @@ namespace HRMS.View.Modules
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("useruploaddocuments", "ddlPageSelector_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("useruploaddocuments", "RebindGridForCurrentPage", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+        protected void rptPageNumbers_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "GoToPage")
+                {
+                    Session["CurrentPageIndex"] = Convert.ToInt32(e.CommandArgument);
+                    RebindGridForCurrentPage();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("useruploaddocuments", "rptPageNumbers_ItemCommand", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+        protected void lnkPrevPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                if (pageIndex > 0)
+                {
+                    Session["CurrentPageIndex"] = pageIndex - 1;
+                    RebindGridForCurrentPage();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("useruploaddocuments", "lnkPrevPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+        protected void lnkNextPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["CurrentPageIndex"] ?? 0);
+                Session["CurrentPageIndex"] = pageIndex + 1;
+                RebindGridForCurrentPage();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("useruploaddocuments", "lnkNextPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+        private class PagerItem
+        {
+            public int PageIndex { get; set; }
+            public string PageNumber { get; set; }
+            public bool IsActive { get; set; }
         }
         protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)
         {

@@ -467,7 +467,7 @@ namespace HRMS.View.Modules
                         string compName = hfName.Value.ToLower().Trim();
                         if (compName.Contains("pf"))
                             pf = amount;
-                        else if (compName.Contains("Provident Fund"))
+                        else if (compName.Contains("provident fund"))
                             esi = amount;
                         else if (compName.Contains("esi"))
                             esi = amount;
@@ -486,21 +486,49 @@ namespace HRMS.View.Modules
                     }
                 }
 
+                // Calculate gross salary from earnings components (server-side)
+                decimal gross = basicSalary + hra + conveyanceAllowance + medicalAllowance + specialAllowance + 
+                                educationAllowance + travelAllowance + uniformAllowance + telephoneAllowance + 
+                                foodAllowance + shiftAllowance + incentive + bonus + otherAllowance;
+
+                // Calculate total deductions (excluding exceed paid leave)
+                decimal totalDeductions = 0;
+                foreach (RepeaterItem item in rptDeductions.Items)
+                {
+                    HiddenField hfName = (HiddenField)item.FindControl("hfComponentName");
+                    CheckBox chk = (CheckBox)item.FindControl("chkComponent");
+                    TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
+
+                    if (hfName != null && chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
+                    {
+                        string compName = hfName.Value.ToLower().Trim();
+                        // Exclude exceed paid leave from deductions
+                        if (!compName.Contains("exceed") && !compName.Contains("paid leave"))
+                        {
+                            totalDeductions += amount;
+                        }
+                    }
+                }
+
+                // Calculate monthly and annual salary
+                decimal monthlySalary = gross - totalDeductions;
+                decimal annualSalary = gross * 12;
+
                 // Validate Gross Salary
-                if (string.IsNullOrEmpty(txtGrossSalary.Text) || !decimal.TryParse(txtGrossSalary.Text, out decimal gross) || gross <= 0)
+                if (gross <= 0)
                 {
                     ShowAlert("Gross salary must be greater than zero!");
                     return;
                 }
 
                 // Validate Monthly & Annual Salary
-                if (string.IsNullOrEmpty(txtMonthlySalary.Text) || !decimal.TryParse(txtMonthlySalary.Text, out decimal monthlySalary) || monthlySalary <= 0)
+                if (monthlySalary <= 0)
                 {
                     ShowAlert("Monthly salary must be greater than zero!");
                     return;
                 }
 
-                if (string.IsNullOrEmpty(txtAnnualSalary.Text) || !decimal.TryParse(txtAnnualSalary.Text, out decimal annualSalary) || annualSalary <= 0)
+                if (annualSalary <= 0)
                 {
                     ShowAlert("Annual salary must be greater than zero!");
                     return;
@@ -510,25 +538,6 @@ namespace HRMS.View.Modules
                 if (basicSalary > gross)
                 {
                     ShowAlert("Basic salary cannot exceed gross salary!");
-                    return;
-                }
-
-                // Validate Gross Salary = Total Earnings (already calculated, just recheck)
-                decimal totalEarnings = 0;
-                foreach (RepeaterItem item in rptEarnings.Items)
-                {
-                    CheckBox chk = (CheckBox)item.FindControl("chkComponent");
-                    TextBox txt = (TextBox)item.FindControl("txtComponentAmount");
-
-                    if (chk.Checked && decimal.TryParse(txt.Text, out decimal amount))
-                    {
-                        totalEarnings += amount;
-                    }
-                }
-
-                if (Math.Abs(totalEarnings - gross) > 0.01m)
-                {
-                    ShowAlert("Gross salary must equal total earnings!");
                     return;
                 }
 
@@ -661,4 +670,3 @@ namespace HRMS.View.Modules
         }
     }
 }
-

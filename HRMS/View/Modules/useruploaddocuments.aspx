@@ -146,6 +146,53 @@
                 margin: 0;
             }
 
+        .page-list {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 6px;
+        }
+
+            .page-list li {
+                display: inline-block;
+            }
+
+        .page-btn {
+            display: inline-block;
+            min-width: 34px;
+            padding: 6px 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            color: #495057;
+            background-color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+            .page-btn:hover {
+                background-color: #f1f3f5;
+                color: #495057;
+                text-decoration: none;
+            }
+
+            .page-btn.active {
+                background-color: #556ee6;
+                border-color: #556ee6;
+                color: #fff;
+            }
+
+            .page-btn[disabled],
+            .page-btn.disabled {
+                opacity: 0.5;
+                pointer-events: none;
+                cursor: default;
+            }
+
         .custom-gridview {
             border-left: none;
             border-right: none;
@@ -443,11 +490,21 @@
                                 CssClass="pagination-container"
                                 Style="display: flex; justify-content: flex-end; font-size: 14px; color: black;"
                                 Visible="false">
-
-                                <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true"
-                                    OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged"
-                                    Style="background-color: white; color: black; border: 1px solid #ddd; padding: 5px 10px; margin: 2px;">
-                                </asp:DropDownList>
+                                <ul class="page-list">
+                                    <li>
+                                        <asp:LinkButton ID="lnkPrevPage" runat="server" CssClass="page-btn" OnClick="lnkPrevPage_Click">&laquo; Prev</asp:LinkButton>
+                                    </li>
+                                    <asp:Repeater ID="rptPageNumbers" runat="server" OnItemCommand="rptPageNumbers_ItemCommand">
+                                        <ItemTemplate>
+                                            <li>
+                                                <asp:LinkButton ID="lnkPageNumber" runat="server" CssClass='<%# (bool)Eval("IsActive") ? "page-btn active" : "page-btn" %>' CommandName="GoToPage" CommandArgument='<%# Eval("PageIndex") %>' Text='<%# Eval("PageNumber") %>'></asp:LinkButton>
+                                            </li>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                    <li>
+                                        <asp:LinkButton ID="lnkNextPage" runat="server" CssClass="page-btn" OnClick="lnkNextPage_Click">Next &raquo;</asp:LinkButton>
+                                    </li>
+                                </ul>
                             </asp:Panel>
 
 

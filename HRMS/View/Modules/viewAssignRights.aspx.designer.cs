@@ -168,39 +168,39 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.GridView gridview;
 
         /// <summary>
-        /// lblPageInfo control.
+        /// pagerContainer control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblPageInfo;
+        protected global::System.Web.UI.WebControls.Panel pagerContainer;
 
         /// <summary>
-        /// btnPrevPage control.
+        /// lnkPrevPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnPrevPage;
+        protected global::System.Web.UI.WebControls.LinkButton lnkPrevPage;
 
         /// <summary>
-        /// ddlPageSelector control.
+        /// rptPageNumbers control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlPageSelector;
+        protected global::System.Web.UI.WebControls.Repeater rptPageNumbers;
 
         /// <summary>
-        /// btnNextPage control.
+        /// lnkNextPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnNextPage;
+        protected global::System.Web.UI.WebControls.LinkButton lnkNextPage;
     }
 }

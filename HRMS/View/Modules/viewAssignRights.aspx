@@ -17,65 +17,65 @@
             margin-right: 20px;
         }
 
-        .pagination-bar {
+        .pagination-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 18px;
+            justify-content: flex-end;
             padding: 12px 16px;
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-top: 1px solid #dee2e6;
         }
 
-        .pagination-info {
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-        }
+            .pagination-container button,
+            .pagination-container select {
+                margin: 0;
+            }
 
-        .pagination-controls {
+        .page-list {
             display: flex;
             align-items: center;
-            gap: 8px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 6px;
         }
 
-        .pagination-nav-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px;
-            height: 34px;
+            .page-list li {
+                display: inline-block;
+            }
+
+        .page-btn {
+            display: inline-block;
+            min-width: 34px;
+            padding: 6px 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
             border-radius: 6px;
-            background: #fff;
-            border: 1px solid #d1d5db;
-            color: #374151;
+            color: #495057;
+            background-color: #fff;
             text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
         }
 
-            .pagination-nav-btn:hover {
-                background: #2563eb;
-                border-color: #2563eb;
-                color: #fff;
+            .page-btn:hover {
+                background-color: #f1f3f5;
+                color: #495057;
                 text-decoration: none;
             }
 
-            .pagination-nav-btn.aspNetDisabled {
-                opacity: 0.4;
+            .page-btn.active {
+                background-color: #556ee6;
+                border-color: #556ee6;
+                color: #fff;
+            }
+
+            .page-btn[disabled],
+            .page-btn.disabled {
+                opacity: 0.5;
                 pointer-events: none;
                 cursor: default;
             }
-
-        .pagination-select {
-            border-radius: 6px;
-            border: 1px solid #d1d5db;
-            padding: 6px 10px;
-            font-size: 13px;
-            color: #374151;
-            background: #fff;
-        }
 
         .app-search .position-relative {
             display: flex;
@@ -285,19 +285,23 @@
                                     </Columns>
                                     <PagerStyle CssClass="gridview-pagination" />
                                 </asp:GridView>
-                                <div class="pagination-bar">
-                                    <asp:Label ID="lblPageInfo" runat="server" CssClass="pagination-info" />
-                                    <div class="pagination-controls">
-                                        <asp:LinkButton ID="btnPrevPage" runat="server" CssClass="pagination-nav-btn" OnClick="btnPrevPage_Click" ToolTip="Previous page">
-                                            <i class="fa fa-chevron-left"></i>
-                                        </asp:LinkButton>
-                                        <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true" CssClass="pagination-select" OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged">
-                                        </asp:DropDownList>
-                                        <asp:LinkButton ID="btnNextPage" runat="server" CssClass="pagination-nav-btn" OnClick="btnNextPage_Click" ToolTip="Next page">
-                                            <i class="fa fa-chevron-right"></i>
-                                        </asp:LinkButton>
-                                    </div>
-                                </div>
+                                <asp:Panel ID="pagerContainer" runat="server" CssClass="pagination-container">
+                                    <ul class="page-list">
+                                        <li>
+                                            <asp:LinkButton ID="lnkPrevPage" runat="server" CssClass="page-btn" OnClick="lnkPrevPage_Click">&laquo; Prev</asp:LinkButton>
+                                        </li>
+                                        <asp:Repeater ID="rptPageNumbers" runat="server" OnItemCommand="rptPageNumbers_ItemCommand">
+                                            <ItemTemplate>
+                                                <li>
+                                                    <asp:LinkButton ID="lnkPageNumber" runat="server" CssClass='<%# (bool)Eval("IsActive") ? "page-btn active" : "page-btn" %>' CommandName="GoToPage" CommandArgument='<%# Eval("PageIndex") %>' Text='<%# Eval("PageNumber") %>'></asp:LinkButton>
+                                                </li>
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                        <li>
+                                            <asp:LinkButton ID="lnkNextPage" runat="server" CssClass="page-btn" OnClick="lnkNextPage_Click">Next &raquo;</asp:LinkButton>
+                                        </li>
+                                    </ul>
+                                </asp:Panel>
                             </ContentTemplate>
                             <Triggers>
                                 <asp:AsyncPostBackTrigger ControlID="gridview" EventName="RowCommand" />

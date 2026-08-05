@@ -88,13 +88,11 @@ namespace HRMS.View.Modules
                     if (totalRecords > pageSize)
                     {
                         paginationContainer.Visible = true;
-                        ddlPageSelector.Visible = true;
                         UpdatePageInfoLabel(pageIndex, totalRecords);
                     }
                     else
                     {
                         paginationContainer.Visible = false;
-                        ddlPageSelector.Visible = false;
                     }
                 }
                 else
@@ -102,7 +100,7 @@ namespace HRMS.View.Modules
                     gvResignations.DataSource = null;
                     gvResignations.DataBind();
                     gvResignations.Visible = true;
-                    ddlPageSelector.Visible = false;
+                    paginationContainer.Visible = false;
                     UpdatePageInfoLabel(0, 0);
                 }
             }
@@ -117,19 +115,61 @@ namespace HRMS.View.Modules
             }
         }
 
-        protected void ddlPageSelector_SelectedIndexChanged(object sender, EventArgs e)
+        protected void rptPageNumbers_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             try
             {
-                int selectedPageIndex = Convert.ToInt32(ddlPageSelector.SelectedValue);
-                Session["NoticePeriodCurrentPageIndex"] = selectedPageIndex;
+                if (e.CommandName == "GoToPage")
+                {
+                    Session["NoticePeriodCurrentPageIndex"] = Convert.ToInt32(e.CommandArgument);
+                    BindNoticePeriodGrid();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("NoticePeriodList", "rptPageNumbers_ItemCommand", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void lnkPrevPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["NoticePeriodCurrentPageIndex"] ?? 0);
+                if (pageIndex > 0)
+                {
+                    Session["NoticePeriodCurrentPageIndex"] = pageIndex - 1;
+                    BindNoticePeriodGrid();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("NoticePeriodList", "lnkPrevPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        protected void lnkNextPage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pageIndex = Convert.ToInt32(Session["NoticePeriodCurrentPageIndex"] ?? 0);
+                Session["NoticePeriodCurrentPageIndex"] = pageIndex + 1;
                 BindNoticePeriodGrid();
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("NoticePeriodList", "ddlPageSelector_SelectedIndexChanged", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+                errorlog.fnStoreErrorLog("NoticePeriodList", "lnkNextPage_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
+        }
+
+        private class PagerItem
+        {
+            public int PageIndex { get; set; }
+            public string PageNumber { get; set; }
+            public bool IsActive { get; set; }
         }
 
         protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -223,16 +263,23 @@ namespace HRMS.View.Modules
         {
             try
             {
-                int totalPages = (int)Math.Ceiling((double)pagecount / 10);
-                ddlPageSelector.Items.Clear();
-                for (int i = 1; i <= totalPages; i++)
+                int pageSize = 10;
+                int totalPages = Math.Max((int)Math.Ceiling((double)pagecount / pageSize), 1);
+
+                List<PagerItem> pages = new List<PagerItem>();
+                for (int i = 0; i < totalPages; i++)
                 {
-                    ddlPageSelector.Items.Add(new ListItem($"{i}/{totalPages}", (i - 1).ToString()));
+                    pages.Add(new PagerItem { PageIndex = i, PageNumber = (i + 1).ToString(), IsActive = i == pageIndex });
                 }
-                if (ddlPageSelector.Items.Count > 0)
-                {
-                    ddlPageSelector.SelectedValue = pageIndex.ToString();
-                }
+
+                rptPageNumbers.DataSource = pages;
+                rptPageNumbers.DataBind();
+
+                lnkPrevPage.Enabled = pageIndex > 0;
+                lnkPrevPage.CssClass = lnkPrevPage.Enabled ? "page-btn" : "page-btn disabled";
+
+                lnkNextPage.Enabled = pageIndex < totalPages - 1;
+                lnkNextPage.CssClass = lnkNextPage.Enabled ? "page-btn" : "page-btn disabled";
             }
             catch (Exception ex)
             {

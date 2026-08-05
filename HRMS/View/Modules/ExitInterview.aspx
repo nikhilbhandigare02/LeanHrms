@@ -3,15 +3,15 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="../../assets/js/commonFunctions.js"></script>
     <script type="text/javascript">
-        function isOfflineModeSelected() {
+        function isVirtualModeSelected() {
             var ddlInterviewMode = document.getElementById('<%= ddlInterviewMode.ClientID %>');
             if (!ddlInterviewMode || ddlInterviewMode.selectedIndex < 0) {
                 return false;
             }
             var selectedText = (ddlInterviewMode.options[ddlInterviewMode.selectedIndex].text || '').trim().toLowerCase();
-            // The live "Interview Mode" lookup data has a typo ("Ofline" instead of
-            // "Offline") - match both so this keeps working if the typo gets fixed later.
-            return selectedText === 'offline' || selectedText === 'ofline';
+            // The live "Interview Mode" lookup data has a typo ("Vertual" instead of
+            // "Virtual") - match both so this keeps working if the typo gets fixed later.
+            return selectedText === 'virtual' || selectedText === 'vertual';
         }
 
         function toggleLocationField() {
@@ -21,7 +21,7 @@
                 return;
             }
 
-            if (isOfflineModeSelected()) {
+            if (isVirtualModeSelected()) {
                 divLocation.style.display = 'block';
             } else {
                 divLocation.style.display = 'none';
@@ -32,7 +32,7 @@
         }
 
         function validateLocation(source, args) {
-            if (!isOfflineModeSelected()) {
+            if (!isVirtualModeSelected()) {
                 args.IsValid = true;
                 return;
             }
@@ -295,13 +295,9 @@
                             </div>
                         </div>
                     </asp:Panel>
-                    </ContentTemplate>
-                    <Triggers>
-                        <asp:AsyncPostBackTrigger ControlID="gvExitInterviews" EventName="RowCommand" />
-                    </Triggers>
-                    </asp:UpdatePanel>
 
                     <br />
+                    <asp:Panel ID="pnlGridSection" runat="server" Visible="true">
                     <div class="table-responsive">
                         <asp:HiddenField ID="hfPageIndex" runat="server" />
                         <asp:UpdatePanel ID="UpdatePanelGrid" runat="server" UpdateMode="Conditional">
@@ -351,6 +347,12 @@
                             </asp:DropDownList>
                         </div>
                     </div>
+                    </asp:Panel>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="gvExitInterviews" EventName="RowCommand" />
+                    </Triggers>
+                    </asp:UpdatePanel>
                 </div>
             </div>
         </div>
@@ -365,6 +367,53 @@
                 showConfirmButton: false
             });
         }
+    </script>
+    <script type="text/javascript">
+        // Freeze the Save/Update button and show "Submitting..." for the duration of
+        // the async postback, so the user can't double-click while waiting on the
+        // backend response (SaveExitInterview/UpdateExitInterview can take a few
+        // seconds since they also send an email). The button's real text ("Save" vs
+        // "Update") and enabled state come back correctly on their own once the
+        // server response re-renders the panel, but we restore them defensively in
+        // endRequest too, in case the panel isn't the one that ends up refreshed.
+        (function () {
+            var saveButtonId = '<%= btnSave.ClientID %>';
+
+            function setButtonBusy(btn, busy) {
+                if (!btn) {
+                    return;
+                }
+                if (busy) {
+                    btn.dataset.originalText = btn.value;
+                    btn.disabled = true;
+                    btn.value = 'Submitting...';
+                } else {
+                    btn.disabled = false;
+                    if (btn.dataset.originalText) {
+                        btn.value = btn.dataset.originalText;
+                    }
+                }
+            }
+
+            Sys.Application.add_load(function () {
+                var prm = Sys.WebForms.PageRequestManager.getInstance();
+                if (!prm || prm._exitInterviewSaveGuardAttached) {
+                    return;
+                }
+                prm._exitInterviewSaveGuardAttached = true;
+
+                prm.add_beginRequest(function (sender, args) {
+                    var postBackElement = args.get_postBackElement();
+                    if (postBackElement && postBackElement.id === saveButtonId) {
+                        setButtonBusy(document.getElementById(saveButtonId), true);
+                    }
+                });
+
+                prm.add_endRequest(function () {
+                    setButtonBusy(document.getElementById(saveButtonId), false);
+                });
+            });
+        })();
     </script>
     <script type="text/javascript">
         function initializeSearch() {

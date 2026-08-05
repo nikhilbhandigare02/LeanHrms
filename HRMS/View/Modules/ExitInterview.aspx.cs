@@ -31,6 +31,7 @@ namespace Lean.View.Modules
         protected global::System.Web.UI.WebControls.Button btnSave;
         protected global::System.Web.UI.WebControls.Button btnCancel;
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl divLocation;
+        protected global::System.Web.UI.WebControls.Panel pnlGridSection;
         protected global::System.Web.UI.WebControls.HiddenField hfPageIndex;
         protected global::System.Web.UI.WebControls.GridView gvExitInterviews;
         protected global::System.Web.UI.WebControls.DropDownList ddlPageSelector;
@@ -97,7 +98,7 @@ namespace Lean.View.Modules
         protected void cvLocation_ServerValidate(object source, ServerValidateEventArgs args)
         {
             string selectedModeText = ddlInterviewMode.SelectedItem != null ? ddlInterviewMode.SelectedItem.Text : string.Empty;
-            if (!IsOfflineMode(selectedModeText))
+            if (!IsVirtualMode(selectedModeText))
             {
                 args.IsValid = true;
                 return;
@@ -250,6 +251,7 @@ namespace Lean.View.Modules
         protected void btn_addExitInterview_ServerClick(object sender, EventArgs e)
         {
             pnlExitInterviewForm.Visible = true;
+            pnlGridSection.Visible = false;
             ClearForm();
             formTitle.InnerText = "Schedule Exit Interview";
             hdnExitInterviewId.Value = "";
@@ -274,7 +276,7 @@ namespace Lean.View.Modules
                     exitInterview.Interview_Status_id = Convert.ToInt32(ddlInterviewStatus.SelectedValue);
                     exitInterview.Interview_Mode_id = Convert.ToInt32(ddlInterviewMode.SelectedValue);
                     string selectedModeText = ddlInterviewMode.SelectedItem != null ? ddlInterviewMode.SelectedItem.Text : string.Empty;
-                    exitInterview.Location = IsOfflineMode(selectedModeText) ? txtLocation.Text : string.Empty;
+                    exitInterview.Location = IsVirtualMode(selectedModeText) ? txtLocation.Text : string.Empty;
                     exitInterview.Notes = txtNotes.Text;
                     exitInterview.InsertedBy = Convert.ToInt32(Session["userId"]);
 
@@ -293,6 +295,7 @@ namespace Lean.View.Modules
                         string safeMsg = HttpUtility.JavaScriptStringEncode(result);
                         ScriptManager.RegisterStartupScript(this, GetType(), "success", "showMessage('Success', '" + safeMsg + "');", true);
                         pnlExitInterviewForm.Visible = false;
+                        pnlGridSection.Visible = true;
                         BindExitInterviewGrid();
                         UpdatePanelGrid.Update();
                     }
@@ -318,7 +321,9 @@ namespace Lean.View.Modules
         protected void btnCancel_Click(object sender, EventArgs e)
         {
             pnlExitInterviewForm.Visible = false;
+            pnlGridSection.Visible = true;
             ClearForm();
+            UpdatePanelGrid.Update();
         }
 
         protected void btnBack_Click(object sender, EventArgs e)
@@ -351,13 +356,13 @@ namespace Lean.View.Modules
             }
         }
 
-        private static bool IsOfflineMode(string modeText)
+        private static bool IsVirtualMode(string modeText)
         {
             string normalized = (modeText ?? string.Empty).Trim();
-            // The live "Interview Mode" lookup data has a typo ("Ofline" instead of
-            // "Offline") - match both so this keeps working if the typo gets fixed later.
-            return string.Equals(normalized, "Offline", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(normalized, "Ofline", StringComparison.OrdinalIgnoreCase);
+            // The live "Interview Mode" lookup data has a typo ("Vertual" instead of
+            // "Virtual") - match both so this keeps working if the typo gets fixed later.
+            return string.Equals(normalized, "Virtual", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "Vertual", StringComparison.OrdinalIgnoreCase);
         }
 
         private void SetDropDownValueSafe(DropDownList ddl, string value, string missingLabel)
@@ -383,6 +388,7 @@ namespace Lean.View.Modules
                 if (exitInterview != null)
                 {
                     pnlExitInterviewForm.Visible = true;
+                    pnlGridSection.Visible = false;
                     formTitle.InnerText = "View Exit Interview";
                     hdnExitInterviewId.Value = exitInterview.ExitInterviewId.ToString();
 
@@ -429,6 +435,7 @@ namespace Lean.View.Modules
                 if (exitInterview != null)
                 {
                     pnlExitInterviewForm.Visible = true;
+                    pnlGridSection.Visible = false;
                     formTitle.InnerText = "Edit Exit Interview";
                     hdnExitInterviewId.Value = exitInterview.ExitInterviewId.ToString();
                     btnSave.Text = "Update";

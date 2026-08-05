@@ -28,6 +28,27 @@ namespace HRMS.View.Modules
             }
         }
 
+        private static bool IsHrAccepted(ResignationDO resignation)
+        {
+            return resignation != null
+                && string.Equals((resignation.hr_status ?? string.Empty).Trim(), "Accepted", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // The Last Working Date column must always show the Notice End Date
+        // (tbl_hr_review.CreatedDate + NoticeDays, same calculation as
+        // NoticePeriodManagement's sp_GetNoticePeriodDetails) rather than the
+        // resignation's originally proposed last_working_date.
+        private static void ApplyNoticeEndDateDisplay(HandoverprocessBL resignationBL, List<ResignationDO> resignations)
+        {
+            foreach (var row in resignations)
+            {
+                NoticePeriodDO noticePeriod = resignationBL.GetNoticePeriodDetails(row.EmployeeResignationId);
+                row.last_working_date_display = (noticePeriod != null && noticePeriod.NoticeEndDate.HasValue)
+                    ? noticePeriod.NoticeEndDate.Value.ToString("yyyy-MM-dd")
+                    : "-";
+            }
+        }
+
         protected void BindNoticePeriodGrid()
         {
             try
@@ -35,15 +56,11 @@ namespace HRMS.View.Modules
                 int reportingManagerId = Convert.ToInt32(Session["userId"]);
                 HandoverprocessBL resignationBL = new HandoverprocessBL();
                 var resignations = resignationBL.GetEmployeeResignationDetails(reportingManagerId)
+                    .Where(IsHrAccepted)
                     .OrderByDescending(x => x.EmployeeResignationId)
                     .ToList();
 
-                foreach (var row in resignations)
-                {
-                    row.last_working_date_display = row.last_working_date == DateTime.MinValue
-                        ? "-"
-                        : row.last_working_date.ToString("yyyy-MM-dd");
-                }
+                ApplyNoticeEndDateDisplay(resignationBL, resignations);
 
                 Session["NoticePeriodListData"] = resignations;
 
@@ -169,7 +186,11 @@ namespace HRMS.View.Modules
                 if (createdet == null)
                 {
                     int reportingManagerId = Convert.ToInt32(Session["userId"]);
-                    createdet = new HandoverprocessBL().GetEmployeeResignationDetails(reportingManagerId);
+                    HandoverprocessBL resignationBL = new HandoverprocessBL();
+                    createdet = resignationBL.GetEmployeeResignationDetails(reportingManagerId)
+                        .Where(IsHrAccepted)
+                        .ToList();
+                    ApplyNoticeEndDateDisplay(resignationBL, createdet);
                 }
 
                 if (createdet != null)

@@ -239,7 +239,7 @@
                                                         </asp:PlaceHolder>
                                                         <asp:PlaceHolder runat="server" Visible='<%# !((Eval("SubMenu") ?? "").ToString().Trim().ToLower() == "document") && !((Eval("SubMenu") ?? "").ToString().Trim().ToLower() == "update probation period") %>'>
                                                             <asp:HyperLink ID="SubMenuLink" runat="server" Text='<%# Eval("SubMenu") %>' Key="t-default"
-                                                                NavigateUrl='<%# (Eval("SubMenuLink") != null && !string.IsNullOrWhiteSpace(Eval("SubMenuLink").ToString())) ? Eval("SubMenuLink").ToString() : "" %>'>
+                                                                NavigateUrl='<%# (Eval("SubMenuLink") != null && !string.IsNullOrWhiteSpace(Eval("SubMenuLink").ToString())) ? Eval("SubMenuLink").ToString().Trim() : "" %>'>
                                                             </asp:HyperLink>
                                                         </asp:PlaceHolder>
 
@@ -313,6 +313,55 @@
                 </footer>
             </div>
         </div>
+        <script type="text/javascript">
+            // Timer1 (work-hours clock) ticks every second via its own async postback.
+            // If that background tick races with a user-initiated async postback on any
+            // page (e.g. clicking Save inside an UpdatePanel), the two requests can be
+            // processed out of order, and whichever response arrives second carries
+            // stale view state - the browser then throws "Invalid postback or callback
+            // argument" / PageRequestManagerServerErrorException. Pausing the timer's
+            // client-side ticking for the duration of any other async postback removes
+            // the race without changing the timer's visible behavior or any page logic.
+            (function () {
+                var timerClientId = '<%= Timer1.ClientID %>';
+                var pausedByOtherRequest = false;
+
+                function getTimerComponent() {
+                    return (window.$find) ? $find(timerClientId) : null;
+                }
+
+                Sys.Application.add_load(function () {
+                    var prm = Sys.WebForms.PageRequestManager.getInstance();
+                    if (!prm || prm._exitInterviewTimerGuardAttached) {
+                        return;
+                    }
+                    prm._exitInterviewTimerGuardAttached = true;
+
+                    prm.add_beginRequest(function (sender, args) {
+                        var postBackElement = args.get_postBackElement();
+                        var isTimerTick = postBackElement && postBackElement.id === timerClientId;
+                        if (isTimerTick) {
+                            return;
+                        }
+                        var timer = getTimerComponent();
+                        if (timer && timer.get_enabled()) {
+                            timer.set_enabled(false);
+                            pausedByOtherRequest = true;
+                        }
+                    });
+
+                    prm.add_endRequest(function () {
+                        if (pausedByOtherRequest) {
+                            var timer = getTimerComponent();
+                            if (timer) {
+                                timer.set_enabled(true);
+                            }
+                            pausedByOtherRequest = false;
+                        }
+                    });
+                });
+            })();
+        </script>
     </form>
 
     <!-- Right Sidebar -->

@@ -168,7 +168,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="field-label">Notice Days</label>
-                                <asp:TextBox ID="txtNoticeDays" runat="server" CssClass="form-control" TextMode="Number" />
+                                <asp:TextBox ID="txtNoticeDays" runat="server" CssClass="form-control" TextMode="Number"
+                                    onchange="recalculateRevisedLastWorkingDate();" oninput="recalculateRevisedLastWorkingDate();" />
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -183,8 +184,8 @@
                                 <label class="field-label">Revised Last Working Date</label>
                                 <div class="input-group">
                                     <asp:TextBox ID="txtRevisedLastWorkingDate" runat="server"
-                                        CssClass="form-control" autocomplete="off"
-                                        placeholder="Select revised last working date" />
+                                        CssClass="form-control" autocomplete="off" ReadOnly="true"
+                                        placeholder="Auto-calculated from Resignation Date + Notice Days" />
                                     <span class="input-group-text">
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
@@ -245,6 +246,31 @@
             });
         }
 
+        function recalculateRevisedLastWorkingDate() {
+            var noticeDaysText = document.getElementById('<%= txtNoticeDays.ClientID %>').value;
+            var revisedField = document.getElementById('<%= txtRevisedLastWorkingDate.ClientID %>');
+
+            if (!revisedField) {
+                return;
+            }
+
+            var noticeDays = parseInt(noticeDaysText, 10);
+            if (isNaN(noticeDays) || noticeDays < 0) {
+                noticeDays = 0;
+            }
+
+            // Notice Start Date = today.
+            var noticeStartDate = new Date();
+            noticeStartDate.setHours(0, 0, 0, 0);
+            noticeStartDate.setDate(noticeStartDate.getDate() + noticeDays);
+
+            var dd = String(noticeStartDate.getDate()).padStart(2, '0');
+            var mm = String(noticeStartDate.getMonth() + 1).padStart(2, '0');
+            var yyyy = noticeStartDate.getFullYear();
+
+            revisedField.value = dd + '-' + mm + '-' + yyyy;
+        }
+
         function validateHRReview() {
             var noticePeriod = document.getElementById('<%= ddlNoticePeriodRequired.ClientID %>').value;
             var buyout = document.getElementById('<%= ddlBuyoutApplicable.ClientID %>').value;
@@ -270,16 +296,5 @@
             return true;
         }
 
-        $(document).ready(function () {
-            flatpickr("#<%= txtRevisedLastWorkingDate.ClientID %>", {
-                dateFormat: "d-m-Y",
-                allowInput: true,
-                minDate: "today"
-            });
-
-            $('.input-group-text').on('click', function () {
-                $(this).closest('.input-group').find('input').focus();
-            });
-        });
     </script>
 </asp:Content>

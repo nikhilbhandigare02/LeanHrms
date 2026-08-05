@@ -59,11 +59,8 @@
         .resignation-page .table.custom-gridview th:last-child { min-width: 140px; }
 
         .resignation-page .col-emp-name { min-width: 120px; }
-        .resignation-page .col-email { min-width: 220px; }
         .resignation-page .col-date { min-width: 95px; }
-        .resignation-page .col-notice { min-width: 70px; }
         .resignation-page .col-last-date { min-width: 95px; }
-        .resignation-page .col-reason { min-width: 150px; }
         .resignation-page .col-authority { min-width: 130px; }
         .resignation-page .col-status { min-width: 90px; }
 
@@ -247,22 +244,14 @@
 
                                     <asp:BoundField DataField="EmployeeName" HeaderText="Employee Name"
                                         HeaderStyle-CssClass="col-emp-name" ItemStyle-CssClass="col-emp-name" />
-                                    <asp:BoundField DataField="EmployeeEmail" HeaderText="Email"
-                                        HeaderStyle-CssClass="col-email" ItemStyle-CssClass="col-email" />
 
                                     <asp:BoundField DataField="resignation_date" HeaderText="Resignation Date"
                                         DataFormatString="{0:yyyy-MM-dd}"
                                         HeaderStyle-CssClass="col-date" ItemStyle-CssClass="col-date" />
 
-                                    <asp:BoundField DataField="notice_period_days" HeaderText="Notice (Days)"
-                                        HeaderStyle-CssClass="col-notice" ItemStyle-CssClass="text-center col-notice" />
-
                                     <asp:BoundField DataField="last_working_date_display" HeaderText="Last Working Date"
                                         DataFormatString="{0:yyyy-MM-dd}"
                                         HeaderStyle-CssClass="col-last-date" ItemStyle-CssClass="col-last-date" />
-
-                                    <asp:BoundField DataField="reason" HeaderText="Reason"
-                                        HeaderStyle-CssClass="col-reason" ItemStyle-CssClass="col-reason" />
 
                                     <asp:TemplateField HeaderText="Authority Status" HeaderStyle-CssClass="col-authority" ItemStyle-CssClass="text-center col-authority">
                                         <ItemTemplate>

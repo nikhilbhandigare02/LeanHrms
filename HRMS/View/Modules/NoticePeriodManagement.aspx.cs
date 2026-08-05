@@ -82,7 +82,7 @@ namespace HRMS.View.Modules
 
                 string attendanceStatus = model != null ? model.AttendanceStatus : null;
                 lblAttendanceStatus.Text = string.IsNullOrWhiteSpace(attendanceStatus) ? "-" : attendanceStatus;
-                lblAttendanceStatus.CssClass = string.Equals(attendanceStatus, "Present", StringComparison.OrdinalIgnoreCase)
+                lblAttendanceStatus.CssClass = string.Equals(attendanceStatus, "On Track", StringComparison.OrdinalIgnoreCase)
                     ? "info-value text-success"
                     : "info-value text-muted";
             }

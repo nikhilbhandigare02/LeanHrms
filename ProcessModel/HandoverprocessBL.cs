@@ -812,6 +812,7 @@ namespace ProcessModel
                 string normalized = NormalizeMySqlConnectionString(MySqlconnection);
                 using (MySqlConnection con = new MySqlConnection(normalized))
                 using (MySqlCommand cmd = new MySqlCommand("sp_UpdateHRReview", con))
+                
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@p_HRReviewId", model.HRReviewId);

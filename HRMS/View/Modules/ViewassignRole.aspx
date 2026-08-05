@@ -53,6 +53,9 @@
         .pagination-container {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
+            padding: 12px 16px;
+            border-top: 1px solid #dee2e6;
         }
 
             .pagination-container button,
@@ -275,11 +278,11 @@
 
                     <br />
                     <%--<asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>--%>
-                    <div class="table-responsive">
-                        <asp:HiddenField ID="hfPageIndexViewAssign" runat="server" />
+                    <asp:HiddenField ID="hfPageIndexViewAssign" runat="server" />
 
-                        <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-                            <ContentTemplate>
+                    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                        <ContentTemplate>
+                            <div class="table-responsive">
                                 <asp:GridView runat="server" ID="gridview" class="table custom-gridview" AutoGenerateColumns="false" DataKeyNames="Userroledetailsid" OnRowCommand="gv_RowCommand" EnablePersistedSelection="true" OnPageIndexChanging="OnPageIndexChanging" PageSize="10"
                                     AllowSorting="true" OnSorting="gridview_Sorting" Style="margin: 0 auto;" EmptyDataText="No records found.">
                                     <Columns>
@@ -301,10 +304,10 @@
                                         <asp:TemplateField HeaderText="Action" ItemStyle-Width="100px">
                                             <ItemTemplate>
                                                 <asp:LinkButton ID="lnkView" runat="server" CommandName="editassignedrole" title="Edit Assigned Role" CommandArgument='<%# Eval("Userroledetailsid") %>'>
-                                                     <i class="fa fa-edit"></i> 
+                                                     <i class="fa fa-edit"></i>
                                                  </asp:LinkButton>
                                                 &nbsp;
-            
+
                                                 <asp:LinkButton ID="lnkDelete" CommandName="deleteassignedrole" runat="server" title="Delete Assigned Role" CommandArgument='<%# Eval("Userroledetailsid") %>' OnClientClick="return openDeleteModal(); return false;">
                                                  <i class="fa fa-trash"></i>
                                                  </asp:LinkButton>
@@ -313,20 +316,18 @@
                                     </Columns>
                                     <PagerStyle CssClass="gridview-pagination" />
                                 </asp:GridView>
+                            </div>
 
-                                <div class="pagination-container" style="font-size: 14px; color: black;">
-                                    <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true" OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged"
-                                        Style="background-color: white; color: black; border: 1px solid #ddd; padding: 5px 10px; margin: 2px; margin-left: auto;">
-                                    </asp:DropDownList>
-                                </div>
-
-                            </ContentTemplate>
-                            <Triggers>
-                                <asp:AsyncPostBackTrigger ControlID="gridview" EventName="RowCommand" />
-                            </Triggers>
-                        </asp:UpdatePanel>
-
-                    </div>
+                            <div class="pagination-container" style="font-size: 14px; color: black;">
+                                <asp:DropDownList runat="server" ID="ddlPageSelector" AutoPostBack="true" OnSelectedIndexChanged="ddlPageSelector_SelectedIndexChanged"
+                                    Style="background-color: white; color: black; border: 1px solid #ddd; padding: 5px 10px; margin: 2px;">
+                                </asp:DropDownList>
+                            </div>
+                        </ContentTemplate>
+                        <Triggers>
+                            <asp:AsyncPostBackTrigger ControlID="gridview" EventName="RowCommand" />
+                        </Triggers>
+                    </asp:UpdatePanel>
                 </div>
             </div>
         </div>

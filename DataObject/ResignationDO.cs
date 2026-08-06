@@ -69,6 +69,7 @@ namespace DataObject
 
         // HR Review section
         public int HRReviewId { get; set; }
+        public DateTime? NoticeStartDate { get; set; }
         public string NoticePeriodRequired { get; set; }
         public int? NoticeDays { get; set; }
         public string BuyoutApplicable { get; set; }
@@ -84,6 +85,43 @@ namespace DataObject
         public bool Success { get; set; }
         public string ResponseMsg { get; set; }
 
+    }
+
+    public class KTHandoverDO
+    {
+        // Employee / Resignation info (read-only header on the KT page)
+        public int ResignationId { get; set; }
+        public int EmployeeId { get; set; }
+        public string EmployeeCode { get; set; }
+        public string EmployeeName { get; set; }
+        public string Department { get; set; }
+        public string Designation { get; set; }
+        public DateTime ResignationDate { get; set; }
+        public DateTime ProposedLastWorkingDate { get; set; }
+
+        // KT & Handover section
+        public int KTId { get; set; }
+        public string KTPlan { get; set; }
+        public string ReplacementEmployee { get; set; }
+        public string KTStatus { get; set; }
+        public DateTime? KTStartDate { get; set; }
+        public DateTime? KTCompletionDate { get; set; }
+    }
+
+    public class KTProjectHandoverRowDO
+    {
+        public int KTProjectHandoverId { get; set; }
+        public int KTId { get; set; }
+        public string ProjectName { get; set; }
+        public string AssignedEmployee { get; set; }
+        public string Status { get; set; }
+    }
+
+    public class KTHandoverResponseDO
+    {
+        public int KTId { get; set; }
+        public bool Success { get; set; }
+        public string ResponseMsg { get; set; }
     }
 
     public class HandOverDO

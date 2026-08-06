@@ -1,7 +1,20 @@
 using DataObject;
 using ProcessModel;
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Web.UI;
+using iText.Html2pdf;
+using iText.IO.Font.Constants;
+using iText.IO.Image;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Draw;
+using iText.Layout;
+using iText.Layout.Borders;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 
 namespace HRMS.View.Modules
 {
@@ -129,6 +142,8 @@ namespace HRMS.View.Modules
             string noticePeriodRequired = ddlNoticePeriodRequired.SelectedValue;
             string buyoutApplicable = ddlBuyoutApplicable.SelectedValue;
             string hrRemarks = txtHRRemarks.Text.Trim();
+            DateTime noticeStartDate;
+            DateTime.TryParse(lblResignationDate.Text, out noticeStartDate);
 
             if (resignationId <= 0)
             {
@@ -188,7 +203,8 @@ namespace HRMS.View.Modules
                 NoticeDays = noticeDays,
                 BuyoutApplicable = buyoutApplicable,
                 RevisedLastWorkingDate = revisedLastWorkingDate,
-                HRRemarks = hrRemarks
+                HRRemarks = hrRemarks,
+                NoticeStartDate= noticeStartDate
             };
 
             int updatedBy = Convert.ToInt32(Session["userId"]);
@@ -202,6 +218,23 @@ namespace HRMS.View.Modules
 
                 if (result != null && result.Success)
                 {
+                    try
+                    {
+                        ResignationMailDO mailDetails = bl.GetResignationAcceptedMailDetails(resignationId);
+                        byte[] pdfBytes = GenerateAcceptanceLetterPdf(mailDetails?.LetterHtml);
+
+                        string fileName = "Resignation_Acceptance_" + resignationId + "_" + lblEmployeeName.Text + ".pdf";
+                        bl.SendResignationAcceptedEmail(mailDetails, pdfBytes, fileName);
+                    }
+                    catch (Exception emailEx)
+                    {
+                        // Log email error but don't fail the main operation - the HR
+                        // review was already saved successfully at this point.
+                        CommonBL errorlog = new CommonBL();
+                        errorlog.fnStoreErrorLog("ResignationHRReview", "btnAcceptResignation_Click-Email",
+                            "Exception Message: " + emailEx.Message + " StackTrace: " + emailEx.StackTrace, UserId);
+                    }
+
                     string safeMsg = System.Web.HttpUtility.JavaScriptStringEncode(
                         result.ResponseMsg ?? "HR Review saved successfully.");
                     ScriptManager.RegisterStartupScript(this, GetType(), "hrReviewSaved",
@@ -228,6 +261,174 @@ namespace HRMS.View.Modules
         protected void btnCancel_Click(object sender, EventArgs e)
         {
             Response.Redirect("~/View/Modules/ResignationList.aspx", false);
+        }
+
+        // The letter wording (with dynamic data already filled in) comes entirely from
+        // sp_get_resignation_accepted_mail_details's LetterHtml column - neither this
+        // method nor the fallback below hardcodes any of the letter's text, only the
+        // surrounding company letterhead (logo/contact-info header) design.
+        // HtmlConverter (iText pdfHTML) is the primary renderer; if that throws for any
+        // reason, GenerateAcceptanceLetterPdfFallback reproduces the same layout via
+        // iText's Document/Layout API, parsing the same LetterHtml fragment directly.
+        private byte[] GenerateAcceptanceLetterPdf(string letterHtml)
+        {
+            try
+            {
+                string logoHtml = string.Empty;
+                string logoPath = Server.MapPath("~/assets/images/alphonsol_logo.png");
+                if (File.Exists(logoPath))
+                {
+                    string base64 = Convert.ToBase64String(File.ReadAllBytes(logoPath));
+                    logoHtml = "<img src='data:image/png;base64," + base64 + "' style='width:240px;display:block;' />";
+                }
+
+                string html = @"
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<style>
+body{font-family:Calibri,Arial,sans-serif;font-size:13px;color:#111;line-height:1.45;margin:0;padding:0;}
+.page{padding:24px 28px;}
+.header{width:100%;border-collapse:collapse;}
+.left{width:42%;vertical-align:bottom;}
+.right{width:58%;text-align:right;vertical-align:top;font-size:13px;font-weight:600;color:#4a4a4a;}
+.cin{margin-top:6px;font-size:12px;color:#444;}
+.sep{height:2px;background:#f28c28;border:0;margin:12px 0 20px 0;}
+p{margin:0 0 10px 0;}
+ul{margin:4px 0 14px 18px;padding:0;}
+</style>
+</head>
+<body>
+<div class='page'>
+  <table class='header'>
+    <tr>
+      <td class='left'>" + logoHtml + @"<div class='cin'>CIN No - U72200MH2022PTC381560</div></td>
+      <td class='right'>
+        High-street Corporate Center, FB-03, Kapurbawdi Junction, Thane(W)-400601<br/>
+        Contact No - 9920393999<br/>
+        Email Address - support@alphonsol.com<br/>
+        Website - www.alphonsol.com
+      </td>
+    </tr>
+  </table>
+  <hr class='sep' />
+  " + (letterHtml ?? string.Empty) + @"
+</div>
+</body>
+</html>";
+
+                using (var ms = new MemoryStream())
+                {
+                    HtmlConverter.ConvertToPdf(html, ms);
+                    return ms.ToArray();
+                }
+            }
+            catch
+            {
+                return GenerateAcceptanceLetterPdfFallback(letterHtml);
+            }
+        }
+
+        private static readonly Regex LetterBlockPattern = new Regex(
+            @"<p[^>]*>(.*?)</p>|<ul[^>]*>(.*?)</ul>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        private static readonly Regex LetterListItemPattern = new Regex(
+            @"<li[^>]*>(.*?)</li>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        private static readonly Regex HtmlTagPattern = new Regex(@"<[^>]+>", RegexOptions.Singleline);
+
+        private static string StripHtmlTags(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return string.Empty;
+            }
+
+            return System.Web.HttpUtility.HtmlDecode(HtmlTagPattern.Replace(html, string.Empty)).Trim();
+        }
+
+        private byte[] GenerateAcceptanceLetterPdfFallback(string letterHtml)
+        {
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    WriterProperties writerProperties = new WriterProperties();
+                    PdfWriter writer = new PdfWriter(ms, writerProperties);
+                    PdfDocument pdf = new PdfDocument(writer);
+                    Document document = new Document(pdf);
+                    document.SetMargins(42, 42, 42, 42);
+
+                    PdfFont boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+                    PdfFont normalFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+
+                    iText.Layout.Element.Table headerTable = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(new float[] { 45, 55 })).UseAllAvailableWidth();
+
+                    string logoPath = Server.MapPath("~/assets/images/alphonsol_logo.png");
+                    if (File.Exists(logoPath))
+                    {
+                        iText.Layout.Element.Image logo = new iText.Layout.Element.Image(ImageDataFactory.Create(logoPath)).SetWidth(110);
+                        headerTable.AddCell(new Cell().Add(logo).SetBorder(Border.NO_BORDER).SetVerticalAlignment(VerticalAlignment.MIDDLE));
+                    }
+                    else
+                    {
+                        headerTable.AddCell(new Cell().SetBorder(Border.NO_BORDER));
+                    }
+
+                    Div contactInfo = new Div().SetTextAlignment(TextAlignment.RIGHT);
+                    contactInfo.Add(new Paragraph("High-street Corporate Center, FB-03, Kapurbawdi Junction, Thane(W)-400601")
+                        .SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                    contactInfo.Add(new Paragraph("Contact No - 9920393999")
+                        .SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                    contactInfo.Add(new Paragraph("Email Address - support@alphonsol.com")
+                        .SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                    contactInfo.Add(new Paragraph("Website - www.alphonsol.com")
+                        .SetFont(boldFont).SetFontSize(9).SetMarginBottom(0));
+                    headerTable.AddCell(new Cell().Add(contactInfo).SetBorder(Border.NO_BORDER).SetVerticalAlignment(VerticalAlignment.MIDDLE));
+
+                    document.Add(headerTable);
+
+                    LineSeparator line = new LineSeparator(new SolidLine());
+                    line.SetStrokeColor(new DeviceRgb(255, 140, 0));
+                    document.Add(line);
+                    document.Add(new Paragraph("\n"));
+
+                    document.Add(new Paragraph("Acceptance of Resignation").SetFont(boldFont).SetFontSize(14).SetMarginBottom(14));
+
+                    if (!string.IsNullOrWhiteSpace(letterHtml))
+                    {
+                        foreach (Match block in LetterBlockPattern.Matches(letterHtml))
+                        {
+                            if (block.Groups[1].Success)
+                            {
+                                string text = StripHtmlTags(block.Groups[1].Value);
+                                if (!string.IsNullOrWhiteSpace(text))
+                                {
+                                    document.Add(new Paragraph(text).SetFont(normalFont).SetFontSize(11).SetMarginBottom(10));
+                                }
+                            }
+                            else if (block.Groups[2].Success)
+                            {
+                                iText.Layout.Element.List list = new iText.Layout.Element.List().SetListSymbol("• ").SetFont(normalFont).SetFontSize(11).SetMarginBottom(14);
+                                foreach (Match li in LetterListItemPattern.Matches(block.Groups[2].Value))
+                                {
+                                    list.Add(new iText.Layout.Element.ListItem(StripHtmlTags(li.Groups[1].Value)));
+                                }
+                                document.Add(list);
+                            }
+                        }
+                    }
+
+                    document.Close();
+                    return ms.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("ResignationHRReview", "GenerateAcceptanceLetterPdfFallback",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                return null;
+            }
         }
     }
 }

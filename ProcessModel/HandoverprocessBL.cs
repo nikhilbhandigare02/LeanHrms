@@ -885,6 +885,7 @@ namespace ProcessModel
                                 : DBNull.Value);
                         cmd.Parameters.AddWithValue("p_HRRemarks", model.HRRemarks);
                         cmd.Parameters.AddWithValue("p_UpdatedBy", updatedBy);
+                        cmd.Parameters.AddWithValue("p_NoticeStartDate", model.NoticeStartDate);
 
                         MySqlParameter pHRReviewId = new MySqlParameter("p_HRReviewId", MySqlDbType.Int32);
                         pHRReviewId.Direction = ParameterDirection.Output;
@@ -933,6 +934,94 @@ namespace ProcessModel
             }
 
             return response;
+        }
+
+        // Recipients/CC/BCC/Subject/Body are all produced by sp_get_resignation_accepted_mail_details,
+        // not built in C#, so HR can change wording/recipients without a code change.
+        public ResignationMailDO GetResignationAcceptedMailDetails(int resignationId)
+        {
+            ResignationMailDO mail = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return mail;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_get_resignation_accepted_mail_details", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_resignation_id", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            mail = new ResignationMailDO
+                            {
+                                ToEmail = GetStringSafe(dr, "ToEmail"),
+                                CcEmail = GetStringSafe(dr, "CcEmail"),
+                                BccEmail = GetStringSafe(dr, "BccEmail"),
+                                Subject = GetStringSafe(dr, "Subject"),
+                                Body = GetStringSafe(dr, "Body"),
+                                LetterHtml = GetStringSafe(dr, "LetterHtml")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetResignationAcceptedMailDetails",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return mail;
+        }
+
+        // Fetches the mail details for the given resignation from the SP and sends the
+        // email, optionally with the acceptance letter attached as a PDF. Never throws -
+        // any failure here must not undo the HR review that was just saved, so callers
+        // can fire-and-forget this right after a successful accept.
+        public void SendResignationAcceptedEmail(int resignationId, byte[] attachmentBytes = null, string attachmentFileName = null)
+        {
+            SendResignationAcceptedEmail(GetResignationAcceptedMailDetails(resignationId), attachmentBytes, attachmentFileName);
+        }
+
+        // Same as above, but takes an already-fetched ResignationMailDO so callers that
+        // also need mail.LetterHtml (e.g. to render the PDF attachment) don't have to hit
+        // sp_get_resignation_accepted_mail_details a second time.
+        public void SendResignationAcceptedEmail(ResignationMailDO mail, byte[] attachmentBytes = null, string attachmentFileName = null)
+        {
+            try
+            {
+                if (mail == null || string.IsNullOrWhiteSpace(mail.ToEmail))
+                {
+                    return;
+                }
+
+                CommonBL commonBL = new CommonBL();
+                commonBL.SendEmail(mail.ToEmail, mail.CcEmail, mail.BccEmail, mail.Subject, mail.Body, attachmentBytes, attachmentFileName);
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "SendResignationAcceptedEmail",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
         }
 
         private ResignationActionResponseDO ReadResignationActionResponse(IDataReader dr, bool isSuccessFallback)

@@ -951,5 +951,131 @@ namespace ProcessModel
           fnStoreErrorLog("CommonBL", "SendEmail", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
       }
   }
+
+  public void SendEmail(string toMail, string ccMail, string bccMail, string subject, string body)
+  {
+      try
+      {
+          string Email = ConfigurationManager.AppSettings["SenderEmail"];
+          string Password = ConfigurationManager.AppSettings["SenderPassword"];
+          int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
+          string Host = ConfigurationManager.AppSettings["SenderHost"];
+
+          using (MailMessage mail = new MailMessage())
+          {
+              mail.From = new MailAddress(Email, "HRMS");
+
+              // TO
+              foreach (string email in toMail.Split(';'))
+              {
+                  if (!string.IsNullOrWhiteSpace(email))
+                      mail.To.Add(email.Trim());
+              }
+
+              // CC
+              if (!string.IsNullOrWhiteSpace(ccMail))
+              {
+                  foreach (string email in ccMail.Split(';'))
+                  {
+                      if (!string.IsNullOrWhiteSpace(email))
+                          mail.CC.Add(email.Trim());
+                  }
+              }
+
+              // BCC
+              if (!string.IsNullOrWhiteSpace(bccMail))
+              {
+                  foreach (string email in bccMail.Split(';'))
+                  {
+                      if (!string.IsNullOrWhiteSpace(email))
+                          mail.Bcc.Add(email.Trim());
+                  }
+              }
+
+              mail.Subject = subject;
+              mail.Body = body;
+              mail.IsBodyHtml = true;
+
+              using (SmtpClient smtp = new SmtpClient(Host, Port))
+              {
+                  smtp.UseDefaultCredentials = false;
+                  smtp.Credentials = new NetworkCredential(Email, Password);
+                  smtp.EnableSsl = true;
+
+                  smtp.Send(mail);
+              }
+          }
+      }
+      catch (Exception ex)
+      {
+          fnStoreErrorLog("CommonBL", "SendEmail", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+      }
+  }
+
+  public void SendEmail(string toMail, string ccMail, string bccMail, string subject, string body, byte[] attachmentBytes, string attachmentFileName)
+  {
+      try
+      {
+          string Email = ConfigurationManager.AppSettings["SenderEmail"];
+          string Password = ConfigurationManager.AppSettings["SenderPassword"];
+          int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
+          string Host = ConfigurationManager.AppSettings["SenderHost"];
+
+          using (MailMessage mail = new MailMessage())
+          {
+              mail.From = new MailAddress(Email, "HRMS");
+
+              // TO
+              foreach (string email in toMail.Split(';'))
+              {
+                  if (!string.IsNullOrWhiteSpace(email))
+                      mail.To.Add(email.Trim());
+              }
+
+              // CC
+              if (!string.IsNullOrWhiteSpace(ccMail))
+              {
+                  foreach (string email in ccMail.Split(';'))
+                  {
+                      if (!string.IsNullOrWhiteSpace(email))
+                          mail.CC.Add(email.Trim());
+                  }
+              }
+
+              // BCC
+              if (!string.IsNullOrWhiteSpace(bccMail))
+              {
+                  foreach (string email in bccMail.Split(';'))
+                  {
+                      if (!string.IsNullOrWhiteSpace(email))
+                          mail.Bcc.Add(email.Trim());
+                  }
+              }
+
+              mail.Subject = subject;
+              mail.Body = body;
+              mail.IsBodyHtml = true;
+
+              if (attachmentBytes != null && attachmentBytes.Length > 0)
+              {
+                  string fileName = string.IsNullOrWhiteSpace(attachmentFileName) ? "attachment.pdf" : attachmentFileName;
+                  mail.Attachments.Add(new Attachment(new MemoryStream(attachmentBytes), fileName, "application/pdf"));
+              }
+
+              using (SmtpClient smtp = new SmtpClient(Host, Port))
+              {
+                  smtp.UseDefaultCredentials = false;
+                  smtp.Credentials = new NetworkCredential(Email, Password);
+                  smtp.EnableSsl = true;
+
+                  smtp.Send(mail);
+              }
+          }
+      }
+      catch (Exception ex)
+      {
+          fnStoreErrorLog("CommonBL", "SendEmail", "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+      }
+  }
     }
 }

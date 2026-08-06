@@ -31,10 +31,42 @@
         .captcha-container {
             margin-bottom: 5px; /* Adjust the margin as needed */
         }
+
+        .hrms-loader-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.65);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hrms-loader-overlay.hrms-loader-active {
+            display: flex;
+        }
+
+        .hrms-loader-spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #EFF6FF;
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: hrms-loader-spin 0.8s linear infinite;
+        }
+
+        @keyframes hrms-loader-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
 </head>
 <body>
+    <div id="hrmsGlobalLoader" class="hrms-loader-overlay" aria-hidden="true">
+        <div class="hrms-loader-spinner"></div>
+    </div>
     <form id="form1" runat="server">
         <div class="account-pages my-5 pt-sm-5">
             <div class="container">
@@ -160,6 +192,31 @@
         });
     });
 </script>
+<script>
+    // Shows a full-page loading overlay once the login form is actually being submitted.
+    // Gating on beforeunload (rather than showing it directly on click) means the overlay
+    // never appears or gets stuck if client-side validation blocks the postback.
+    document.addEventListener('DOMContentLoaded', function () {
+        var loaderEl = document.getElementById('hrmsGlobalLoader');
+        var loginBtn = document.getElementById('<%= loginButton.ClientID %>');
+        var pendingSubmit = false;
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function () {
+                pendingSubmit = true;
+                window.setTimeout(function () { pendingSubmit = false; }, 1000);
+            });
+        }
+
+        window.addEventListener('beforeunload', function () {
+            if (pendingSubmit && loaderEl) {
+                loaderEl.classList.add('hrms-loader-active');
+                loaderEl.setAttribute('aria-hidden', 'false');
+            }
+        });
+    });
+</script>
+
 <script>
     function togglePasswordVisibility() {
         var passwordInput = document.getElementById('<%= passwordtxt.ClientID %>');

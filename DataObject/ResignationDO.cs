@@ -73,6 +73,7 @@ namespace DataObject
         public int? NoticeDays { get; set; }
         public string BuyoutApplicable { get; set; }
         public DateTime? RevisedLastWorkingDate { get; set; }
+        public DateTime? NoticeStartDate { get; set; }
         public string HRRemarks { get; set; }
         public string Status { get; set; }
     }
@@ -84,6 +85,16 @@ namespace DataObject
         public bool Success { get; set; }
         public string ResponseMsg { get; set; }
 
+    }
+
+    public class ResignationMailDO
+    {
+        public string ToEmail { get; set; }
+        public string CcEmail { get; set; }
+        public string BccEmail { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public string LetterHtml { get; set; }
     }
 
     public class HandOverDO

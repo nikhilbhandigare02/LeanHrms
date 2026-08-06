@@ -171,7 +171,17 @@
                                 <asp:TextBox ID="txtNoticeDays" runat="server" CssClass="form-control" TextMode="Number"
                                     onchange="recalculateRevisedLastWorkingDate();" oninput="recalculateRevisedLastWorkingDate();" />
                             </div>
+                        </div>
 
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">Notice Start Date <span class="text-danger">*</span></label>
+                                <asp:TextBox ID="txtNoticeStartDate" runat="server" CssClass="form-control" TextMode="Date"
+                                    onchange="recalculateRevisedLastWorkingDate();" />
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="field-label">Buyout Applicable</label>
                                 <asp:DropDownList ID="ddlBuyoutApplicable" runat="server" CssClass="form-control custom-dropdown">
@@ -247,6 +257,7 @@
         }
 
         function recalculateRevisedLastWorkingDate() {
+            var noticeStartDateText = document.getElementById('<%= txtNoticeStartDate.ClientID %>').value;
             var noticeDaysText = document.getElementById('<%= txtNoticeDays.ClientID %>').value;
             var revisedField = document.getElementById('<%= txtRevisedLastWorkingDate.ClientID %>');
 
@@ -255,13 +266,21 @@
             }
 
             var noticeDays = parseInt(noticeDaysText, 10);
-            if (isNaN(noticeDays) || noticeDays < 0) {
-                noticeDays = 0;
+
+            if (!noticeStartDateText || noticeDaysText.trim() === '' || isNaN(noticeDays) || noticeDays < 0) {
+                // No Notice Start Date selected, or Notice Days is empty/invalid -
+                // fall back to the Proposed Last Working Date instead of calculating.
+                var proposedLabel = document.getElementById('<%= lblProposedLastWorkingDate.ClientID %>');
+                revisedField.value = proposedLabel ? proposedLabel.textContent.trim() : '';
+                return;
             }
 
-            // Notice Start Date = today.
-            var noticeStartDate = new Date();
-            noticeStartDate.setHours(0, 0, 0, 0);
+            // Revised Last Working Date = Notice Start Date + Notice Days.
+            // noticeStartDateText is "yyyy-MM-dd" (native date input format) - parse the
+            // parts explicitly rather than `new Date(text)`, which JS treats as UTC and
+            // can shift a day in negative-UTC-offset time zones.
+            var parts = noticeStartDateText.split('-');
+            var noticeStartDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
             noticeStartDate.setDate(noticeStartDate.getDate() + noticeDays);
 
             var dd = String(noticeStartDate.getDate()).padStart(2, '0');
@@ -273,12 +292,17 @@
 
         function validateHRReview() {
             var noticePeriod = document.getElementById('<%= ddlNoticePeriodRequired.ClientID %>').value;
+            var noticeStartDate = document.getElementById('<%= txtNoticeStartDate.ClientID %>').value.trim();
             var buyout = document.getElementById('<%= ddlBuyoutApplicable.ClientID %>').value;
             var revisedDate = document.getElementById('<%= txtRevisedLastWorkingDate.ClientID %>').value.trim();
             var remarks = document.getElementById('<%= txtHRRemarks.ClientID %>').value.trim();
 
             if (!noticePeriod) {
                 alert('Please select Notice Period Required.');
+                return false;
+            }
+            if (!noticeStartDate) {
+                alert('Please select Notice Start Date.');
                 return false;
             }
             if (!buyout) {

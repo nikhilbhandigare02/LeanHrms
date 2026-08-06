@@ -97,16 +97,20 @@ namespace HRMS.View.Modules
                 {
                     txtNoticeDays.Text = "0";
                     txtRevisedLastWorkingDate.Text = defaultRevisedLastWorkingDate;
+                    // Notice Start Date defaults to today when the form is opened for a
+                    // new review; HR can still edit it before submitting.
+                    txtNoticeStartDate.Text = DateTime.Today.ToString("yyyy-MM-dd");
 
                     hfHRReviewId.Value = "0";
                     btnAcceptResignation.Text = "Accept";
 
                     // Enable all fields for save mode. Revised Last Working Date stays
                     // ReadOnly (markup) - it is always derived from Notice Start Date
-                    // (today) + Notice Days, never entered manually.
+                    // + Notice Days, never entered manually.
                     ddlNoticePeriodRequired.Enabled = true;
                     ddlBuyoutApplicable.Enabled = true;
                     txtNoticeDays.Enabled = true;
+                    txtNoticeStartDate.Enabled = true;
                     txtHRRemarks.Enabled = true;
                 }
                 else
@@ -117,6 +121,11 @@ namespace HRMS.View.Modules
                     ddlBuyoutApplicable.SelectedValue = string.IsNullOrWhiteSpace(existingReview.BuyoutApplicable) ? "" : existingReview.BuyoutApplicable;
                     txtRevisedLastWorkingDate.Text = defaultRevisedLastWorkingDate;
                     txtHRRemarks.Text = existingReview.HRRemarks;
+                    // Show the saved Notice Start Date when reopening an existing review;
+                    // fall back to today only for reviews saved before this field existed.
+                    txtNoticeStartDate.Text = existingReview.NoticeStartDate.HasValue
+                        ? existingReview.NoticeStartDate.Value.ToString("yyyy-MM-dd")
+                        : DateTime.Today.ToString("yyyy-MM-dd");
 
                     // Update mode: Notice Period Required was already decided when the
                     // review was first saved - keep it locked so it can't be changed later.
@@ -142,8 +151,7 @@ namespace HRMS.View.Modules
             string noticePeriodRequired = ddlNoticePeriodRequired.SelectedValue;
             string buyoutApplicable = ddlBuyoutApplicable.SelectedValue;
             string hrRemarks = txtHRRemarks.Text.Trim();
-            DateTime noticeStartDate;
-            DateTime.TryParse(lblResignationDate.Text, out noticeStartDate);
+           
 
             if (resignationId <= 0)
             {
@@ -156,6 +164,14 @@ namespace HRMS.View.Modules
             {
                 ScriptManager.RegisterStartupScript(this, GetType(), "reqNotice",
                     "alert('Please select Notice Period Required.');", true);
+                return;
+            }
+
+            DateTime noticeStartDate;
+            if (!DateTime.TryParse(txtNoticeStartDate.Text.Trim(), out noticeStartDate))
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "reqNoticeStartDate",
+                    "alert('Please select Notice Start Date.');", true);
                 return;
             }
 
@@ -180,16 +196,27 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            int noticeDays;
-            if (!int.TryParse(txtNoticeDays.Text.Trim(), out noticeDays) || noticeDays < 0)
-            {
-                noticeDays = 0;
-            }
+            int noticeDaysParsed;
+            bool noticeDaysProvided = int.TryParse(txtNoticeDays.Text.Trim(), out noticeDaysParsed) && noticeDaysParsed >= 0;
+            int noticeDays = noticeDaysProvided ? noticeDaysParsed : 0;
 
-            // Revised Last Working Date is always derived from Notice Start Date (today)
-            // + Notice Days - recompute it authoritatively here rather than trusting the
-            // posted (ReadOnly) textbox value.
-            DateTime revisedLastWorkingDate = DateTime.Today.AddDays(noticeDays);
+            // Revised Last Working Date is derived from Notice Start Date + Notice Days -
+            // recompute it authoritatively here rather than trusting the posted (ReadOnly)
+            // textbox value. If Notice Days is empty/not selected, fall back to the
+            // Proposed Last Working Date instead, matching the client-side display
+            // behavior in recalculateRevisedLastWorkingDate().
+            DateTime revisedLastWorkingDate;
+            if (noticeDaysProvided)
+            {
+                revisedLastWorkingDate = noticeStartDate.AddDays(noticeDays);
+            }
+            else
+            {
+                DateTime proposedLastWorkingDate;
+                revisedLastWorkingDate = DateTime.TryParse(lblProposedLastWorkingDate.Text, out proposedLastWorkingDate)
+                    ? proposedLastWorkingDate
+                    : noticeStartDate;
+            }
             txtRevisedLastWorkingDate.Text = revisedLastWorkingDate.ToString("dd-MM-yyyy");
 
             int hrReviewId;
@@ -199,6 +226,7 @@ namespace HRMS.View.Modules
             {
                 HRReviewId = hrReviewId,
                 ResignationId = resignationId,
+              
                 NoticePeriodRequired = noticePeriodRequired,
                 NoticeDays = noticeDays,
                 BuyoutApplicable = buyoutApplicable,

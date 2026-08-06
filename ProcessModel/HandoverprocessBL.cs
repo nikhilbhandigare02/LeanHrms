@@ -630,6 +630,7 @@ namespace ProcessModel
                         if (dr.NextResult() && dr.Read())
                         {
                             model.HRReviewId = GetIntSafe(dr, "HRReviewId");
+                            model.NoticeStartDate = GetNullableDateSafe(dr, "NoticeStartDate");
                             model.NoticePeriodRequired = GetStringSafe(dr, "NoticePeriodRequired");
                             model.NoticeDays = GetIntSafe(dr, "NoticeDays");
                             model.BuyoutApplicable = GetStringSafe(dr, "BuyoutApplicable");
@@ -681,6 +682,7 @@ namespace ProcessModel
                             {
                                 HRReviewId = GetIntSafe(dr, "HRReviewId"),
                                 ResignationId = GetIntSafe(dr, "ResignationId"),
+                                NoticeStartDate = GetNullableDateSafe(dr, "NoticeStartDate"),
                                 NoticePeriodRequired = GetStringSafe(dr, "NoticePeriodRequired"),
                                 NoticeDays = GetIntSafe(dr, "NoticeDays"),
                                 BuyoutApplicable = GetStringSafe(dr, "BuyoutApplicable"),
@@ -816,6 +818,7 @@ namespace ProcessModel
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@p_HRReviewId", model.HRReviewId);
+                    cmd.Parameters.AddWithValue("@p_NoticeStartDate", model.NoticeStartDate.HasValue ? (object)model.NoticeStartDate.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("@p_NoticePeriodRequired", model.NoticePeriodRequired ?? string.Empty);
                     cmd.Parameters.AddWithValue("@p_NoticeDays", model.NoticeDays.HasValue ? (object)model.NoticeDays.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("@p_BuyoutApplicable", model.BuyoutApplicable ?? string.Empty);
@@ -875,6 +878,8 @@ namespace ProcessModel
                         cmd.CommandType = CommandType.StoredProcedure;
 
                         cmd.Parameters.AddWithValue("p_ResignationId", model.ResignationId);
+                        cmd.Parameters.AddWithValue("p_NoticeStartDate",
+                            model.NoticeStartDate.HasValue ? (object)model.NoticeStartDate.Value : DBNull.Value);
                         cmd.Parameters.AddWithValue("p_NoticePeriodRequired", model.NoticePeriodRequired);
                         cmd.Parameters.AddWithValue("p_NoticeDays",
                             model.NoticeDays.HasValue ? (object)model.NoticeDays.Value : DBNull.Value);
@@ -936,8 +941,9 @@ namespace ProcessModel
             return response;
         }
 
-        // Recipients/CC/BCC/Subject/Body are all produced by sp_get_resignation_accepted_mail_details,
-        // not built in C#, so HR can change wording/recipients without a code change.
+        // Recipients/CC/BCC/Subject/Body/LetterHtml are all produced by
+        // sp_get_resignation_accepted_mail_details, not built in C#, so HR can change
+        // wording/recipients without a code change.
         public ResignationMailDO GetResignationAcceptedMailDetails(int resignationId)
         {
             ResignationMailDO mail = null;
@@ -1022,6 +1028,116 @@ namespace ProcessModel
                     UserId
                 );
             }
+        }
+
+        public KTHandoverDO GetKTHandoverByResignationId(int resignationId)
+        {
+            KTHandoverDO model = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return model;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_GetKTHandoverByResignationId", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_ResignationId", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model = new KTHandoverDO
+                            {
+                                KTId = GetIntSafe(dr, "KTId"),
+                                ResignationId = GetIntSafe(dr, "ResignationId"),
+                                KTPlan = GetStringSafe(dr, "KTPlan"),
+                                ReplacementEmployee = GetStringSafe(dr, "ReplacementEmployee"),
+                                KTStatus = GetStringSafe(dr, "KTStatus"),
+                                KTStartDate = GetNullableDateSafe(dr, "KTStartDate"),
+                                KTCompletionDate = GetNullableDateSafe(dr, "KTCompletionDate")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetKTHandoverByResignationId",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return model;
+        }
+
+        public KTHandoverResponseDO SaveKTHandover(KTHandoverDO model, int createdBy)
+        {
+            var response = new KTHandoverResponseDO { Success = false, ResponseMsg = "Unable to save KT & Handover details." };
+
+            if (model == null || model.ResignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                response.ResponseMsg = "Invalid KT & Handover request.";
+                return response;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_SaveKTHandover", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_ResignationId", model.ResignationId);
+                    cmd.Parameters.AddWithValue("@p_KTPlan", model.KTPlan ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_ReplacementEmployee", (object)model.ReplacementEmployee ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_KTStatus", model.KTStatus ?? "Pending");
+                    cmd.Parameters.AddWithValue("@p_KTStartDate", model.KTStartDate.HasValue ? (object)model.KTStartDate.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_KTCompletionDate", model.KTCompletionDate.HasValue ? (object)model.KTCompletionDate.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_CreatedBy", createdBy);
+
+                    var outKTId = new MySqlParameter("@p_KTId", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
+                    var outSuccess = new MySqlParameter("@p_Success", MySqlDbType.Byte) { Direction = ParameterDirection.Output };
+                    var outMsg = new MySqlParameter("@p_ResponseMsg", MySqlDbType.VarChar, 200) { Direction = ParameterDirection.Output };
+
+                    cmd.Parameters.Add(outKTId);
+                    cmd.Parameters.Add(outSuccess);
+                    cmd.Parameters.Add(outMsg);
+
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+
+                    response.KTId = outKTId.Value != DBNull.Value ? Convert.ToInt32(outKTId.Value) : 0;
+                    response.Success = outSuccess.Value != DBNull.Value && Convert.ToInt32(outSuccess.Value) == 1;
+                    response.ResponseMsg = outMsg.Value != DBNull.Value
+                        ? Convert.ToString(outMsg.Value)
+                        : (response.Success ? "KT & Handover details saved successfully." : "Failed to save KT & Handover details.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "SaveKTHandover",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                response.Success = false;
+                response.ResponseMsg = "Error occurred while saving KT & Handover details.";
+            }
+
+            return response;
         }
 
         private ResignationActionResponseDO ReadResignationActionResponse(IDataReader dr, bool isSuccessFallback)

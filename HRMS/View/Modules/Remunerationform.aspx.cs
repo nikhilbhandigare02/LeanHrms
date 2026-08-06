@@ -468,7 +468,7 @@ namespace HRMS.View.Modules
                         if (compName.Contains("pf"))
                             pf = amount;
                         else if (compName.Contains("provident fund"))
-                            esi = amount;
+                            pf = amount;
                         else if (compName.Contains("esi"))
                             esi = amount;
                         else if (compName.Contains("professional tax"))

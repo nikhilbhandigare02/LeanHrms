@@ -54,6 +54,9 @@
     </asp:ContentPlaceHolder>
 </head>
 <body data-sidebar="light">
+    <div id="hrmsGlobalLoader" class="hrms-loader-overlay" aria-hidden="true">
+        <div class="hrms-loader-spinner"></div>
+    </div>
     <form runat="server" id="form1">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
         <!-- Begin page -->
@@ -360,6 +363,108 @@
                         }
                     });
                 });
+            })();
+        </script>
+        <script type="text/javascript">
+            // Shows a full-page loading overlay whenever a Save/Submit/Update control is
+            // activated, covering both classic full postbacks (form submit -> page reload)
+            // and UpdatePanel-based async postbacks, without requiring any change on the
+            // individual pages that use this master. Controls are matched by their visible
+            // label text/value (not by ID), since ID naming isn't consistent across pages.
+            (function () {
+                var loaderEl = document.getElementById('hrmsGlobalLoader');
+                var pendingFullPostback = false;
+                var pendingResetTimer = null;
+                var autoHideTimer = null;
+
+                function showLoader() {
+                    if (!loaderEl) {
+                        return;
+                    }
+                    loaderEl.classList.add('hrms-loader-active');
+                    loaderEl.setAttribute('aria-hidden', 'false');
+                    window.clearTimeout(autoHideTimer);
+                    autoHideTimer = window.setTimeout(hideLoader, 30000);
+                }
+
+                function hideLoader() {
+                    if (!loaderEl) {
+                        return;
+                    }
+                    loaderEl.classList.remove('hrms-loader-active');
+                    loaderEl.setAttribute('aria-hidden', 'true');
+                    window.clearTimeout(autoHideTimer);
+                }
+
+                function getControlLabel(el) {
+                    if (!el) {
+                        return '';
+                    }
+                    var tag = (el.tagName || '').toLowerCase();
+                    if (tag === 'input') {
+                        return el.value || '';
+                    }
+                    return el.textContent || el.innerText || '';
+                }
+
+                var saveSubmitUpdatePattern = /\b(save|submit|update)\b/i;
+
+                function isSaveSubmitUpdateControl(el) {
+                    while (el && el.nodeType === 1) {
+                        var tag = el.tagName.toLowerCase();
+                        var isCandidate =
+                            (tag === 'input' && (el.type === 'submit' || el.type === 'button')) ||
+                            tag === 'button' ||
+                            (tag === 'a' && (el.getAttribute('href') || '').indexOf('__doPostBack') >= 0);
+
+                        if (isCandidate) {
+                            return saveSubmitUpdatePattern.test((getControlLabel(el) || '').trim());
+                        }
+
+                        el = el.parentElement;
+                    }
+                    return false;
+                }
+
+                // Classic full postback: the browser only actually unloads/resubmits the
+                // page once any client-side validation has passed, so gating the loader on
+                // beforeunload means it never shows (or gets stuck) for a blocked postback.
+                document.addEventListener('click', function (event) {
+                    if (isSaveSubmitUpdateControl(event.target)) {
+                        pendingFullPostback = true;
+                        window.clearTimeout(pendingResetTimer);
+                        pendingResetTimer = window.setTimeout(function () {
+                            pendingFullPostback = false;
+                        }, 1000);
+                    }
+                }, true);
+
+                window.addEventListener('beforeunload', function () {
+                    if (pendingFullPostback) {
+                        showLoader();
+                    }
+                });
+
+                // UpdatePanel-based async postback.
+                if (window.Sys && Sys.Application && Sys.Application.add_load) {
+                    Sys.Application.add_load(function () {
+                        var prm = Sys.WebForms.PageRequestManager.getInstance();
+                        if (!prm || prm._hrmsLoaderGuardAttached) {
+                            return;
+                        }
+                        prm._hrmsLoaderGuardAttached = true;
+
+                        prm.add_beginRequest(function (sender, args) {
+                            if (isSaveSubmitUpdateControl(args.get_postBackElement())) {
+                                showLoader();
+                            }
+                        });
+
+                        prm.add_endRequest(function () {
+                            hideLoader();
+                        });
+                    });
+                }
             })();
         </script>
     </form>
@@ -820,6 +925,35 @@
             --hrms-sidebar-text: #526077;
             --hrms-sidebar-strong: #172033;
             --hrms-sidebar-line: #E8EEF7;
+        }
+
+        .hrms-loader-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.65);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hrms-loader-overlay.hrms-loader-active {
+            display: flex;
+        }
+
+        .hrms-loader-spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--hrms-primary-soft, #EFF6FF);
+            border-top-color: var(--hrms-primary, #2563EB);
+            border-radius: 50%;
+            animation: hrms-loader-spin 0.8s linear infinite;
+        }
+
+        @keyframes hrms-loader-spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #page-topbar {

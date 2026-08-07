@@ -140,6 +140,48 @@
             border-radius: 10px;
             border: 1px solid #dbe3ee;
         }
+
+        .resignation-page .info-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+
+        .resignation-page .info-value {
+            font-size: 14px;
+            color: #1f2d3d;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .resignation-page label.field-label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .resignation-page .btn-accept {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border: 0;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 22px;
+        }
+
+        .resignation-page .btn-cancel {
+            background: #64748b;
+            border: 0;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 22px;
+        }
     </style>
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
 </asp:Content>
@@ -151,6 +193,9 @@
         <div class="col-lg-12">
             <div class="card shadow-lg rounded-3">
                 <div class="card-body">
+
+                    <!-- ==================== LIST SECTION ==================== -->
+                    <asp:Panel ID="pnlKTList" runat="server" Visible="true">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <asp:Label runat="server" ID="lbluser" CssClass="card-title mb-4"
                             Style="font-size: 2.0em; font-weight: bold;">Knowledge Transfer &amp; Handover</asp:Label>
@@ -186,22 +231,6 @@
                                     <asp:BoundField DataField="EmployeeName" HeaderText="Employee Name"
                                         HeaderStyle-CssClass="col-emp-name" ItemStyle-CssClass="col-emp-name" />
 
-                                    <asp:BoundField DataField="resignation_date" HeaderText="Resignation Date"
-                                        DataFormatString="{0:yyyy-MM-dd}"
-                                        HeaderStyle-CssClass="col-date" ItemStyle-CssClass="col-date" />
-
-                                    <asp:BoundField DataField="last_working_date_display" HeaderText="Last Working Date"
-                                        DataFormatString="{0:yyyy-MM-dd}"
-                                        HeaderStyle-CssClass="col-last-date" ItemStyle-CssClass="col-last-date" />
-
-                                    <asp:TemplateField HeaderText="Authority Status" HeaderStyle-CssClass="col-authority" ItemStyle-CssClass="text-center col-authority">
-                                        <ItemTemplate>
-                                            <span class='badge <%# Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager") ? "bg-warning text-dark" : "bg-primary" %>'>
-                                                <%# Convert.ToString(Eval("authority_status")) %>
-                                            </span>
-                                        </ItemTemplate>
-                                    </asp:TemplateField>
-
                                     <asp:BoundField DataField="hr_status" HeaderText="Hr Status"
                                         HeaderStyle-CssClass="col-status" ItemStyle-CssClass="col-status" />
 
@@ -235,9 +264,162 @@
                                 </asp:DropDownList>
                             </asp:Panel>
 
-
                         </div>
                     </div>
+                    </asp:Panel>
+
+                    <!-- ==================== KT FORM SECTION ==================== -->
+                    <asp:Panel ID="pnlKTForm" runat="server" Visible="false">
+                        <asp:HiddenField ID="hfResignationId" runat="server" />
+                        <asp:HiddenField ID="hfKTId" runat="server" />
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="card-title" style="font-size: 1.6em; font-weight: bold;">Knowledge Transfer &amp; Handover</span>
+                        </div>
+
+                        <!-- Employee Information (Read Only) -->
+                        <div class="row mb-2">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Employee ID</div>
+                                <asp:Label ID="lblEmployeeId" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Employee Name</div>
+                                <asp:Label ID="lblEmployeeName" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Department</div>
+                                <asp:Label ID="lblDepartment" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Designation</div>
+                                <asp:Label ID="lblDesignation" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Resignation Date</div>
+                                <asp:Label ID="lblResignationDate" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="info-label">Proposed Last Working Date</div>
+                                <asp:Label ID="lblProposedLastWorkingDate" runat="server" CssClass="info-value" Text="-" />
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <h5 class="mb-3">KT plan</h5>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <asp:TextBox ID="txtKTPlan" runat="server"
+                                    CssClass="form-control" TextMode="MultiLine" Rows="3"
+                                    placeholder="Required" />
+                                <asp:RequiredFieldValidator ID="rfvKTPlan" runat="server" ControlToValidate="txtKTPlan"
+                                    ErrorMessage="KT Plan is mandatory" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="KTMainGroup" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">Replacement employee <span class="text-danger">*</span></label>
+                                <asp:TextBox ID="txtReplacementEmployee" runat="server" CssClass="form-control" />
+                                <asp:RequiredFieldValidator ID="rfvReplacementEmployee" runat="server" ControlToValidate="txtReplacementEmployee"
+                                    ErrorMessage="Replacement Employee is mandatory" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="KTMainGroup" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">KT status <span class="text-danger">*</span></label>
+                                <asp:DropDownList ID="ddlKTStatus" runat="server" CssClass="form-control custom-dropdown">
+                                    <asp:ListItem Text="-- Select --" Value="" />
+                                    <asp:ListItem Text="Pending" Value="Pending" />
+                                    <asp:ListItem Text="In Progress" Value="In Progress" />
+                                    <asp:ListItem Text="Completed" Value="Completed" />
+                                </asp:DropDownList>
+                                <asp:RequiredFieldValidator ID="rfvKTStatus" runat="server" ControlToValidate="ddlKTStatus"
+                                    InitialValue="" ErrorMessage="Please select KT Status" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="KTMainGroup" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">KT start date</label>
+                                <asp:TextBox ID="txtKTStartDate" runat="server" CssClass="form-control" TextMode="Date" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">KT completion date</label>
+                                <asp:TextBox ID="txtKTCompletionDate" runat="server" CssClass="form-control" TextMode="Date" />
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 mt-2">Project handover</h5>
+
+                        <div class="table-responsive mb-3">
+                            <asp:GridView runat="server" ID="gvProjectHandover" class="table custom-gridview" AutoGenerateColumns="false"
+                                OnRowCommand="gvProjectHandover_RowCommand" EmptyDataText="No project handover rows added yet.">
+                                <Columns>
+                                    <asp:BoundField DataField="ProjectName" HeaderText="Project Name" />
+                                    <asp:BoundField DataField="AssignedEmployee" HeaderText="Assigned Employee" />
+                                    <asp:BoundField DataField="Status" HeaderText="Status" />
+                                    <asp:TemplateField HeaderText="Action" ItemStyle-Width="90px">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="lnkRemoveRow" runat="server" CommandName="RemoveRow"
+                                                CommandArgument="<%# Container.DataItemIndex %>" CausesValidation="false"
+                                                CssClass="btn btn-sm btn-outline-danger" ToolTip="Remove row">
+                                                <i class="fa fa-trash"></i>
+                                            </asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+
+                        <div class="row align-items-end mb-3">
+                            <div class="col-md-4 mb-2">
+                                <label class="field-label">Project Name <span class="text-danger">*</span></label>
+                                <asp:TextBox ID="txtNewProjectName" runat="server" CssClass="form-control" />
+                                <asp:RequiredFieldValidator ID="rfvNewProjectName" runat="server" ControlToValidate="txtNewProjectName"
+                                    ErrorMessage="Project Name is mandatory" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="ProjectRowGroup" />
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="field-label">Assigned Employee <span class="text-danger">*</span></label>
+                                <asp:TextBox ID="txtNewAssignedEmployee" runat="server" CssClass="form-control" />
+                                <asp:RequiredFieldValidator ID="rfvNewAssignedEmployee" runat="server" ControlToValidate="txtNewAssignedEmployee"
+                                    ErrorMessage="Assigned Employee is mandatory" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="ProjectRowGroup" />
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="field-label">Status <span class="text-danger">*</span></label>
+                                <asp:DropDownList ID="ddlNewProjectStatus" runat="server" CssClass="form-control custom-dropdown">
+                                    <asp:ListItem Text="-- Select --" Value="" />
+                                    <asp:ListItem Text="Pending" Value="Pending" />
+                                    <asp:ListItem Text="In Progress" Value="In Progress" />
+                                    <asp:ListItem Text="Completed" Value="Completed" />
+                                </asp:DropDownList>
+                                <asp:RequiredFieldValidator ID="rfvNewProjectStatus" runat="server" ControlToValidate="ddlNewProjectStatus"
+                                    InitialValue="" ErrorMessage="Please select Status" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="ProjectRowGroup" />
+                            </div>
+                            <div class="col-md-1 mb-2">
+                                <asp:Button ID="btnAddProjectRow" runat="server" CssClass="btn btn-secondary w-100"
+                                    Text="Add" ValidationGroup="ProjectRowGroup" OnClick="btnAddProjectRow_Click" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <asp:Button ID="btnSaveKT" runat="server"
+                                CssClass="btn-accept" Text="Save"
+                                ValidationGroup="KTMainGroup"
+                                OnClick="btnSaveKT_Click" />
+                            <asp:Button ID="btnCancelKT" runat="server"
+                                CssClass="btn-cancel" Text="Cancel"
+                                CausesValidation="false"
+                                OnClick="btnCancelKT_Click" />
+                        </div>
+
+                    </asp:Panel>
 
                 </div>
             </div>
@@ -251,6 +433,15 @@
                 text: remark,
                 timer: 4000,
                 showConfirmButton: false
+            });
+        }
+
+        function showKTResult(status, message) {
+            Swal.fire({
+                icon: status.toLowerCase() === "success" ? "success" : "error",
+                text: message,
+                timer: status.toLowerCase() === "success" ? 2500 : undefined,
+                showConfirmButton: status.toLowerCase() !== "success"
             });
         }
 

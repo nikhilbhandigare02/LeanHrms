@@ -109,6 +109,7 @@ namespace DataObject
         public DateTime? KTCompletionDate { get; set; }
     }
 
+    [Serializable]
     public class KTProjectHandoverRowDO
     {
         public int KTProjectHandoverId { get; set; }

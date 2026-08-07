@@ -12,6 +12,24 @@ namespace HRMS.View.Modules
     {
         protected string UserId = null;
 
+        private List<KTProjectHandoverRowDO> ProjectRows
+        {
+            get
+            {
+                var rows = ViewState["KTProjectRows"] as List<KTProjectHandoverRowDO>;
+                if (rows == null)
+                {
+                    rows = new List<KTProjectHandoverRowDO>();
+                    ViewState["KTProjectRows"] = rows;
+                }
+                return rows;
+            }
+            set
+            {
+                ViewState["KTProjectRows"] = value;
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
@@ -239,7 +257,7 @@ namespace HRMS.View.Modules
 
                 if (e.CommandName == "OpenKT")
                 {
-                    Response.Redirect("~/View/Modules/KnowledgeTransfer.aspx?ResignationId=" + resignationId, false);
+                    ShowKTForm(resignationId);
                     return;
                 }
             }
@@ -252,6 +270,239 @@ namespace HRMS.View.Modules
                     ex.Message,
                     UserId);
             }
+        }
+
+        // ==================== KT FORM (same page - toggled via panel visibility,
+        // so only ONE page name needs authorization/menu permission mapping) ====================
+
+        private void ShowKTForm(int resignationId)
+        {
+            hfResignationId.Value = resignationId.ToString();
+            pnlKTList.Visible = false;
+            pnlKTForm.Visible = true;
+            BindKTForm(resignationId);
+        }
+
+        private void ShowKTList()
+        {
+            pnlKTForm.Visible = false;
+            pnlKTList.Visible = true;
+            BindKTListGrid();
+        }
+
+        private void BindKTForm(int resignationId)
+        {
+            try
+            {
+                HandoverprocessBL bl = new HandoverprocessBL();
+
+                // Reuse the existing HR Review lookup for the read-only employee /
+                // resignation header info - avoids a duplicate employee query.
+                HRReviewDO employeeInfo = bl.GetHRReviewDetails(resignationId);
+                lblEmployeeId.Text = employeeInfo.EmployeeId > 0 ? employeeInfo.EmployeeId.ToString() : "-";
+                lblEmployeeName.Text = string.IsNullOrWhiteSpace(employeeInfo.EmployeeName) ? "-" : employeeInfo.EmployeeName;
+                lblDepartment.Text = string.IsNullOrWhiteSpace(employeeInfo.Department) ? "-" : employeeInfo.Department;
+                lblDesignation.Text = string.IsNullOrWhiteSpace(employeeInfo.Designation) ? "-" : employeeInfo.Designation;
+                lblResignationDate.Text = employeeInfo.ResignationDate == DateTime.MinValue ? "-" : employeeInfo.ResignationDate.ToString("dd-MM-yyyy");
+                lblProposedLastWorkingDate.Text = employeeInfo.ProposedLastWorkingDate == DateTime.MinValue ? "-" : employeeInfo.ProposedLastWorkingDate.ToString("dd-MM-yyyy");
+
+                KTHandoverDO existingKT = bl.GetKTHandoverByResignationId(resignationId);
+
+                if (existingKT == null)
+                {
+                    // No KT record yet - blank form ready for entry.
+                    hfKTId.Value = "0";
+                    txtKTPlan.Text = string.Empty;
+                    txtReplacementEmployee.Text = string.Empty;
+                    ddlKTStatus.SelectedValue = "";
+                    txtKTStartDate.Text = string.Empty;
+                    txtKTCompletionDate.Text = string.Empty;
+                    ProjectRows = new List<KTProjectHandoverRowDO>();
+                    btnSaveKT.Text = "Save";
+                }
+                else
+                {
+                    hfKTId.Value = existingKT.KTId.ToString();
+                    txtKTPlan.Text = existingKT.KTPlan;
+                    txtReplacementEmployee.Text = existingKT.ReplacementEmployee;
+                    SetDropDownValueSafe(ddlKTStatus, existingKT.KTStatus);
+                    txtKTStartDate.Text = existingKT.KTStartDate.HasValue ? existingKT.KTStartDate.Value.ToString("yyyy-MM-dd") : string.Empty;
+                    txtKTCompletionDate.Text = existingKT.KTCompletionDate.HasValue ? existingKT.KTCompletionDate.Value.ToString("yyyy-MM-dd") : string.Empty;
+
+                    ProjectRows = bl.GetKTProjectHandoverRows(existingKT.KTId);
+                    btnSaveKT.Text = "Update";
+                }
+
+                txtNewProjectName.Text = string.Empty;
+                txtNewAssignedEmployee.Text = string.Empty;
+                ddlNewProjectStatus.SelectedValue = "";
+
+                BindProjectGrid();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("KnowledgeTransferList", "BindKTForm",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+            }
+        }
+
+        private static void SetDropDownValueSafe(DropDownList ddl, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value) && ddl.Items.FindByValue(value) != null)
+            {
+                ddl.SelectedValue = value;
+            }
+        }
+
+        private void BindProjectGrid()
+        {
+            gvProjectHandover.DataSource = ProjectRows;
+            gvProjectHandover.DataBind();
+        }
+
+        protected void btnAddProjectRow_Click(object sender, EventArgs e)
+        {
+            // rfvNewProjectName/rfvNewAssignedEmployee/rfvNewProjectStatus (ValidationGroup
+            // "ProjectRowGroup") already show the inline below-field messages and block
+            // this postback client-side; Page.IsValid is the server-side safety net.
+            if (!Page.IsValid)
+            {
+                return;
+            }
+
+            string projectName = txtNewProjectName.Text.Trim();
+            string assignedEmployee = txtNewAssignedEmployee.Text.Trim();
+            string status = ddlNewProjectStatus.SelectedValue;
+
+            var rows = ProjectRows;
+            rows.Add(new KTProjectHandoverRowDO
+            {
+                ProjectName = projectName,
+                AssignedEmployee = assignedEmployee,
+                Status = status
+            });
+            ProjectRows = rows;
+
+            txtNewProjectName.Text = string.Empty;
+            txtNewAssignedEmployee.Text = string.Empty;
+            ddlNewProjectStatus.SelectedValue = "";
+
+            BindProjectGrid();
+        }
+
+        protected void gvProjectHandover_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "RemoveRow")
+            {
+                int index;
+                if (int.TryParse(e.CommandArgument.ToString(), out index))
+                {
+                    var rows = ProjectRows;
+                    if (index >= 0 && index < rows.Count)
+                    {
+                        rows.RemoveAt(index);
+                        ProjectRows = rows;
+                        BindProjectGrid();
+                    }
+                }
+            }
+        }
+
+        protected void btnSaveKT_Click(object sender, EventArgs e)
+        {
+            // rfvKTPlan/rfvReplacementEmployee/rfvKTStatus (ValidationGroup "KTMainGroup")
+            // already show the inline below-field messages and block this postback
+            // client-side; Page.IsValid is the server-side safety net.
+            if (!Page.IsValid)
+            {
+                return;
+            }
+
+            int resignationId;
+            int.TryParse(hfResignationId.Value, out resignationId);
+
+            string ktPlan = txtKTPlan.Text.Trim();
+            string replacementEmployee = txtReplacementEmployee.Text.Trim();
+            string ktStatus = ddlKTStatus.SelectedValue;
+
+            if (resignationId <= 0)
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "invalidResignation",
+                    "alert('Invalid resignation request.');", true);
+                return;
+            }
+
+            DateTime? ktStartDate = null;
+            DateTime parsedStart;
+            if (DateTime.TryParse(txtKTStartDate.Text.Trim(), out parsedStart))
+            {
+                ktStartDate = parsedStart;
+            }
+
+            DateTime? ktCompletionDate = null;
+            DateTime parsedCompletion;
+            if (DateTime.TryParse(txtKTCompletionDate.Text.Trim(), out parsedCompletion))
+            {
+                ktCompletionDate = parsedCompletion;
+            }
+
+            int ktId;
+            int.TryParse(hfKTId.Value, out ktId);
+
+            var model = new KTHandoverDO
+            {
+                KTId = ktId,
+                ResignationId = resignationId,
+                KTPlan = ktPlan,
+                ReplacementEmployee = txtReplacementEmployee.Text.Trim(),
+                KTStatus = ddlKTStatus.SelectedValue,
+                KTStartDate = ktStartDate,
+                KTCompletionDate = ktCompletionDate
+            };
+
+            int userId = Convert.ToInt32(Session["userId"]);
+
+            try
+            {
+                HandoverprocessBL bl = new HandoverprocessBL();
+                KTHandoverResponseDO result = ktId > 0
+                    ? bl.UpdateKTHandover(model, userId)
+                    : bl.SaveKTHandover(model, userId);
+
+                if (result != null && result.Success)
+                {
+                    int savedKTId = result.KTId > 0 ? result.KTId : ktId;
+                    bl.SaveKTProjectHandoverRows(savedKTId, ProjectRows);
+
+                    string safeMsg = System.Web.HttpUtility.JavaScriptStringEncode(
+                        result.ResponseMsg ?? "KT & Handover details saved successfully.");
+                    ScriptManager.RegisterStartupScript(this, GetType(), "ktSaved",
+                        $"showKTResult('Success', '{safeMsg}');", true);
+
+                    ShowKTList();
+                }
+                else
+                {
+                    string safeErr = System.Web.HttpUtility.JavaScriptStringEncode(
+                        result?.ResponseMsg ?? "Unable to save KT & Handover details.");
+                    ScriptManager.RegisterStartupScript(this, GetType(), "ktError",
+                        $"showKTResult('Error', '{safeErr}');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("KnowledgeTransferList", "btnSaveKT_Click",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace, UserId);
+                ScriptManager.RegisterStartupScript(this, GetType(), "ktException",
+                    "alert('Error occurred while saving KT & Handover details.');", true);
+            }
+        }
+
+        protected void btnCancelKT_Click(object sender, EventArgs e)
+        {
+            ShowKTList();
         }
     }
 }

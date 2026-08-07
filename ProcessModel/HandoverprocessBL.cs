@@ -1140,6 +1140,170 @@ namespace ProcessModel
             return response;
         }
 
+        public KTHandoverResponseDO UpdateKTHandover(KTHandoverDO model, int updatedBy)
+        {
+            var response = new KTHandoverResponseDO { Success = false, ResponseMsg = "Unable to update KT & Handover details." };
+
+            if (model == null || model.KTId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                response.ResponseMsg = "Invalid KT & Handover request.";
+                return response;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_UpdateKTHandover", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_KTId", model.KTId);
+                    cmd.Parameters.AddWithValue("@p_KTPlan", model.KTPlan ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@p_ReplacementEmployee", (object)model.ReplacementEmployee ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_KTStatus", model.KTStatus ?? "Pending");
+                    cmd.Parameters.AddWithValue("@p_KTStartDate", model.KTStartDate.HasValue ? (object)model.KTStartDate.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_KTCompletionDate", model.KTCompletionDate.HasValue ? (object)model.KTCompletionDate.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@p_UpdatedBy", updatedBy);
+
+                    var outSuccess = new MySqlParameter("@p_Success", MySqlDbType.Byte) { Direction = ParameterDirection.Output };
+                    var outMsg = new MySqlParameter("@p_ResponseMsg", MySqlDbType.VarChar, 200) { Direction = ParameterDirection.Output };
+
+                    cmd.Parameters.Add(outSuccess);
+                    cmd.Parameters.Add(outMsg);
+
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+
+                    response.KTId = model.KTId;
+                    response.Success = outSuccess.Value != DBNull.Value && Convert.ToInt32(outSuccess.Value) == 1;
+                    response.ResponseMsg = outMsg.Value != DBNull.Value
+                        ? Convert.ToString(outMsg.Value)
+                        : (response.Success ? "KT & Handover details updated successfully." : "Failed to update KT & Handover details.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "UpdateKTHandover",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                response.Success = false;
+                response.ResponseMsg = "Error occurred while updating KT & Handover details.";
+            }
+
+            return response;
+        }
+
+        public List<KTProjectHandoverRowDO> GetKTProjectHandoverRows(int ktId)
+        {
+            var rows = new List<KTProjectHandoverRowDO>();
+
+            if (ktId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return rows;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_GetKTProjectHandoverList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_KTId", ktId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            rows.Add(new KTProjectHandoverRowDO
+                            {
+                                KTProjectHandoverId = GetIntSafe(dr, "KTProjectHandoverId"),
+                                KTId = GetIntSafe(dr, "KTId"),
+                                ProjectName = GetStringSafe(dr, "ProjectName"),
+                                AssignedEmployee = GetStringSafe(dr, "AssignedEmployee"),
+                                Status = GetStringSafe(dr, "Status")
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetKTProjectHandoverRows",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return rows;
+        }
+
+        public bool SaveKTProjectHandoverRows(int ktId, List<KTProjectHandoverRowDO> rows)
+        {
+            if (ktId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return false;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                {
+                    con.Open();
+
+                    using (MySqlCommand delCmd = new MySqlCommand("sp_DeleteKTProjectHandoverRows", con))
+                    {
+                        delCmd.CommandType = CommandType.StoredProcedure;
+                        delCmd.Parameters.AddWithValue("@p_KTId", ktId);
+                        delCmd.ExecuteNonQuery();
+                    }
+
+                    if (rows != null)
+                    {
+                        foreach (var row in rows)
+                        {
+                            if (row == null || string.IsNullOrWhiteSpace(row.ProjectName))
+                            {
+                                continue;
+                            }
+
+                            using (MySqlCommand insCmd = new MySqlCommand("sp_InsertKTProjectHandoverRow", con))
+                            {
+                                insCmd.CommandType = CommandType.StoredProcedure;
+                                insCmd.Parameters.AddWithValue("@p_KTId", ktId);
+                                insCmd.Parameters.AddWithValue("@p_ProjectName", row.ProjectName);
+                                insCmd.Parameters.AddWithValue("@p_AssignedEmployee", (object)row.AssignedEmployee ?? DBNull.Value);
+                                insCmd.Parameters.AddWithValue("@p_Status", row.Status ?? "Pending");
+                                insCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "SaveKTProjectHandoverRows",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                return false;
+            }
+        }
+
         private ResignationActionResponseDO ReadResignationActionResponse(IDataReader dr, bool isSuccessFallback)
         {
             var response = new ResignationActionResponseDO

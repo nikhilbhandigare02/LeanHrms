@@ -179,6 +179,12 @@
                                 <asp:TextBox ID="txtNoticeStartDate" runat="server" CssClass="form-control" TextMode="Date"
                                     onchange="recalculateRevisedLastWorkingDate();" />
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="field-label">Revised Last Working Date</label>
+                                <asp:TextBox ID="txtRevisedLastWorkingDate" runat="server"
+                                    CssClass="form-control" autocomplete="off" ReadOnly="true"
+                                    placeholder="Auto-calculated from Resignation Date + Notice Days" />
+                            </div>
                         </div>
 
                         <div class="row">
@@ -189,17 +195,6 @@
                                     <asp:ListItem Text="Yes" Value="Yes" />
                                     <asp:ListItem Text="No" Value="No" />
                                 </asp:DropDownList>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="field-label">Revised Last Working Date</label>
-                                <div class="input-group">
-                                    <asp:TextBox ID="txtRevisedLastWorkingDate" runat="server"
-                                        CssClass="form-control" autocomplete="off" ReadOnly="true"
-                                        placeholder="Auto-calculated from Resignation Date + Notice Days" />
-                                    <span class="input-group-text">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </span>
-                                </div>
                             </div>
 
                             <div class="col-md-12 mb-3">
@@ -217,7 +212,7 @@
                         <div class="d-flex gap-2">
                             <asp:Button ID="btnAcceptResignation" runat="server"
                                 CssClass="btn-accept" Text="Accept Resignation"
-                                OnClientClick="return validateHRReview();"
+                                OnClientClick="return freezeAcceptButtonIfValid();"
                                 OnClick="btnAcceptResignation_Click" />
                             <asp:Button ID="btnCancel" runat="server"
                                 CssClass="btn-cancel" Text="Cancel"
@@ -317,6 +312,30 @@
                 alert('HR Remarks are mandatory.');
                 return false;
             }
+            return true;
+        }
+
+        // Freeze the Accept/Update button and show "Updating..." for the duration of
+        // the postback, so the user can't double-click while waiting on the backend
+        // response. This is a full (non-AJAX) postback, so the button is disabled via
+        // setTimeout - deferring it to the next tick lets the browser's own form
+        // submission (already triggered by this same click) go through first with the
+        // button's value included, rather than risk the disabled button being dropped
+        // from the submitted form data. If validation fails, the button is left alone
+        // and no postback happens.
+        function freezeAcceptButtonIfValid() {
+            if (!validateHRReview()) {
+                return false;
+            }
+
+            setTimeout(function () {
+                var btn = document.getElementById('<%= btnAcceptResignation.ClientID %>');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.value = 'Updating...';
+                }
+            }, 0);
+
             return true;
         }
 

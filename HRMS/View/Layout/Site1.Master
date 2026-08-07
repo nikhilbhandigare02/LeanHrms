@@ -366,8 +366,8 @@
             })();
         </script>
         <script type="text/javascript">
-            // Shows a full-page loading overlay whenever a Save/Submit/Update control is
-            // activated, covering both classic full postbacks (form submit -> page reload)
+            // Shows a full-page loading overlay whenever a Save/Submit/Update/Accept/Send
+            // control is activated, covering both classic full postbacks (form submit -> page reload)
             // and UpdatePanel-based async postbacks, without requiring any change on the
             // individual pages that use this master. Controls are matched by their visible
             // label text/value (not by ID), since ID naming isn't consistent across pages.
@@ -407,7 +407,7 @@
                     return el.textContent || el.innerText || '';
                 }
 
-                var saveSubmitUpdatePattern = /\b(save|submit|update)\b/i;
+                var saveSubmitUpdatePattern = /\b(save|submit|update|accept|send)\b/i;
 
                 function isSaveSubmitUpdateControl(el) {
                     while (el && el.nodeType === 1) {

@@ -29,6 +29,10 @@ namespace DataObject
 
 
     }
+    public class OnboardingDocumentHtmlDO
+    {
+        public string LetterHtml { get; set; }
+    }
     public class DropDown
     {
         public int lookupid { get; set; }

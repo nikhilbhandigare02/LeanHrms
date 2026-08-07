@@ -890,7 +890,7 @@ namespace ProcessModel
                                 : DBNull.Value);
                         cmd.Parameters.AddWithValue("p_HRRemarks", model.HRRemarks);
                         cmd.Parameters.AddWithValue("p_UpdatedBy", updatedBy);
-                        cmd.Parameters.AddWithValue("p_NoticeStartDate", model.NoticeStartDate);
+                       
 
                         MySqlParameter pHRReviewId = new MySqlParameter("p_HRReviewId", MySqlDbType.Int32);
                         pHRReviewId.Direction = ParameterDirection.Output;
@@ -1028,6 +1028,61 @@ namespace ProcessModel
                     UserId
                 );
             }
+        }
+
+        // Recipients/Subject/Body for the manager-level accept/reject email
+        // (ResignationList.aspx) come from sp_get_resignation_action_mail_details, not
+        // built in C#. Unlike the HR-final-acceptance flow, there's no LetterHtml here -
+        // Rejected never gets a PDF, and Accepted's PDF is still built in C# from the
+        // resignation record the caller already has (GenerateResignationPdf).
+        public ResignationMailDO GetResignationActionMailDetails(int resignationId, string action)
+        {
+            ResignationMailDO mail = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return mail;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_get_resignation_action_mail_details", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_resignation_id", resignationId);
+                    cmd.Parameters.AddWithValue("@p_action", action ?? string.Empty);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            mail = new ResignationMailDO
+                            {
+                                ToEmail = GetStringSafe(dr, "ToEmail"),
+                                CcEmail = GetStringSafe(dr, "CcEmail"),
+                                BccEmail = GetStringSafe(dr, "BccEmail"),
+                                Subject = GetStringSafe(dr, "Subject"),
+                                Body = GetStringSafe(dr, "Body")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetResignationActionMailDetails",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return mail;
         }
 
         public KTHandoverDO GetKTHandoverByResignationId(int resignationId)

@@ -309,7 +309,12 @@ namespace HRMS.View.Modules
                     return false;
                 }
 
-                if (string.IsNullOrWhiteSpace(resignation.EmployeeEmail))
+                string employeeName = resignation.EmployeeName;
+
+                HandoverprocessBL bl = new HandoverprocessBL();
+                ResignationMailDO mailDetails = bl.GetResignationActionMailDetails(resignationId, action);
+
+                if (mailDetails == null || string.IsNullOrWhiteSpace(mailDetails.ToEmail))
                 {
                     CommonBL errorlog = new CommonBL();
                     errorlog.fnStoreErrorLog(
@@ -321,36 +326,6 @@ namespace HRMS.View.Modules
                     return false;
                 }
 
-                string employeeEmail = resignation.EmployeeEmail;
-                string employeeName = resignation.EmployeeName;
-
-                string subject = $"Your Resignation has been {action}";
-
-                string statusColor = action.Equals("Accepted", StringComparison.OrdinalIgnoreCase) ? "#28a745" : "#dc3545";
-
-                string body = $@"
-        <div style='font-family: Arial, sans-serif; line-height:1.6; color:#333;'>
-            <h2 style='color:{statusColor};'>Your Resignation has been {action}</h2>
-            <p>Dear <strong>{employeeName}</strong>,</p>";
-
-                if (action.Equals("Accepted", StringComparison.OrdinalIgnoreCase))
-                {
-                    body += $@"
-            <p>Your resignation has been <strong style='color:{statusColor};'>accepted</strong> by HR.</p>
-            <p>Your last working date is: <strong>{lastWorkingDate?.ToString("dd-MMM-yyyy")}</strong></p>";
-                }
-                else if (action.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
-                {
-                    body += $@"
-            <p>Your resignation has been <strong style='color:{statusColor};'>rejected</strong> by HR.</p>
-            <p>HR Remark: <strong>{remark}</strong></p>";
-                }
-
-                body += @"
-            <hr style='border:none; border-top:1px solid #ccc;'/>
-            <p>Regards,<br/>HR Team</p>
-        </div>";
-
                 string Email = ConfigurationManager.AppSettings["SenderEmail"];
                 string Password = ConfigurationManager.AppSettings["SenderPassword"];
                 int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
@@ -359,38 +334,67 @@ namespace HRMS.View.Modules
                 using (MailMessage mail = new MailMessage())
                 {
                     mail.From = new MailAddress(Email, "HRMS System");
-                    mail.To.Add(employeeEmail);
-                    mail.Subject = subject;
-                    mail.Body = body;
+
+                    foreach (string addr in mailDetails.ToEmail.Split(';'))
+                    {
+                        if (!string.IsNullOrWhiteSpace(addr))
+                            mail.To.Add(addr.Trim());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(mailDetails.CcEmail))
+                    {
+                        foreach (string addr in mailDetails.CcEmail.Split(';'))
+                        {
+                            if (!string.IsNullOrWhiteSpace(addr))
+                                mail.CC.Add(addr.Trim());
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(mailDetails.BccEmail))
+                    {
+                        foreach (string addr in mailDetails.BccEmail.Split(';'))
+                        {
+                            if (!string.IsNullOrWhiteSpace(addr))
+                                mail.Bcc.Add(addr.Trim());
+                        }
+                    }
+
+                    mail.Subject = mailDetails.Subject;
+                    mail.Body = mailDetails.Body;
                     mail.IsBodyHtml = true;
 
-                    byte[] pdfBytes = null;
-                    try
+                    // Only Accepted gets the resignation letter attached - no attachment
+                    // is needed (or generated) for Rejected.
+                    if (action.Equals("Accepted", StringComparison.OrdinalIgnoreCase))
                     {
-                        pdfBytes = GenerateResignationPdf(
-                            resignation,
-                            action,
-                            remark,
-                            employeeName
-                        );
-                    }
-                    catch (Exception pdfEx)
-                    {
-                        CommonBL errorlog = new CommonBL();
-                        errorlog.fnStoreErrorLog(
-                            "ResignationList",
-                            "SendResignationEmail",
-                            "PDF generation failed: " + pdfEx.Message + " | StackTrace=" + pdfEx.StackTrace,
-                            UserId
-                        );
-                    }
+                        byte[] pdfBytes = null;
+                        try
+                        {
+                            pdfBytes = GenerateResignationPdf(
+                                resignation,
+                                action,
+                                remark,
+                                employeeName
+                            );
+                        }
+                        catch (Exception pdfEx)
+                        {
+                            CommonBL errorlog = new CommonBL();
+                            errorlog.fnStoreErrorLog(
+                                "ResignationList",
+                                "SendResignationEmail",
+                                "PDF generation failed: " + pdfEx.Message + " | StackTrace=" + pdfEx.StackTrace,
+                                UserId
+                            );
+                        }
 
-                    if (pdfBytes != null && pdfBytes.Length > 0)
-                    {
-                        string fileName = "Resignation_" + resignation.EmployeeResignationId + ".pdf";
-                        var stream = new MemoryStream(pdfBytes);
-                        var attachment = new Attachment(stream, fileName, MediaTypeNames.Application.Pdf);
-                        mail.Attachments.Add(attachment);
+                        if (pdfBytes != null && pdfBytes.Length > 0)
+                        {
+                            string fileName = "Resignation_" + resignation.EmployeeResignationId + ".pdf";
+                            var stream = new MemoryStream(pdfBytes);
+                            var attachment = new Attachment(stream, fileName, MediaTypeNames.Application.Pdf);
+                            mail.Attachments.Add(attachment);
+                        }
                     }
 
                     using (SmtpClient smtp = new SmtpClient(Host, Port))

@@ -225,6 +225,41 @@ namespace ProcessModel
             return dropDownData;
         }
 
+        // Renders the onboarding letter (Offer/Appointment/Confirmation) for the given
+        // employee + category as HTML, entirely from sp_get_onboarding_document_html -
+        // SendDocuments.aspx converts this to a PDF and attaches it, no manual file
+        // upload or C#-side letter wording involved.
+        public string GetOnboardingDocumentHtml(int userId, string documentCategory, string designation, DateTime? effectiveDate, string additionalDetails, string candidateName = null)
+        {
+            string letterHtml = null;
+            try
+            {
+                List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
+                mysqlParameters.Add(DataClass.GetParameter("@p_user_id", userId));
+                mysqlParameters.Add(DataClass.GetParameter("@p_document_category", documentCategory ?? string.Empty));
+                mysqlParameters.Add(DataClass.GetParameter("@p_designation", designation ?? string.Empty));
+                mysqlParameters.Add(DataClass.GetParameter("@p_effective_date", effectiveDate.HasValue ? (object)effectiveDate.Value : DBNull.Value));
+                mysqlParameters.Add(DataClass.GetParameter("@p_additional_details", additionalDetails ?? string.Empty));
+                mysqlParameters.Add(DataClass.GetParameter("@p_candidate_name", candidateName ?? string.Empty));
+
+                getDrtolist getDrtolistParam = new getDrtolist();
+                List<OnboardingDocumentHtmlDO> result = getDrtolistParam.getdatafromreder<OnboardingDocumentHtmlDO>(
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_get_onboarding_document_html")
+                );
+
+                if (result != null && result.Count > 0)
+                {
+                    letterHtml = result[0].LetterHtml;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("CommonBL", "GetOnboardingDocumentHtml", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+            return letterHtml;
+        }
+
         public void insertlog(string v1, string message, string v2, string v3, string v4)
         {
             try
@@ -916,7 +951,7 @@ namespace ProcessModel
               mail.From = new MailAddress(Email, "HRMS");
 
               // TO
-              foreach (string email in toMail.Split(';'))
+              foreach (string email in toMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
               {
                   if (!string.IsNullOrWhiteSpace(email))
                       mail.To.Add(email.Trim());
@@ -925,7 +960,7 @@ namespace ProcessModel
               // CC
               if (!string.IsNullOrWhiteSpace(ccMail))
               {
-                  foreach (string email in ccMail.Split(';'))
+                  foreach (string email in ccMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
                   {
                       if (!string.IsNullOrWhiteSpace(email))
                           mail.CC.Add(email.Trim());
@@ -966,7 +1001,7 @@ namespace ProcessModel
               mail.From = new MailAddress(Email, "HRMS");
 
               // TO
-              foreach (string email in toMail.Split(';'))
+              foreach (string email in toMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
               {
                   if (!string.IsNullOrWhiteSpace(email))
                       mail.To.Add(email.Trim());
@@ -975,7 +1010,7 @@ namespace ProcessModel
               // CC
               if (!string.IsNullOrWhiteSpace(ccMail))
               {
-                  foreach (string email in ccMail.Split(';'))
+                  foreach (string email in ccMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
                   {
                       if (!string.IsNullOrWhiteSpace(email))
                           mail.CC.Add(email.Trim());
@@ -985,7 +1020,7 @@ namespace ProcessModel
               // BCC
               if (!string.IsNullOrWhiteSpace(bccMail))
               {
-                  foreach (string email in bccMail.Split(';'))
+                  foreach (string email in bccMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
                   {
                       if (!string.IsNullOrWhiteSpace(email))
                           mail.Bcc.Add(email.Trim());
@@ -1026,7 +1061,7 @@ namespace ProcessModel
               mail.From = new MailAddress(Email, "HRMS");
 
               // TO
-              foreach (string email in toMail.Split(';'))
+              foreach (string email in toMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
               {
                   if (!string.IsNullOrWhiteSpace(email))
                       mail.To.Add(email.Trim());
@@ -1035,7 +1070,7 @@ namespace ProcessModel
               // CC
               if (!string.IsNullOrWhiteSpace(ccMail))
               {
-                  foreach (string email in ccMail.Split(';'))
+                  foreach (string email in ccMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
                   {
                       if (!string.IsNullOrWhiteSpace(email))
                           mail.CC.Add(email.Trim());
@@ -1045,7 +1080,7 @@ namespace ProcessModel
               // BCC
               if (!string.IsNullOrWhiteSpace(bccMail))
               {
-                  foreach (string email in bccMail.Split(';'))
+                  foreach (string email in bccMail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
                   {
                       if (!string.IsNullOrWhiteSpace(email))
                           mail.Bcc.Add(email.Trim());

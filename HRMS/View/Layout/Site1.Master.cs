@@ -23,6 +23,7 @@ namespace Lean.View.Layout
             if (name.Equals("Document", StringComparison.OrdinalIgnoreCase)) return 4;
             if (name.Equals("Employee Leave List", StringComparison.OrdinalIgnoreCase)) return 5;
             if (name.Equals("Attendance Details", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (name.Equals("Send Documents", StringComparison.OrdinalIgnoreCase)) return 7;
             return 999;
         }
         private static int GetMainMenuOrder(string menuName)
@@ -141,6 +142,7 @@ namespace Lean.View.Layout
             //upsertSubMenu("Document", "/View/Modules/useruploaddocuments.aspx");
             upsertSubMenu("Employee Leave List", "/View/Modules/EmployeeLeaveList.aspx");
             upsertSubMenu("Attendance Details", "/View/Modules/AttendanceDetails.aspx");
+            upsertSubMenu("Send Documents", "/View/Modules/SendDocuments.aspx");
         }
 
         private static void EnsureResignationNoticeSubMenu(List<MenuData> menuDataList)
@@ -208,7 +210,8 @@ namespace Lean.View.Layout
                         string.Equals(lastSegment, "AccountsDashboard.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "ImageLibrary.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AppraisalHistory.aspx", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(lastSegment, "AttendanceDetails.aspx", StringComparison.OrdinalIgnoreCase);
+                        string.Equals(lastSegment, "AttendanceDetails.aspx", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(lastSegment, "SendDocuments.aspx", StringComparison.OrdinalIgnoreCase);
 
                     //bool isAddProjectViewMode = url.Contains("Addproject") && url.Contains("mode=view");
                     int roleId = Convert.ToInt32(Session["roleid"]);

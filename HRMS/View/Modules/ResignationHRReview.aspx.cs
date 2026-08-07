@@ -264,7 +264,7 @@ namespace HRMS.View.Modules
                     }
 
                     string safeMsg = System.Web.HttpUtility.JavaScriptStringEncode(
-                        result.ResponseMsg ?? "HR Review saved successfully.");
+                        result.ResponseMsg ?? "HR Review saved successfully.And mail sent to Employee");
                     ScriptManager.RegisterStartupScript(this, GetType(), "hrReviewSaved",
                         $"showHRReviewResult('Success', '{safeMsg}', 'ResignationList.aspx');", true);
                 }
@@ -291,64 +291,18 @@ namespace HRMS.View.Modules
             Response.Redirect("~/View/Modules/ResignationList.aspx", false);
         }
 
-        // The letter wording (with dynamic data already filled in) comes entirely from
-        // sp_get_resignation_accepted_mail_details's LetterHtml column - neither this
-        // method nor the fallback below hardcodes any of the letter's text, only the
-        // surrounding company letterhead (logo/contact-info header) design.
-        // HtmlConverter (iText pdfHTML) is the primary renderer; if that throws for any
-        // reason, GenerateAcceptanceLetterPdfFallback reproduces the same layout via
-        // iText's Document/Layout API, parsing the same LetterHtml fragment directly.
+        // sp_get_resignation_accepted_mail_details.LetterHtml is the COMPLETE letter
+        // document - letterhead (logo/contact-info header) and all, with dynamic data
+        // already filled in and the logo embedded as a base64 data URI (pulled from
+        // app_image_library, same as sp_get_employee_payslip.sql does). This method
+        // builds no markup of its own - it's just a pass-through to the PDF renderer.
         private byte[] GenerateAcceptanceLetterPdf(string letterHtml)
         {
             try
             {
-                string logoHtml = string.Empty;
-                string logoPath = Server.MapPath("~/assets/images/alphonsol_logo.png");
-                if (File.Exists(logoPath))
-                {
-                    string base64 = Convert.ToBase64String(File.ReadAllBytes(logoPath));
-                    logoHtml = "<img src='data:image/png;base64," + base64 + "' style='width:240px;display:block;' />";
-                }
-
-                string html = @"
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset='utf-8' />
-<style>
-body{font-family:Calibri,Arial,sans-serif;font-size:13px;color:#111;line-height:1.45;margin:0;padding:0;}
-.page{padding:24px 28px;}
-.header{width:100%;border-collapse:collapse;}
-.left{width:42%;vertical-align:bottom;}
-.right{width:58%;text-align:right;vertical-align:top;font-size:13px;font-weight:600;color:#4a4a4a;}
-.cin{margin-top:6px;font-size:12px;color:#444;}
-.sep{height:2px;background:#f28c28;border:0;margin:12px 0 20px 0;}
-p{margin:0 0 10px 0;}
-ul{margin:4px 0 14px 18px;padding:0;}
-</style>
-</head>
-<body>
-<div class='page'>
-  <table class='header'>
-    <tr>
-      <td class='left'>" + logoHtml + @"<div class='cin'>CIN No - U72200MH2022PTC381560</div></td>
-      <td class='right'>
-        High-street Corporate Center, FB-03, Kapurbawdi Junction, Thane(W)-400601<br/>
-        Contact No - 9920393999<br/>
-        Email Address - support@alphonsol.com<br/>
-        Website - www.alphonsol.com
-      </td>
-    </tr>
-  </table>
-  <hr class='sep' />
-  " + (letterHtml ?? string.Empty) + @"
-</div>
-</body>
-</html>";
-
                 using (var ms = new MemoryStream())
                 {
-                    HtmlConverter.ConvertToPdf(html, ms);
+                    HtmlConverter.ConvertToPdf(letterHtml ?? string.Empty, ms);
                     return ms.ToArray();
                 }
             }

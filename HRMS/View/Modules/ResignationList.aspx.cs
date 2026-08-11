@@ -1035,6 +1035,11 @@ ul{margin:4px 0 14px 18px;padding:0;}
                     var selected = resignations.FirstOrDefault(x => x.EmployeeResignationId == resignationId);
                     bool isManagerAuthority = selected != null &&
                         string.Equals(Convert.ToString(selected.authority_status), "Manager Authority", StringComparison.OrdinalIgnoreCase);
+                    // "Rejected by Reporting Manager" / "Accepted by Reporting Manager" are
+                    // NOT final states - they mean the Reporting Manager has decided and it's
+                    // now HR's turn to Approve/Reject, so they must NOT be treated as already
+                    // actioned (that would make CanApproveOrReject's enabled button unusable).
+                    // Only HR's own final Accepted/Rejected counts as already completed.
                     bool alreadyActionTaken = selected != null &&
                         (string.Equals(Convert.ToString(selected.hr_status), "Accepted", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(Convert.ToString(selected.hr_status), "Rejected", StringComparison.OrdinalIgnoreCase)
@@ -1092,6 +1097,36 @@ ul{margin:4px 0 14px 18px;padding:0;}
                 int.TryParse(Convert.ToString(statusFlagObj), out flag);
             }
             return flag == 1;
+        }
+
+        // Approve/Reject are only meaningful once the Reporting Manager has made their
+        // own decision and it's HR's turn - i.e. status is exactly "Rejected by
+        // Reporting Manager" or "Accepted by Reporting Manager". Any other status
+        // (Pending, or HR's own final Accepted/Rejected) keeps both buttons disabled.
+        protected bool CanApproveOrReject(object statusFlagObj, object hrStatusObj)
+        {
+            if (!CanHrTakeAction(statusFlagObj))
+            {
+                return false;
+            }
+
+            string status = Convert.ToString(hrStatusObj).Trim();
+            return string.Equals(status, "Rejected by Reporting Manager", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, "Accepted by Reporting Manager", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Edit is the inverse of Approve/Reject (never enabled at the same time as
+        // them), and additionally only ever enabled once authority_status has moved to
+        // "Approved By HR".
+        protected bool CanEditReview(object statusFlagObj, object hrStatusObj, object authorityStatusObj)
+        {
+            if (CanApproveOrReject(statusFlagObj, hrStatusObj))
+            {
+                return false;
+            }
+
+            string authorityStatus = Convert.ToString(authorityStatusObj).Trim();
+            return string.Equals(authorityStatus, "Approved By HR", StringComparison.OrdinalIgnoreCase);
         }
 
         protected string GetAuthorityStatusText(object statusFlagObj)

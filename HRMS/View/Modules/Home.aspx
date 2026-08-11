@@ -569,6 +569,104 @@
             font-size: 16px;
             z-index: 1;
         }
+
+        /* View Details - ONE common read-only details layout shared by every Type
+           (Event, Holiday, Meeting, Training, Celebration). Reuses the modal
+           overlay/header/footer chrome for visual consistency with the rest of the
+           app, but the body is a plain label/value detail card, never the Add form. */
+        .hv-detail-body {
+            padding: 20px 22px 6px;
+        }
+
+        .hv-detail-card {
+            border: 1px solid #eef1f6;
+            border-radius: 12px;
+            padding: 24px 20px;
+            background: linear-gradient(180deg, #fbfcff 0%, #ffffff 100%);
+            text-align: center;
+        }
+
+        .hv-detail-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #10213F;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .hv-detail-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 12px;
+            background: #EFF6FF;
+            color: #2563EB;
+            border: 1px solid #DBEAFE;
+            margin-bottom: 18px;
+        }
+
+        .hv-detail-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hv-detail-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding-top: 14px;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .hv-detail-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .hv-detail-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #10213F;
+        }
+
+        .hv-desc-block {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #f0f2f5;
+            text-align: left;
+        }
+
+        .hv-desc-text {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #334155;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .hv-detail-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid #eef1f6;
+            display: block;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 480px) {
+            .hv-detail-card {
+                padding: 18px 14px;
+            }
+        }
     </style>
 
     <div class="hb-wrap">
@@ -1945,14 +2043,6 @@
 
                         </div>
 
-                        <asp:Button
-                            ID="btnDownloadEvent"
-                            runat="server"
-                            Text="Download Attachment"
-                            CssClass="hb-btn hb-btn-primary"
-                            Visible="false"
-                            OnClick="btnDownloadEvent_Click" />
-
                     </div>
                 </div>
 
@@ -1972,6 +2062,68 @@
                         OnClick="saveEvent"
                         OnClientClick="return validateEvent();" />
 
+                </div>
+
+            </div>
+        </div>
+
+        <!-- View Details - ONE common read-only details layout shared by every Type
+             (Event, Holiday, Meeting, Training, Celebration). Deliberately does NOT
+             reuse the Add/Edit Event form fields (eventTitle/eventType/eventDate/etc.)
+             above; this is always a plain label/value details card instead. -->
+        <div class="hb-modal-overlay" id="modalViewDetails" onclick="overlayClose(event, 'modalViewDetails')">
+            <div class="hb-modal">
+
+                <div class="hb-modal-header">
+                    <div class="hb-icon events" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ea44f" stroke-width="2">
+                            <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                        </svg>
+                    </div>
+
+                    <div class="hb-modal-title">View Details</div>
+
+                    <button type="button" class="hb-modal-close" onclick="closeModal('modalViewDetails')">
+                        &#x2715;
+                    </button>
+                </div>
+
+                <div class="hv-detail-body">
+                    <div class="hv-detail-card">
+                        <div class="hv-detail-badge">
+                            <asp:Label ID="lblViewDetailsType" runat="server" />
+                        </div>
+                        <div class="hv-detail-title">
+                            <asp:Label ID="lblViewDetailsTitle" runat="server" />
+                        </div>
+
+                        <div class="hv-detail-grid">
+                            <div class="hv-detail-row">
+                                <span class="hv-detail-label">Date</span>
+                                <span class="hv-detail-value"><asp:Label ID="lblViewDetailsDate" runat="server" /></span>
+                            </div>
+                            <asp:Panel ID="pnlViewDetailsTime" runat="server" CssClass="hv-detail-row" Visible="false">
+                                <span class="hv-detail-label">Time</span>
+                                <span class="hv-detail-value"><asp:Label ID="lblViewDetailsTime" runat="server" /></span>
+                            </asp:Panel>
+                        </div>
+
+                        <asp:Panel ID="pnlViewDetailsDesc" runat="server" CssClass="hv-desc-block" Visible="false">
+                            <div class="hv-detail-label" style="margin-bottom: 6px;">Description</div>
+                            <div class="hv-desc-text"><asp:Label ID="lblViewDetailsDesc" runat="server" /></div>
+                        </asp:Panel>
+
+                        <asp:Panel ID="pnlViewDetailsImage" runat="server" CssClass="hv-desc-block" Visible="false">
+                            <asp:Image ID="imgViewDetailsAttachment" runat="server" CssClass="hv-detail-image" />
+                        </asp:Panel>
+
+                        <asp:Button ID="btnDownloadEvent" runat="server" Text="Download Attachment"
+                            CssClass="hb-btn hb-btn-primary mt-3" Visible="false" OnClick="btnDownloadEvent_Click" />
+                    </div>
+                </div>
+
+                <div class="hb-modal-footer">
+                    <button type="button" class="hb-btn hb-btn-ghost" onclick="closeModal('modalViewDetails')">Back</button>
                 </div>
 
             </div>
@@ -2297,7 +2449,7 @@
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                ['modalNews', 'modalBirthday', 'modalEvent'].forEach(closeModal);
+                ['modalNews', 'modalBirthday', 'modalEvent', 'modalViewDetails'].forEach(closeModal);
             }
         });
 

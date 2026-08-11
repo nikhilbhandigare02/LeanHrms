@@ -410,12 +410,8 @@
                                                 CommandName="Accept"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") %>'
                                                 ToolTip="Accept"
-                                                Enabled='<%# !Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject") %>'
-                                                CssClass='<%# (!Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-success btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                Enabled='<%# CanApproveOrReject(Eval("status_updated_flag"), Eval("hr_status")) %>'
+                                                CssClass='<%# CanApproveOrReject(Eval("status_updated_flag"), Eval("hr_status")) ? "btn btn-success btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
                                                 <i class="fas fa-check"></i>
                                             </asp:LinkButton>
 
@@ -423,12 +419,8 @@
                                                 CommandName="Reject"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") %>'
                                                 ToolTip="Reject"
-                                                Enabled='<%# !Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject") %>'
-                                                CssClass='<%# (!Convert.ToString(Eval("authority_status")).Trim().ToLower().Contains("manager")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept")
-                                                    && !Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("reject")) ? "btn btn-danger btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                Enabled='<%# CanApproveOrReject(Eval("status_updated_flag"), Eval("hr_status")) %>'
+                                                CssClass='<%# CanApproveOrReject(Eval("status_updated_flag"), Eval("hr_status")) ? "btn btn-danger btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
                                                 <i class="fas fa-times"></i>
                                             </asp:LinkButton>
 
@@ -436,8 +428,8 @@
                                                 CommandName="UpdateReview"
                                                 CommandArgument='<%# Eval("EmployeeResignationId") %>'
                                                 ToolTip="Update"
-                                                Enabled='<%# Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept") %>'
-                                                CssClass='<%# Convert.ToString(Eval("hr_status")).Trim().ToLower().Contains("accept") ? "btn btn-primary btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
+                                                Enabled='<%# CanEditReview(Eval("status_updated_flag"), Eval("hr_status"), Eval("authority_status")) %>'
+                                                CssClass='<%# CanEditReview(Eval("status_updated_flag"), Eval("hr_status"), Eval("authority_status")) ? "btn btn-primary btn-sm action-btn icon-only" : "btn btn-secondary btn-sm action-btn icon-only disabled" %>'>
                                                 <i class="fas fa-pen"></i>
                                             </asp:LinkButton>
                                             </div>

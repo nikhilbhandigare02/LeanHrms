@@ -109,7 +109,11 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="page-title">HR Review &amp; Acceptance</span>
-                            <asp:Label ID="lblReviewStatus" runat="server" CssClass="badge bg-warning text-dark" Text="HR review pending" />
+                            <div class="d-flex align-items-center gap-2">
+                                <asp:Label ID="lblReviewStatus" runat="server" CssClass="badge bg-warning text-dark" Text="HR review pending" />
+                                <asp:Button ID="btnBack" runat="server" CssClass="btn btn-secondary" Text="Back"
+                                    CausesValidation="false" OnClick="btnBack_Click" />
+                            </div>
                         </div>
 
                         <!-- Employee Information (Read Only) -->
@@ -165,6 +169,9 @@
                                     <asp:ListItem Text="Yes" Value="Yes" />
                                     <asp:ListItem Text="No" Value="No" />
                                 </asp:DropDownList>
+                                <asp:RequiredFieldValidator ID="rfvNoticePeriodRequired" runat="server" ControlToValidate="ddlNoticePeriodRequired"
+                                    InitialValue="" ErrorMessage="Please select Notice Period Required" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="HRReviewGroup" />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="field-label">Notice Days</label>
@@ -178,12 +185,18 @@
                                 <label class="field-label">Notice Start Date <span class="text-danger">*</span></label>
                                 <asp:TextBox ID="txtNoticeStartDate" runat="server" CssClass="form-control" TextMode="Date"
                                     onchange="recalculateRevisedLastWorkingDate();" />
+                                <asp:RequiredFieldValidator ID="rfvNoticeStartDate" runat="server" ControlToValidate="txtNoticeStartDate"
+                                    ErrorMessage="Please select Notice Start Date" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="HRReviewGroup" />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="field-label">Revised Last Working Date</label>
                                 <asp:TextBox ID="txtRevisedLastWorkingDate" runat="server"
                                     CssClass="form-control" autocomplete="off" ReadOnly="true"
                                     placeholder="Auto-calculated from Resignation Date + Notice Days" />
+                                <asp:RequiredFieldValidator ID="rfvRevisedLastWorkingDate" runat="server" ControlToValidate="txtRevisedLastWorkingDate"
+                                    ErrorMessage="Please select Revised Last Working Date" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="HRReviewGroup" />
                             </div>
                         </div>
 
@@ -195,6 +208,9 @@
                                     <asp:ListItem Text="Yes" Value="Yes" />
                                     <asp:ListItem Text="No" Value="No" />
                                 </asp:DropDownList>
+                                <asp:RequiredFieldValidator ID="rfvBuyoutApplicable" runat="server" ControlToValidate="ddlBuyoutApplicable"
+                                    InitialValue="" ErrorMessage="Please select Buyout Applicable" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="HRReviewGroup" />
                             </div>
 
                             <div class="col-md-12 mb-3">
@@ -202,6 +218,9 @@
                                 <asp:TextBox ID="txtHRRemarks" runat="server"
                                     CssClass="form-control" TextMode="MultiLine" Rows="3"
                                     placeholder="Required" />
+                                <asp:RequiredFieldValidator ID="rfvHRRemarks" runat="server" ControlToValidate="txtHRRemarks"
+                                    ErrorMessage="HR Remarks are mandatory" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="HRReviewGroup" />
                             </div>
                         </div>
 
@@ -212,6 +231,7 @@
                         <div class="d-flex gap-2">
                             <asp:Button ID="btnAcceptResignation" runat="server"
                                 CssClass="btn-accept" Text="Accept Resignation"
+                                ValidationGroup="HRReviewGroup"
                                 OnClientClick="return freezeAcceptButtonIfValid();"
                                 OnClick="btnAcceptResignation_Click" />
                             <asp:Button ID="btnCancel" runat="server"
@@ -285,46 +305,17 @@
             revisedField.value = dd + '-' + mm + '-' + yyyy;
         }
 
-        function validateHRReview() {
-            var noticePeriod = document.getElementById('<%= ddlNoticePeriodRequired.ClientID %>').value;
-            var noticeStartDate = document.getElementById('<%= txtNoticeStartDate.ClientID %>').value.trim();
-            var buyout = document.getElementById('<%= ddlBuyoutApplicable.ClientID %>').value;
-            var revisedDate = document.getElementById('<%= txtRevisedLastWorkingDate.ClientID %>').value.trim();
-            var remarks = document.getElementById('<%= txtHRRemarks.ClientID %>').value.trim();
-
-            if (!noticePeriod) {
-                alert('Please select Notice Period Required.');
-                return false;
-            }
-            if (!noticeStartDate) {
-                alert('Please select Notice Start Date.');
-                return false;
-            }
-            if (!buyout) {
-                alert('Please select Buyout Applicable.');
-                return false;
-            }
-            if (!revisedDate) {
-                alert('Please select Revised Last Working Date.');
-                return false;
-            }
-            if (!remarks) {
-                alert('HR Remarks are mandatory.');
-                return false;
-            }
-            return true;
-        }
-
         // Freeze the Accept/Update button and show "Updating..." for the duration of
         // the postback, so the user can't double-click while waiting on the backend
         // response. This is a full (non-AJAX) postback, so the button is disabled via
         // setTimeout - deferring it to the next tick lets the browser's own form
         // submission (already triggered by this same click) go through first with the
         // button's value included, rather than risk the disabled button being dropped
-        // from the submitted form data. If validation fails, the button is left alone
-        // and no postback happens.
+        // from the submitted form data. Field validation is handled by the
+        // RequiredFieldValidators (ValidationGroup "HRReviewGroup") - Page_ClientValidate
+        // is called explicitly here so the button is only frozen when they all pass.
         function freezeAcceptButtonIfValid() {
-            if (!validateHRReview()) {
+            if (typeof (Page_ClientValidate) === 'function' && !Page_ClientValidate('HRReviewGroup')) {
                 return false;
             }
 

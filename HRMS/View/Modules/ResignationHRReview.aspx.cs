@@ -145,13 +145,21 @@ namespace HRMS.View.Modules
 
         protected void btnAcceptResignation_Click(object sender, EventArgs e)
         {
+            // rfvNoticePeriodRequired/rfvNoticeStartDate/rfvBuyoutApplicable/
+            // rfvRevisedLastWorkingDate/rfvHRRemarks (ValidationGroup "HRReviewGroup")
+            // already show the inline below-field messages and block this postback
+            // client-side; Page.IsValid is the server-side safety net.
+            if (!Page.IsValid)
+            {
+                return;
+            }
+
             int resignationId;
             int.TryParse(hfResignationId.Value, out resignationId);
 
             string noticePeriodRequired = ddlNoticePeriodRequired.SelectedValue;
             string buyoutApplicable = ddlBuyoutApplicable.SelectedValue;
             string hrRemarks = txtHRRemarks.Text.Trim();
-           
 
             if (resignationId <= 0)
             {
@@ -160,39 +168,11 @@ namespace HRMS.View.Modules
                 return;
             }
 
-            if (string.IsNullOrEmpty(noticePeriodRequired))
-            {
-                ScriptManager.RegisterStartupScript(this, GetType(), "reqNotice",
-                    "alert('Please select Notice Period Required.');", true);
-                return;
-            }
-
             DateTime noticeStartDate;
             if (!DateTime.TryParse(txtNoticeStartDate.Text.Trim(), out noticeStartDate))
             {
                 ScriptManager.RegisterStartupScript(this, GetType(), "reqNoticeStartDate",
                     "alert('Please select Notice Start Date.');", true);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(buyoutApplicable))
-            {
-                ScriptManager.RegisterStartupScript(this, GetType(), "reqBuyout",
-                    "alert('Please select Buyout Applicable.');", true);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(txtRevisedLastWorkingDate.Text.Trim()))
-            {
-                ScriptManager.RegisterStartupScript(this, GetType(), "reqLwd",
-                    "alert('Please select Revised Last Working Date.');", true);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(hrRemarks))
-            {
-                ScriptManager.RegisterStartupScript(this, GetType(), "reqRemarks",
-                    "alert('HR Remarks are mandatory.');", true);
                 return;
             }
 
@@ -287,6 +267,11 @@ namespace HRMS.View.Modules
         }
 
         protected void btnCancel_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/View/Modules/ResignationList.aspx", false);
+        }
+
+        protected void btnBack_Click(object sender, EventArgs e)
         {
             Response.Redirect("~/View/Modules/ResignationList.aspx", false);
         }

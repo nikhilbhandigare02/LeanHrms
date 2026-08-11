@@ -759,8 +759,10 @@ namespace HRMS.View.Modules
         {
             if (e.CommandName == "ViewEvents")
             {
-                litEventModalTitle.Text = "View Event";
-
+                // View always uses the single, common read-only modalViewDetails layout
+                // - the same structure for every Type (Event/Holiday/Meeting/Training/
+                // Celebration). It never reuses the Add/Edit Event form fields
+                // (eventTitle/eventType/eventDate/etc.) above.
                 string[] args = e.CommandArgument.ToString().Split('|');
 
                 string recordType = args[0];
@@ -774,70 +776,85 @@ namespace HRMS.View.Modules
                     {
                         CompanyEventDO ev = eventList[0];
 
-                        eventTitle.Text = ev.event_title;
-                        eventType.SelectedValue = ev.event_type;
-                        eventDate.Text = Convert.ToDateTime(ev.event_date).ToString("yyyy-MM-dd");
-                        eventTime.Text = ev.eventtime;
-                        eventDesc.Text = ev.event_description;
+                        lblViewDetailsType.Text = ev.event_type;
+                        lblViewDetailsTitle.Text = ev.event_title;
+                        lblViewDetailsDate.Text = Convert.ToDateTime(ev.event_date).ToString("dd MMMM yyyy (dddd)");
 
-                        eventTitle.ReadOnly = true;
-                        eventType.Enabled = false;
-                        eventDate.ReadOnly = true;
-                        eventTime.ReadOnly = true;
-                        eventDesc.ReadOnly = true;
+                        if (!string.IsNullOrWhiteSpace(ev.eventtime))
+                        {
+                            lblViewDetailsTime.Text = ev.eventtime;
+                            pnlViewDetailsTime.Visible = true;
+                        }
+                        else
+                        {
+                            pnlViewDetailsTime.Visible = false;
+                        }
 
-                        btnSaveEvent.Visible = false;
-                        fueventAttachment.Visible = false;
+                        if (!string.IsNullOrWhiteSpace(ev.event_description))
+                        {
+                            lblViewDetailsDesc.Text = ev.event_description;
+                            pnlViewDetailsDesc.Visible = true;
+                        }
+                        else
+                        {
+                            pnlViewDetailsDesc.Visible = false;
+                        }
 
                         if (!string.IsNullOrEmpty(ev.file_base64))
                         {
                             btnDownloadEvent.Visible = true;
                             btnDownloadEvent.CommandArgument = ev.event_mast_id.ToString();
+
+                            // Show an inline preview for image attachments (the Download
+                            // button alone never rendered the actual picture).
+                            if (!string.IsNullOrWhiteSpace(ev.file_type) &&
+                                ev.file_type.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                imgViewDetailsAttachment.ImageUrl = "data:" + ev.file_type + ";base64," + ev.file_base64;
+                                pnlViewDetailsImage.Visible = true;
+                            }
+                            else
+                            {
+                                pnlViewDetailsImage.Visible = false;
+                            }
                         }
                         else
                         {
                             btnDownloadEvent.Visible = false;
+                            pnlViewDetailsImage.Visible = false;
                         }
 
                         ScriptManager.RegisterStartupScript(
                             this,
                             GetType(),
-                            "OpenEvent",
-                            "openModal('modalEvent');",
+                            "OpenViewDetails",
+                            "openModal('modalViewDetails');",
                             true);
                     }
                 }
                 else if (recordType == "Holiday")
                 {
-                    litEventModalTitle.Text = "View Holiday";
-
                     List<HolidayDO> holidayList = objBL.GetHolidayById(id);
 
                     if (holidayList != null && holidayList.Count > 0)
                     {
                         HolidayDO h = holidayList[0];
 
-                        eventTitle.Text = h.holiday_name;
-                        eventType.SelectedValue = "Holiday";
-                        eventDate.Text = Convert.ToDateTime(h.holiday_date).ToString("yyyy-MM-dd");
-                        eventTime.Text = "";
-                        eventDesc.Text = h.holiday_day;
+                        lblViewDetailsType.Text = "Holiday";
+                        lblViewDetailsTitle.Text = h.holiday_name;
+                        lblViewDetailsDate.Text = Convert.ToDateTime(h.holiday_date).ToString("dd MMMM yyyy (dddd)");
 
-                        eventTitle.ReadOnly = true;
-                        eventType.Enabled = false;
-                        eventDate.ReadOnly = true;
-                        eventTime.ReadOnly = true;
-                        eventDesc.ReadOnly = true;
-
-                        btnSaveEvent.Visible = false;
-                        fueventAttachment.Visible = false;
+                        // Holidays have no time, description, or attachment.
+                        pnlViewDetailsTime.Visible = false;
+                        pnlViewDetailsDesc.Visible = false;
+                        pnlViewDetailsImage.Visible = false;
                         btnDownloadEvent.Visible = false;
 
                         ScriptManager.RegisterStartupScript(
                             this,
                             GetType(),
-                            "OpenEvent",
-                            "openModal('modalEvent');",
+                            "OpenViewDetails",
+                            "openModal('modalViewDetails');",
                             true);
                     }
                 }

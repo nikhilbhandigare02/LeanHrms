@@ -95,6 +95,43 @@ namespace Lean.View.Modules
             }
         }
 
+        protected void cvInterviewTime_ServerValidate(object source, ServerValidateEventArgs args)
+        {
+            // Same exemption as cvInterviewDate_ServerValidate - only enforce
+            // "must not be in the past" when scheduling a NEW interview. An existing
+            // record being updated may legitimately already be in the past.
+            bool isExistingRecord = !string.IsNullOrEmpty(hdnExitInterviewId.Value) && hdnExitInterviewId.Value != "0";
+            if (isExistingRecord)
+            {
+                args.IsValid = true;
+                return;
+            }
+
+            DateTime selectedDate;
+            if (!DateTime.TryParse(txtInterviewDate.Text, out selectedDate))
+            {
+                // Interview date itself is missing/invalid - rfvInterviewDate/
+                // cvInterviewDate already report that; don't also fail here.
+                args.IsValid = true;
+                return;
+            }
+
+            TimeSpan selectedTime;
+            if (!TimeSpan.TryParse(args.Value, out selectedTime))
+            {
+                args.IsValid = false;
+                return;
+            }
+
+            // The time input only has minute precision, so truncate the current time's
+            // seconds too before comparing - otherwise selecting exactly the current
+            // minute (which should be allowed) could fail a few seconds later once
+            // DateTime.Now's seconds have ticked past zero.
+            DateTime selectedDateTime = selectedDate.Date + selectedTime;
+            DateTime nowTruncatedToMinute = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0);
+            args.IsValid = selectedDateTime >= nowTruncatedToMinute;
+        }
+
         protected void cvLocation_ServerValidate(object source, ServerValidateEventArgs args)
         {
             string selectedModeText = ddlInterviewMode.SelectedItem != null ? ddlInterviewMode.SelectedItem.Text : string.Empty;

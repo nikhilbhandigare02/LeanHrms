@@ -52,6 +52,11 @@ namespace HRMS.View.Modules
             }
         }
 
+        protected void btnBack_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/View/Modules/NoticePeriodList.aspx", false);
+        }
+
         private void ShowEmptyState()
         {
             lblNoticeStatus.Text = "No active notice period";

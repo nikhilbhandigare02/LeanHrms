@@ -1766,6 +1766,7 @@
     <Content Include="View\Modules\LeaveConfiguration.aspx" />
     <Content Include="View\Modules\NoticePeriodList.aspx" />
     <Content Include="View\Modules\NoticePeriodManagement.aspx" />
+    <Content Include="View\Modules\KnowledgeTransferList.aspx" />
     <Content Include="View\Modules\ImageLibrary.aspx" />
     <Content Include="View\Modules\Remunerationdetails.aspx" />
     <Content Include="View\Modules\Remunerationform.aspx" />
@@ -1774,6 +1775,7 @@
     <Content Include="View\Modules\SalarySlip.aspx" />
     <Content Include="View\Modules\SalaryCalculation.aspx" />
     <Content Include="View\Modules\SalaryCalculationDetails.aspx" />
+    <Content Include="View\Modules\SendDocuments.aspx" />
     <Content Include="View\Modules\TerminationList.aspx" />
     <Content Include="View\Modules\updateprobationperiodflag.aspx" />
     <Content Include="View\Modules\UploadExcelforsalary.aspx" />
@@ -2082,6 +2084,13 @@
     <Compile Include="View\Modules\NoticePeriodManagement.aspx.designer.cs">
       <DependentUpon>NoticePeriodManagement.aspx</DependentUpon>
     </Compile>
+    <Compile Include="View\Modules\KnowledgeTransferList.aspx.cs">
+      <DependentUpon>KnowledgeTransferList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\KnowledgeTransferList.aspx.designer.cs">
+      <DependentUpon>KnowledgeTransferList.aspx</DependentUpon>
+    </Compile>
     <Compile Include="View\Modules\ResignationHRReview.aspx.cs">
       <DependentUpon>ResignationHRReview.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -2116,6 +2125,13 @@
     </Compile>
     <Compile Include="View\Modules\SalaryCalculationDetails.aspx.designer.cs">
       <DependentUpon>SalaryCalculationDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\SendDocuments.aspx.cs">
+      <DependentUpon>SendDocuments.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\SendDocuments.aspx.designer.cs">
+      <DependentUpon>SendDocuments.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\TerminationList.aspx.cs">
       <DependentUpon>TerminationList.aspx</DependentUpon>

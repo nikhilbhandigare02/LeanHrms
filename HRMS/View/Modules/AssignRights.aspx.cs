@@ -309,85 +309,110 @@ namespace HRMS.View.Modules
 
         protected void btn_submit_Click(object sender, EventArgs e)
         {
-            ResponseDO response = new ResponseDO();
             try
             {
                 int userId = GetClientIdFromSession();
                 assignRightsBL assignrights = new assignRightsBL();
                 int roleId = Convert.ToInt32(ddlrole.SelectedValue);
 
-                string finalStatus = "Success";
-                string finalRemark = "Rights assigned successfully!";
-                bool anySuccess = false;
+                List<ListItem> selectedMenus = cbxMenu.Items.Cast<ListItem>().Where(i => i.Selected).ToList();
+                List<ListItem> selectedSubmenus = cbx_submenu.Items.Cast<ListItem>().Where(i => i.Selected).ToList();
+
+                // Distinct validation message when nothing was picked at all, instead of
+                // letting it fall through to the generic assignment-failure message.
+                if (selectedMenus.Count == 0 && selectedSubmenus.Count == 0)
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
+                        "showRightSavedMessage('Error', 'Please select at least one menu or submenu before assigning rights.');", true);
+                    return;
+                }
+
+                int successCount = 0;
+                List<string> failureReasons = new List<string>();
 
                 // First, insert selected menus without submenus
-                foreach (ListItem menuItem in cbxMenu.Items)
+                foreach (ListItem menuItem in selectedMenus)
                 {
-                    if (menuItem.Selected)
-                    {
-                        rightsDO rightsDO = new rightsDO();
-                        rightsDO.Insertedby = userId;
-                        rightsDO.roleid = roleId;
-                        rightsDO.menuid = Convert.ToInt32(menuItem.Value);
-                        rightsDO.submenuid = 0;
+                    rightsDO rightsDO = new rightsDO();
+                    rightsDO.Insertedby = userId;
+                    rightsDO.roleid = roleId;
+                    rightsDO.menuid = Convert.ToInt32(menuItem.Value);
+                    rightsDO.submenuid = 0;
 
-                        List<rightsDO> rights = assignrights.SaveRights(rightsDO);
-                        if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
-                        {
-                            anySuccess = true;
-                        }
-                        else
-                        {
-                            finalStatus = "Error";
-                            finalRemark = "Some rights could not be assigned!";
-                        }
+                    List<rightsDO> rights = assignrights.SaveRights(rightsDO);
+                    if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
+                    {
+                        successCount++;
+                    }
+                    else
+                    {
+                        string reason = rights != null && rights.Count > 0 && !string.IsNullOrWhiteSpace(rights[0].Remarks)
+                            ? rights[0].Remarks
+                            : "Unknown error.";
+                        failureReasons.Add("Menu '" + menuItem.Text + "': " + reason);
                     }
                 }
 
                 // Then, insert selected submenus
-                foreach (ListItem submenuItem in cbx_submenu.Items)
+                foreach (ListItem submenuItem in selectedSubmenus)
                 {
-                    if (submenuItem.Selected)
+                    int submenuId = Convert.ToInt32(submenuItem.Value);
+                    int menuId = 0;
+
+                    if (SubmenuToParentMenuMap.ContainsKey(submenuId))
                     {
-                        int submenuId = Convert.ToInt32(submenuItem.Value);
-                        int menuId = 0;
-                        
-                        if (SubmenuToParentMenuMap.ContainsKey(submenuId))
-                        {
-                            menuId = SubmenuToParentMenuMap[submenuId];
-                        }
+                        menuId = SubmenuToParentMenuMap[submenuId];
+                    }
 
-                        rightsDO rightsDO = new rightsDO();
-                        rightsDO.Insertedby = userId;
-                        rightsDO.roleid = roleId;
-                        rightsDO.menuid = menuId;
-                        rightsDO.submenuid = submenuId;
+                    rightsDO rightsDO = new rightsDO();
+                    rightsDO.Insertedby = userId;
+                    rightsDO.roleid = roleId;
+                    rightsDO.menuid = menuId;
+                    rightsDO.submenuid = submenuId;
 
-                        List<rightsDO> rights = assignrights.SaveRights(rightsDO);
-                        if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
-                        {
-                            anySuccess = true;
-                        }
-                        else
-                        {
-                            finalStatus = "Error";
-                            finalRemark = "Some rights could not be assigned!";
-                        }
+                    List<rightsDO> rights = assignrights.SaveRights(rightsDO);
+                    if (rights != null && rights.Count > 0 && rights[0].Status == "Success")
+                    {
+                        successCount++;
+                    }
+                    else
+                    {
+                        string reason = rights != null && rights.Count > 0 && !string.IsNullOrWhiteSpace(rights[0].Remarks)
+                            ? rights[0].Remarks
+                            : "Unknown error.";
+                        failureReasons.Add("Submenu '" + submenuItem.Text + "': " + reason);
                     }
                 }
 
-                if (anySuccess)
+                int totalSelected = selectedMenus.Count + selectedSubmenus.Count;
+                string status;
+                string remark;
+
+                if (failureReasons.Count == 0)
                 {
-                    ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
-                                   "showRightSavedMessage('" + finalStatus + "', '" + finalRemark + "');" +
-                                   "setTimeout(function(){ window.location.href = 'viewAssignRights.aspx'; }, 5000);", true);
+                    status = "Success";
+                    remark = "Rights assigned successfully!";
+                }
+                else if (successCount > 0)
+                {
+                    // Partial failure - some of the selected rights were saved, but not
+                    // all. Report the actual reason(s) instead of the old generic
+                    // "Some rights could not be assigned!" with no explanation.
+                    status = "Error";
+                    remark = successCount + " of " + totalSelected + " rights assigned. " + string.Join(" ", failureReasons);
                 }
                 else
                 {
-                    ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
-                                    "showRightSavedMessage('Error', 'Please select at least one menu or submenu!');" +
-                                    "setTimeout(function(){ window.location.href = 'AssignRights.aspx'; }, 5000);", true);
+                    status = "Error";
+                    remark = string.Join(" ", failureReasons);
                 }
+
+                string safeStatus = HttpUtility.JavaScriptStringEncode(status);
+                string safeRemark = HttpUtility.JavaScriptStringEncode(remark);
+
+                ClientScript.RegisterStartupScript(this.GetType(), "RightsSavedScript",
+                               "showRightSavedMessage('" + safeStatus + "', '" + safeRemark + "');" +
+                               "setTimeout(function(){ window.location.href = 'viewAssignRights.aspx'; }, 5000);", true);
             }
             catch (Exception ex)
             {

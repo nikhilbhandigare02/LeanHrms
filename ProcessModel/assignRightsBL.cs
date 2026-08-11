@@ -31,11 +31,29 @@ private string DBName = ConfigurationManager.AppSettings["DBName"];
                 mysqlParameters.Add(DataClass.GetParameter("@p_insertedby", rights.Insertedby));
                 mysqlParameters.Add(DataClass.GetParameter("@p_type", "AssignRights"));
                 listdata = getDrtolistParam.getdatafromreder<rightsDO>(DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "Sp_insertAssignRights"));
+
+                // Sp_insertAssignRights checks for an existing active row for this
+                // role/menu/submenu itself and returns Status='Failed' with this exact
+                // Remarks instead of inserting a duplicate. That is not a real failure -
+                // the desired end state (rights assigned) already holds - so normalize it
+                // to Success rather than letting the caller report it as an error.
+                if (listdata.Count > 0 &&
+                    string.Equals(listdata[0].Status, "Failed", StringComparison.OrdinalIgnoreCase) &&
+                    (listdata[0].Remarks ?? string.Empty).IndexOf("ALREADY ACTIVE", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    listdata[0].Status = "Success";
+                    listdata[0].Remarks = "Rights already assigned.";
+                }
             }
             catch (Exception ex)
             {
                 CommonBL errorlog = new CommonBL();
                 errorlog.fnStoreErrorLog("assignRightsBL", "SaveRights", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+
+                // Surface the actual failure reason to the caller instead of an empty
+                // list, which the UI could only report as a generic "could not be
+                // assigned" message with no indication of what actually went wrong.
+                listdata = new List<rightsDO> { new rightsDO { Status = "Error", Remarks = ex.Message } };
             }
             return listdata;
         }

@@ -275,6 +275,8 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="card-title" style="font-size: 1.6em; font-weight: bold;">Knowledge Transfer &amp; Handover</span>
+                            <asp:Button ID="btnBackFromKTForm" runat="server" CssClass="btn btn-secondary" Text="Back"
+                                CausesValidation="false" OnClick="btnCancelKT_Click" />
                         </div>
 
                         <!-- Employee Information (Read Only) -->
@@ -327,6 +329,10 @@
                                 <asp:RequiredFieldValidator ID="rfvReplacementEmployee" runat="server" ControlToValidate="txtReplacementEmployee"
                                     ErrorMessage="Replacement Employee is mandatory" CssClass="text-danger" Display="Dynamic"
                                     ValidationGroup="KTMainGroup" />
+                                <asp:RegularExpressionValidator ID="revReplacementEmployee" runat="server" ControlToValidate="txtReplacementEmployee"
+                                    ValidationExpression="^[^\d]*$"
+                                    ErrorMessage="Replacement Employee should not contain numbers" CssClass="text-danger" Display="Dynamic"
+                                    ValidationGroup="KTMainGroup" />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="field-label">KT status <span class="text-danger">*</span></label>
@@ -366,7 +372,7 @@
                                         <ItemTemplate>
                                             <asp:LinkButton ID="lnkRemoveRow" runat="server" CommandName="RemoveRow"
                                                 CommandArgument="<%# Container.DataItemIndex %>" CausesValidation="false"
-                                                CssClass="btn btn-sm btn-outline-danger" ToolTip="Remove row">
+                                                CssClass="btn btn-sm btn-outline-danger js-confirm-delete-kt-row" ToolTip="Remove row">
                                                 <i class="fa fa-trash"></i>
                                             </asp:LinkButton>
                                         </ItemTemplate>
@@ -444,6 +450,30 @@
                 showConfirmButton: status.toLowerCase() !== "success"
             });
         }
+
+        // Confirm before removing a Project Handover row. The LinkButton has no
+        // OnClientClick, so ASP.NET renders its href as "javascript:__doPostBack(...)"
+        // as usual - intercept the click, show the confirmation, and only run that
+        // same href (which triggers gvProjectHandover_RowCommand server-side) if the
+        // user confirms.
+        $(document).on('click', '.js-confirm-delete-kt-row', function (e) {
+            e.preventDefault();
+            var href = $(this).attr('href');
+
+            Swal.fire({
+                title: 'Delete Knowledge Transfer',
+                text: 'Are you sure you want to delete this knowledge transfer record?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                reverseButtons: true
+            }).then(function (result) {
+                if (result.isConfirmed && href) {
+                    eval(href.replace(/^javascript:/i, ''));
+                }
+            });
+        });
 
     </script>
 

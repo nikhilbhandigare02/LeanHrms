@@ -401,6 +401,31 @@ namespace HRMS.View.Modules
                     var rows = ProjectRows;
                     if (index >= 0 && index < rows.Count)
                     {
+                        KTProjectHandoverRowDO row = rows[index];
+
+                        // Only rows already persisted (loaded from an existing KT record)
+                        // have a real KTProjectHandoverId - a row just added in this same
+                        // session and not yet saved has nothing in the DB to delete yet.
+                        if (row.KTProjectHandoverId > 0)
+                        {
+                            HandoverprocessBL bl = new HandoverprocessBL();
+                            KTHandoverResponseDO result = bl.DeleteKTProjectHandoverRow(row.KTProjectHandoverId);
+
+                            if (result == null || !result.Success)
+                            {
+                                string safeErr = System.Web.HttpUtility.JavaScriptStringEncode(
+                                    result?.ResponseMsg ?? "Unable to delete knowledge transfer record.");
+                                ScriptManager.RegisterStartupScript(this, GetType(), "ktRowDeleteError",
+                                    $"showKTResult('Error', '{safeErr}');", true);
+                                return;
+                            }
+
+                            string safeMsg = System.Web.HttpUtility.JavaScriptStringEncode(
+                                result.ResponseMsg ?? "Knowledge transfer deleted successfully.");
+                            ScriptManager.RegisterStartupScript(this, GetType(), "ktRowDeleted",
+                                $"showKTResult('Success', '{safeMsg}');", true);
+                        }
+
                         rows.RemoveAt(index);
                         ProjectRows = rows;
                         BindProjectGrid();

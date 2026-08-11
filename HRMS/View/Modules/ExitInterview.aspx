@@ -39,11 +39,66 @@
             args.IsValid = args.Value !== null && args.Value.trim().length > 0;
         }
 
+        // Stops the date picker itself from offering past dates when scheduling a NEW
+        // interview - cvInterviewDate_ServerValidate already rejects a past date on
+        // Save, this just prevents picking one in the first place. Skipped for an
+        // existing record being edited, which may legitimately already be in the past.
+        function initInterviewDateMin() {
+            var hdnId = document.getElementById('<%= hdnExitInterviewId.ClientID %>');
+            var txtDate = document.getElementById('<%= txtInterviewDate.ClientID %>');
+            if (!txtDate) {
+                return;
+            }
+
+            var isExistingRecord = hdnId && hdnId.value && hdnId.value !== '0';
+            if (isExistingRecord) {
+                txtDate.removeAttribute('min');
+                return;
+            }
+
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            txtDate.min = yyyy + '-' + mm + '-' + dd;
+        }
+
+        // Stops the time picker itself from offering a past time when the selected
+        // Interview Date is today - cvInterviewTime_ServerValidate already rejects
+        // this combination on Save, this just prevents picking it in the first place.
+        // If the date isn't today (or the interview is an existing record), any time
+        // is allowed, so any earlier min restriction is cleared.
+        function updateInterviewTimeMin() {
+            var hdnId = document.getElementById('<%= hdnExitInterviewId.ClientID %>');
+            var txtDate = document.getElementById('<%= txtInterviewDate.ClientID %>');
+            var txtTime = document.getElementById('<%= txtInterviewTime.ClientID %>');
+            if (!txtDate || !txtTime) {
+                return;
+            }
+
+            var isExistingRecord = hdnId && hdnId.value && hdnId.value !== '0';
+            if (isExistingRecord) {
+                txtTime.removeAttribute('min');
+                return;
+            }
+
+            var now = new Date();
+            var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+            if (txtDate.value === todayStr) {
+                txtTime.min = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            } else {
+                txtTime.removeAttribute('min');
+            }
+        }
+
         // Call on initial page load AND after every async (UpdatePanel) postback -
         // $(document).ready only fires once, but Edit/Schedule/View are all
         // triggered via async postbacks that don't raise a new DOM ready event.
         function initLocationToggle() {
             toggleLocationField();
+            initInterviewDateMin();
+            updateInterviewTimeMin();
         }
 
         $(document).ready(function () {
@@ -226,7 +281,8 @@
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3 date-field">
                                             <label for="txtInterviewDate">Interview Date <span class="text-danger">*</span></label>
-                                            <asp:TextBox ID="txtInterviewDate" CssClass="form-control date-field" TextMode="Date" runat="server"></asp:TextBox>
+                                            <asp:TextBox ID="txtInterviewDate" CssClass="form-control date-field" TextMode="Date" runat="server"
+                                                onchange="updateInterviewTimeMin();"></asp:TextBox>
                                             <asp:RequiredFieldValidator ID="rfvInterviewDate" runat="server" ControlToValidate="txtInterviewDate" 
                                                 ErrorMessage="Please select interview date" CssClass="text-danger" Display="Dynamic" />
                                             <asp:CustomValidator ID="cvInterviewDate" runat="server" ControlToValidate="txtInterviewDate"
@@ -238,8 +294,11 @@
                                         <div class="form-group mb-3">
                                             <label for="txtInterviewTime">Interview Time <span class="text-danger">*</span></label>
                                             <asp:TextBox ID="txtInterviewTime" CssClass="form-control" TextMode="Time" runat="server"></asp:TextBox>
-                                            <asp:RequiredFieldValidator ID="rfvInterviewTime" runat="server" ControlToValidate="txtInterviewTime" 
+                                            <asp:RequiredFieldValidator ID="rfvInterviewTime" runat="server" ControlToValidate="txtInterviewTime"
                                                 ErrorMessage="Please select interview time" CssClass="text-danger" Display="Dynamic" />
+                                            <asp:CustomValidator ID="cvInterviewTime" runat="server" ControlToValidate="txtInterviewTime"
+                                                ErrorMessage="Please select a current or future time for today's interview." CssClass="text-danger" Display="Dynamic"
+                                                OnServerValidate="cvInterviewTime_ServerValidate" />
                                         </div>
                                     </div>
                                 </div>

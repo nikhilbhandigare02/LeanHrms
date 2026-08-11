@@ -1359,6 +1359,56 @@ namespace ProcessModel
             }
         }
 
+        public KTHandoverResponseDO DeleteKTProjectHandoverRow(int ktProjectHandoverId)
+        {
+            var response = new KTHandoverResponseDO { Success = false, ResponseMsg = "Unable to delete knowledge transfer record." };
+
+            if (ktProjectHandoverId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                response.ResponseMsg = "Invalid knowledge transfer request.";
+                return response;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_DeleteKnowledgeTransfer", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_KTProjectHandoverId", ktProjectHandoverId);
+
+                    var outSuccess = new MySqlParameter("@p_Success", MySqlDbType.Byte) { Direction = ParameterDirection.Output };
+                    var outMsg = new MySqlParameter("@p_ResponseMsg", MySqlDbType.VarChar, 200) { Direction = ParameterDirection.Output };
+
+                    cmd.Parameters.Add(outSuccess);
+                    cmd.Parameters.Add(outMsg);
+
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+
+                    response.Success = outSuccess.Value != DBNull.Value && Convert.ToInt32(outSuccess.Value) == 1;
+                    response.ResponseMsg = outMsg.Value != DBNull.Value
+                        ? Convert.ToString(outMsg.Value)
+                        : (response.Success ? "Knowledge transfer deleted successfully." : "Failed to delete knowledge transfer record.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "DeleteKTProjectHandoverRow",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                response.Success = false;
+                response.ResponseMsg = "Error occurred while deleting knowledge transfer record.";
+            }
+
+            return response;
+        }
+
         private ResignationActionResponseDO ReadResignationActionResponse(IDataReader dr, bool isSuccessFallback)
         {
             var response = new ResignationActionResponseDO

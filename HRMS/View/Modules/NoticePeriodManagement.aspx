@@ -51,7 +51,11 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <span class="page-title">Notice period management</span>
-                            <asp:Label ID="lblNoticeStatus" runat="server" CssClass="badge bg-success" Text="Active" />
+                            <div class="d-flex align-items-center gap-2">
+                                <asp:Label ID="lblNoticeStatus" runat="server" CssClass="badge bg-success" Text="Active" />
+                                <asp:Button ID="btnBack" runat="server" CssClass="btn btn-secondary" Text="Back"
+                                    CausesValidation="false" OnClick="btnBack_Click" />
+                            </div>
                         </div>
 
                         <div class="info-row">

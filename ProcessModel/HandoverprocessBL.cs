@@ -624,6 +624,7 @@ namespace ProcessModel
                             model.ProposedLastWorkingDate = GetDateSafe(dr, "ProposedLastWorkingDate");
                             model.Reason = GetStringSafe(dr, "Reason");
                             model.ResignationStatus = GetStringSafe(dr, "ResignationStatus");
+                            model.ManagerRemark = GetStringSafe(dr, "Remarks");
                         }
 
                         // Result set 2: tbl_hr_review (PascalCase columns)

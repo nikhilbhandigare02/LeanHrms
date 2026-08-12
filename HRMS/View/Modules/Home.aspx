@@ -1412,7 +1412,7 @@
 
                 <a class="hb-viewall"
                     href="#"
-                    onclick="toggleExtra('eventsExtra', this, 'View Full Calendar', 'Show Less'); return false;">View Full Calendar
+                    onclick="toggleExtra('eventsExtra', this, 'View Events & Holidays', 'Show Less'); return false;">View Events & Holidays
 
         <span class="hb-extra-count">(+<asp:Literal ID="litMoreEventCount" runat="server"></asp:Literal>)
         </span>

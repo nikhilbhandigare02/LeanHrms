@@ -154,6 +154,10 @@
                                 <div class="info-label">Reason</div>
                                 <asp:Label ID="lblReason" runat="server" CssClass="info-value" Text="-" />
                             </div>
+                            <div class="col-md-12" id="divManagerRemark" runat="server" visible="false">
+                                <div class="info-label">Remarks</div>
+                                <asp:Label ID="lblManagerRemark" runat="server" CssClass="info-value" Text="-" />
+                            </div>
                         </div>
 
                         <hr />

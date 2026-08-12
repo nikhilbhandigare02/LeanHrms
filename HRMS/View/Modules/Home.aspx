@@ -1412,7 +1412,7 @@
 
                 <a class="hb-viewall"
                     href="#"
-                    onclick="toggleExtra('eventsExtra', this, 'View Events & Holidays', 'Show Less'); return false;">View Events & Holidays
+                    onclick="toggleExtra('eventsExtra', this, 'View Holidays & Events', 'Show Less'); return false;">View Holidays & Events
 
         <span class="hb-extra-count">(+<asp:Literal ID="litMoreEventCount" runat="server"></asp:Literal>)
         </span>
@@ -1492,7 +1492,7 @@
                         </div>
                     </div>
                 </div>
-                <a class="hb-viewall" onclick="toggleExtra('eventsExtra', this, 'View Full Calendar', 'Show Less')" href="#">View Full Calendar <span class="hb-extra-count">(+2)</span></a>
+                <a class="hb-viewall" onclick="toggleExtra('eventsExtra', this, 'View Holidays & Events', 'Show Less')" href="#">View Full Calendar <span class="hb-extra-count">(+2)</span></a>
             </div>--%>
             </div>
 
@@ -1692,6 +1692,69 @@
                         OnClick="saveNews"
                         OnClientClick="return validateNews();" />
 
+                </div>
+
+            </div>
+        </div>
+
+        <!-- View News - reuses the common read-only "View Details" card layout
+             (see modalViewDetails) for visual consistency; never reuses the
+             Add News form fields above. -->
+        <div class="hb-modal-overlay" id="modalViewNews" onclick="overlayClose(event, 'modalViewNews')">
+            <div class="hb-modal">
+
+                <div class="hb-modal-header">
+                    <div class="hb-icon news" style="flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2">
+                            <path d="M4 4h16v14a2 2 0 0 1-2 2H4z" />
+                            <path d="M4 4v16M8 8h8M8 12h8M8 16h5" />
+                        </svg>
+                    </div>
+
+                    <div class="hb-modal-title">View Details</div>
+
+                    <button type="button" class="hb-modal-close" onclick="closeModal('modalViewNews')">
+                        &#x2715;
+                    </button>
+                </div>
+
+                <div class="hv-detail-body">
+                    <div class="hv-detail-card">
+                        <div class="hv-detail-badge">
+                            <asp:Label ID="lblViewNewsCategory" runat="server" />
+                        </div>
+                        <div class="hv-detail-title">
+                            <asp:Label ID="lblViewNewsTitle" runat="server" />
+                        </div>
+
+                        <div class="hv-detail-grid">
+                            <div class="hv-detail-row">
+                                <span class="hv-detail-label">Posted By</span>
+                                <span class="hv-detail-value"><asp:Label ID="lblViewNewsPostedBy" runat="server" /></span>
+                            </div>
+                            <div class="hv-detail-row">
+                                <span class="hv-detail-label">Date</span>
+                                <span class="hv-detail-value"><asp:Label ID="lblViewNewsDate" runat="server" /></span>
+                            </div>
+                        </div>
+
+                        <div class="hv-desc-block">
+                            <div class="hv-detail-label" style="margin-bottom: 6px;">Description</div>
+                            <div class="hv-desc-text"><asp:Label ID="lblViewNewsDesc" runat="server" /></div>
+                        </div>
+
+                        <asp:Button
+                            ID="btnDownloadViewAttachment"
+                            runat="server"
+                            Text="Download Attachment"
+                            CssClass="hb-btn hb-btn-primary mt-3"
+                            Visible="false"
+                            OnClick="btnDownloadAttachment_Click" />
+                    </div>
+                </div>
+
+                <div class="hb-modal-footer">
+                    <button type="button" class="hb-btn hb-btn-ghost" onclick="closeModal('modalViewNews')">Back</button>
                 </div>
 
             </div>
@@ -2449,7 +2512,7 @@
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                ['modalNews', 'modalBirthday', 'modalEvent', 'modalViewDetails'].forEach(closeModal);
+                ['modalNews', 'modalViewNews', 'modalBirthday', 'modalEvent', 'modalViewDetails'].forEach(closeModal);
             }
         });
 

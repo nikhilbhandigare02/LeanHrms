@@ -615,8 +615,6 @@ namespace HRMS.View.Modules
         {
             if (e.CommandName == "ViewNews")
             {
-                litNewsModalTitle.Text = "View News / Announcement";
-
                 int news_announcement_id = Convert.ToInt32(e.CommandArgument);
 
                 List<NewsAnnouncementDO> newsList = objBL.GetNewsById(news_announcement_id);
@@ -625,32 +623,28 @@ namespace HRMS.View.Modules
                 {
                     NewsAnnouncementDO news = newsList[0];
 
-                    newsTitle.Text = news.news_title;
-                    newsTag.SelectedValue = news.category;
-                    newsPostedBy.Text = news.posted_by;
-                    newsDesc.Text = news.description;
+                    lblViewNewsTitle.Text = Server.HtmlEncode(news.news_title);
+                    lblViewNewsCategory.Text = Server.HtmlEncode(
+                        string.IsNullOrEmpty(news.category) ? "General" : news.category);
+                    lblViewNewsPostedBy.Text = Server.HtmlEncode(news.posted_by);
+                    lblViewNewsDate.Text = news.inserted_date.ToString("dd MMM yyyy");
+                    lblViewNewsDesc.Text = Server.HtmlEncode(news.description).Replace("\n", "<br />");
 
-                    newsTitle.ReadOnly = true;
-                    newsPostedBy.ReadOnly = true;
-                    newsDesc.ReadOnly = true;
-                    newsTag.Enabled = false;
-
-                    btnSaveNews.Visible = false;
-                    fuNewsAttachment.Visible = false;
                     if (!string.IsNullOrEmpty(news.file_base64))
                     {
-                        btnDownloadAttachment.Visible = true;
-                        btnDownloadAttachment.CommandArgument = news.news_announcement_id.ToString();
+                        btnDownloadViewAttachment.Visible = true;
+                        btnDownloadViewAttachment.CommandArgument = news.news_announcement_id.ToString();
                     }
                     else
                     {
-                        btnDownloadAttachment.Visible = false;
+                        btnDownloadViewAttachment.Visible = false;
                     }
+
                     ScriptManager.RegisterStartupScript(
                         this,
                         GetType(),
-                        "OpenModal",
-                        "openModal('modalNews');",
+                        "OpenViewNewsModal",
+                        "openModal('modalViewNews');",
                         true);
                 }
             }
@@ -681,21 +675,10 @@ namespace HRMS.View.Modules
 
         private void ResetNewsModal()
         {
-            litNewsModalTitle.Text = "Add News / Announcement";
-
             newsTitle.Text = "";
             newsTag.SelectedIndex = 0;
             newsPostedBy.Text = "";
             newsDesc.Text = "";
-
-            newsTitle.ReadOnly = false;
-            newsPostedBy.ReadOnly = false;
-            newsDesc.ReadOnly = false;
-            newsTag.Enabled = true;
-
-            btnSaveNews.Visible = true;
-            fuNewsAttachment.Visible = true;
-            btnDownloadAttachment.Visible = false;
         }
         protected void btnAddNews_Click(object sender, EventArgs e)
         {

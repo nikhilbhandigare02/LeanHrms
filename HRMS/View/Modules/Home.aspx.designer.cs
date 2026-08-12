@@ -294,6 +294,60 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Button btnSaveNews;
 
         /// <summary>
+        /// lblViewNewsCategory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblViewNewsCategory;
+
+        /// <summary>
+        /// lblViewNewsTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblViewNewsTitle;
+
+        /// <summary>
+        /// lblViewNewsPostedBy control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblViewNewsPostedBy;
+
+        /// <summary>
+        /// lblViewNewsDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblViewNewsDate;
+
+        /// <summary>
+        /// lblViewNewsDesc control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblViewNewsDesc;
+
+        /// <summary>
+        /// btnDownloadViewAttachment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDownloadViewAttachment;
+
+        /// <summary>
         /// litEventModalTitle control.
         /// </summary>
         /// <remarks>

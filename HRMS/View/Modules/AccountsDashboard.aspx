@@ -660,7 +660,7 @@
 
                                         <td>
                                             <asp:LinkButton ID="btnViewReimbDocs" runat="server"
-                                                CssClass="btn btn-sm btn-outline-primary"
+                                                CssClass="btn btn-sm btn-outline-primary no-global-loader"
                                                 CommandName="ViewDocs"
                                                 CommandArgument='<%# Eval("reimbursement_id") %>'>
                                                 <i class="fa fa-file-text-o"></i> View Docs
@@ -740,13 +740,13 @@
                                 <td><%# Convert.ToDateTime(Eval("InsertedDate")).ToString("dd MMM yyyy") %></td>
                                 <td>
                                     <asp:LinkButton ID="btnViewReimbDoc" runat="server"
-                                        CssClass="btn btn-sm btn-secondary"
+                                        CssClass="btn btn-sm btn-secondary no-global-loader"
                                         CommandName="ViewReimbDoc"
                                         CommandArgument='<%# Eval("UserDocDetId") %>'>
                                         View
                                     </asp:LinkButton>
                                     <asp:LinkButton ID="btnDownloadReimbDoc" runat="server"
-                                        CssClass="btn btn-sm btn-primary"
+                                        CssClass="btn btn-sm btn-primary no-global-loader"
                                         CommandName="DownloadReimbDoc"
                                         CommandArgument='<%# Eval("UserDocDetId") %>'>
                                         Download

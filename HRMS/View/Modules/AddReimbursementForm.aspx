@@ -307,7 +307,7 @@
                     <div style="display: flex; gap: 10px;">
                         <asp:TextBox ID="txtDocument" runat="server" CssClass="form-control" style="flex: 1;" Visible="false"></asp:TextBox>
                         <asp:HiddenField ID="hdnDocumentData" runat="server" />
-                        <asp:Button ID="btnDownloadDocument" runat="server" Text="Download" CssClass="btn btn-primary" OnClick="btnDownloadDocument_Click" visible="false"/>
+                        <asp:Button ID="btnDownloadDocument" runat="server" Text="Download" CssClass="btn btn-primary no-global-loader" OnClick="btnDownloadDocument_Click" visible="false"/>
                     </div>
                 </div>
 
@@ -324,7 +324,7 @@
                                 <td><%# Eval("FileName") %><%# Eval("FileExtension") %></td>
                                 <td><%# Eval("InsertedDate", "{0:dd-MMM-yyyy}") %></td>
                                 <td>
-                                    <asp:LinkButton runat="server" CommandName="DownloadReimbursementDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action" CausesValidation="false">
+                                    <asp:LinkButton runat="server" CommandName="DownloadReimbursementDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action no-global-loader" CausesValidation="false">
                                         <i class="far fa-eye"></i> View / Download
                                     </asp:LinkButton>
                                 </td>

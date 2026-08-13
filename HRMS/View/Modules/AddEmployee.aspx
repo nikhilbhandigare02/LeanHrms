@@ -1997,7 +1997,7 @@
                                     <asp:BoundField DataField="InsertedDate" HeaderText="Uploaded On" DataFormatString="{0:dd MMM yyyy}" />
                                     <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
-                                            <asp:LinkButton runat="server" CommandName="DownloadDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action" CausesValidation="false"><i class="fas fa-download"></i> Download</asp:LinkButton>
+                                            <asp:LinkButton runat="server" CommandName="DownloadDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action no-global-loader" CausesValidation="false"><i class="fas fa-download"></i> Download</asp:LinkButton>
                                             <asp:LinkButton runat="server" CommandName="DeleteDocument" CommandArgument='<%# Eval("UserDocDetId") %>' CssClass="btn-link-action text-danger" CausesValidation="false" OnClientClick="return confirm('Delete this document?');"><i class="fas fa-trash-alt"></i> Delete</asp:LinkButton>
                                         </ItemTemplate>
                                     </asp:TemplateField>

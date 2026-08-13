@@ -411,6 +411,10 @@
 
                 function isSaveSubmitUpdateControl(el) {
                     while (el && el.nodeType === 1) {
+                        if (el.classList && el.classList.contains('no-global-loader')) {
+                            return false;
+                        }
+
                         var tag = el.tagName.toLowerCase();
                         var isCandidate =
                             (tag === 'input' && (el.type === 'submit' || el.type === 'button')) ||

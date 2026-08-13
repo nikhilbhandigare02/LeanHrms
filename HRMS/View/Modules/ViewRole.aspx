@@ -475,7 +475,7 @@
                                 SortExpression="Roledescription" ItemStyle-Width="130px" />
                             <asp:TemplateField HeaderText="Action" ItemStyle-Width="100px">
                                 <ItemTemplate>
-                                    <asp:LinkButton ID="lnkView" runat="server" CommandName="viewRole" title="View Role" CommandArgument='<%# Eval("Roleid") %>'>
+                                    <asp:LinkButton ID="lnkView" runat="server" CssClass="no-global-loader" CommandName="viewRole" title="View Role" CommandArgument='<%# Eval("Roleid") %>'>
                      <%-- <i class="fa fa-edit"></i> --%>
           </asp:LinkButton>
                                     &nbsp;                                               

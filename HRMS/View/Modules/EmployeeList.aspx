@@ -812,7 +812,10 @@
 
             <div id="pageToolbar" runat="server" class="employee-list-toolbar">
                 <div class="employee-search" id="searchdata" runat="server">
-                    <input type="text" id="searchInput" placeholder="Search by employee code, username, email..." onkeydown="searchOnEnter(event)">
+                    <asp:TextBox ID="txtQuickSearch" runat="server" ClientIDMode="Static" CssClass="quick-search-input"
+                        placeholder="Search by employee code, username, email..." onkeydown="searchOnEnter(event)" />
+                    <asp:Button ID="btnQuickSearch" runat="server" Text="Search" OnClick="QuickSearchButton_Click"
+                        CausesValidation="false" style="display:none;" />
                     <span class="bx bx-search-alt"></span>
                 </div>
                 <button runat="server" id="btn_advanceserach" onserverclick="AdvSearchFunction" class="employee-toolbar-btn employee-btn-outline" title="Advance Search">
@@ -883,7 +886,7 @@
                 <div class="mb-3">
                     <label for="input-contact-number">Contact Number</label>
                     <asp:TextBox ID="txt_contact" runat="server" CssClass="form-control" TabIndex="4"
-                        placeholder="Enter Contact Number" onblur="checkNoLeadingSpace(this)" oninput="formatPhoneNumber(this)"></asp:TextBox>
+                        placeholder="Enter Contact Number" onblur="checkNoLeadingSpace(this)"></asp:TextBox>
                     <asp:CustomValidator ID="cvPhoneNumber" runat="server" ControlToValidate="txt_contact"
                         ClientValidationFunction="validatePhoneNumber"
                         ErrorMessage="Invalid phone number format. Example: +91 XXXXXXXXXX"
@@ -1017,58 +1020,17 @@
         }
     </script>
 
-    <script>     
-        function initializeSearch() {
-            $(document).on('input', '#searchInput', function () {
-                var searchTerm = $(this).val().toLowerCase();
-                filterGrid(searchTerm);
-            });
-            $(document).on('keydown', '#searchInput', searchOnEnter);
-        }
-
-
-        function filterGrid(searchTerm) {
-      <%= gridview.ClientID %> 
-            $('#<%= gridview.ClientID %> tr:has(td)').hide();
-
-            if (searchTerm === '') {
-                $('#<%= gridview.ClientID %> tr:has(td)').show();
-              } else {
-                  var genderColumnIndex = 3;
-
-                  $('#<%= gridview.ClientID %> tr:has(td)').filter(function () {
-                    var found = false;
-                    $(this).find('td').each(function (index) {
-                        var cellText = $(this).text().toLowerCase();
-
-                        if (index === genderColumnIndex && cellText.startsWith(searchTerm)) {
-                            found = true;
-                            return false;
-                        }
-
-                        if (index !== genderColumnIndex && cellText.includes(searchTerm)) {
-                            found = true;
-                            return false;
-                        }
-                    });
-                    return found;
-                }).show();
-            }
-        }
-
-
+    <script>
+        // The quick-search box posts back to the server (QuickSearchButton_Click),
+        // which searches the full employee list and re-paginates - it no longer
+        // hides/shows rows on the client, since that only ever affected whichever
+        // single page of the (server-paged) grid happened to already be rendered.
         function searchOnEnter(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                var searchTerm = $('#searchInput').val().toLowerCase();
-                filterGrid(searchTerm);
+                document.getElementById('<%= btnQuickSearch.ClientID %>').click();
             }
         }
-
-
-        $(document).ready(function () {
-            initializeSearch();
-        });
   </script>
 
     <script>

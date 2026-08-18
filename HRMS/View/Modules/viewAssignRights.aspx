@@ -198,7 +198,10 @@
                         <div class="d-flex justify-content-end align-items-center">
                             <div class="app-search d-none d-lg-block" id="searchdata" runat="server">
                                 <div class="position-relative">
-                                    <input type="text" class="form-control" id="searchInput" placeholder="Search..." onkeydown="searchOnEnter(event)">
+                                    <asp:TextBox ID="txtQuickSearch" runat="server" ClientIDMode="Static" CssClass="form-control"
+                                        placeholder="Search..." onkeydown="searchOnEnter(event)" />
+                                    <asp:Button ID="btnQuickSearch" runat="server" Text="Search" OnClick="QuickSearchButton_Click"
+                                        CausesValidation="false" style="display:none;" />
                                     <span class="bx bx-search-alt"></span>
                                 </div>
                             </div>
@@ -246,7 +249,7 @@
                         <div class="col-12  mt-3">
                             <asp:Button runat="server" ID="Button1" Text="Search" CssClass="btn btn-primary" OnClick="AdvSearchButton_Click" />
                             <asp:Button runat="server" ID="Button7" Text="Clear" CssClass="btn btn-primary" OnClick="AdvClearButton_Click" />
-                            <asp:Button runat="server" ID="Button8" Text="Back" CssClass="btn btn-primary" OnClientClick="highlightBackButton();" OnClick="AdvBackButton_Click" />
+                            <asp:Button runat="server" ID="Button8" Text="Back" CssClass="btn btn-primary" OnClick="AdvBackButton_Click" />
 
                         </div>
                     </div>
@@ -355,58 +358,20 @@
         }
     </script>
 
-    <script>     
-        function initializeSearch() {
-            $(document).on('input', '#searchInput', function () {
-                var searchTerm = $(this).val().toLowerCase();
-                filterGrid(searchTerm);
-            });
-            $(document).on('keydown', '#searchInput', searchOnEnter);
-        }
-
-
-        function filterGrid(searchTerm) {
-    <%= gridview.ClientID %> 
-            $('#<%= gridview.ClientID %> tr:has(td)').hide();
-
-            if (searchTerm === '') {
-                $('#<%= gridview.ClientID %> tr:has(td)').show();
-            } else {
-                var genderColumnIndex = 3;
-
-                $('#<%= gridview.ClientID %> tr:has(td)').filter(function () {
-                    var found = false;
-                    $(this).find('td').each(function (index) {
-                        var cellText = $(this).text().toLowerCase();
-
-                        if (index === genderColumnIndex && cellText.startsWith(searchTerm)) {
-                            found = true;
-                            return false;
-                        }
-
-                        if (index !== genderColumnIndex && cellText.includes(searchTerm)) {
-                            found = true;
-                            return false;
-                        }
-                    });
-                    return found;
-                }).show();
-            }
-        }
-
-
+    <script>
+        // The quick-search box posts back to the server (QuickSearchButton_Click),
+        // which searches the full assigned-rights list and re-paginates via
+        // BindGridView - it no longer hides/shows rows on the client, since that
+        // only ever affected whichever single page of the (server-paged) grid
+        // happened to already be rendered.
         function searchOnEnter(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                var searchTerm = $('#searchInput').val().toLowerCase();
-                filterGrid(searchTerm);
+                document.getElementById('<%= btnQuickSearch.ClientID %>').click();
             }
         }
 
 
-        $(document).ready(function () {
-            initializeSearch();
-        });
     </script>
 </asp:Content>
 

@@ -797,7 +797,7 @@
                             </div>
 
                             <img class="hb-slide-image"
-                                src='<%# Eval("ImageUrl") %>'
+                                src='<%# GetBannerImageSrc(Eval("ImageBase64"), Eval("ImageUrl")) %>'
                                 alt='<%# Eval("Category") %>' />
 
                         </div>

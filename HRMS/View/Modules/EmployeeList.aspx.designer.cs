@@ -78,6 +78,24 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl searchdata;
 
         /// <summary>
+        /// txtQuickSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtQuickSearch;
+
+        /// <summary>
+        /// btnQuickSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnQuickSearch;
+
+        /// <summary>
         /// btn_advanceserach control.
         /// </summary>
         /// <remarks>

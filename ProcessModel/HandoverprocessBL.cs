@@ -298,7 +298,7 @@ namespace ProcessModel
                     DataClass.GetDataReaderFromSpWithParam(
                         param,
                         DBName,
-                        "SP_Save_Employee_Termination"
+                        "SP_Save_Employee_Terminationlist"
                     )
                 );
             }
@@ -340,14 +340,28 @@ namespace ProcessModel
                     obj.EmployeeCode = reader["employee_code"].ToString();
                     obj.notice_status = reader["notice_status"].ToString();
 
-                    //obj.ResponseDeadline = reader["ResponseDeadline"] == DBNull.Value
-                    //    ? (DateTime?)null
-                    //    : Convert.ToDateTime(reader["ResponseDeadline"]);
                     obj.TerminationDate = reader["TerminationDate"] == DBNull.Value
                         ? (DateTime?)null
                         : Convert.ToDateTime(reader["TerminationDate"]);
 
-                    
+                    // Read defensively - the SP may or may not already return
+                    // these columns; if not present, they just stay null and
+                    // the Termination List screen falls back gracefully.
+                    object responseDeadline = SafeGetValue(reader, "ResponseDeadline");
+                    obj.ResponseDeadline = responseDeadline != null ? Convert.ToDateTime(responseDeadline) : (DateTime?)null;
+
+                    object performanceRating = SafeGetValue(reader, "PerformanceRating");
+                    obj.PerformanceRating = performanceRating != null ? Convert.ToInt32(performanceRating) : (int?)null;
+
+                    object noticePeriodDays = SafeGetValue(reader, "NoticePeriodDays");
+                    obj.NoticePeriodDays = noticePeriodDays != null ? Convert.ToInt32(noticePeriodDays) : (int?)null;
+
+                    object reason = SafeGetValue(reader, "termination_reason");
+                    obj.termination_reason = reason != null ? Convert.ToString(reason) : null;
+
+                    object letter = SafeGetValue(reader, "TerminationLetter");
+                    obj.TerminationLetter = letter != null ? Convert.ToString(letter) : null;
+
                     list.Add(obj);
                 }
 
@@ -365,6 +379,22 @@ namespace ProcessModel
             }
 
             return list;
+        }
+
+        // Reads a column value only if the reader's current result set actually
+        // contains it, returning null (rather than throwing) when it doesn't.
+        private static object SafeGetValue(IDataReader reader, string columnName)
+        {
+            try
+            {
+                int ordinal = reader.GetOrdinal(columnName);
+                object value = reader.GetValue(ordinal);
+                return value == DBNull.Value ? null : value;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return null;
+            }
         }
 
         public List<TerminationProcessDO> saveshowcausenotice(TerminationProcessDO obj)

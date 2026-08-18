@@ -67,6 +67,14 @@ namespace DataObject
         public string notice_status { get; set; }
         public DateTime? ResponseDeadline { get; set; }
 
+        // Termination List screen (CAP / POSH / Direct) - read defensively from
+        // whatever the termination stored procedure already returns; no DB
+        // schema change, just surfacing columns that may already be present.
+        public int? PerformanceRating { get; set; }
+        public int? NoticePeriodDays { get; set; }
+        public string termination_reason { get; set; }
+        public string TerminationLetter { get; set; }
+
         public Int32 company_id { get; set; }
         public string company_name { get; set; }
 

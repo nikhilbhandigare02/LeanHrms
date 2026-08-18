@@ -377,8 +377,11 @@ namespace HRMS.View.Modules
             if (string.IsNullOrWhiteSpace(ValueOf(txtWorkingHours))) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours is required.");
             if (!Regex.IsMatch(ValueOf(txtWorkingHours), @"^([0-9]|[01][0-9]|2[0-3]):[0-5][0-9]$")) return FieldError(txtWorkingHours.ClientID, "workingHoursValidationMessage", "Working Hours must be in HH:mm format.");
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlAttendancePolicy))) return FieldError(ddlAttendancePolicy.ClientID, "attendancePolicyRequiredMessage", "Attendance Policy is required.");
-            if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return FieldError(txtPunchingDeviceId.ClientID, "punchingDeviceIdRequiredMessage", "Punching Device ID is required.");
-            if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return FieldError(txtBiometricId.ClientID, "biometricIdRequiredMessage", "Biometric ID is required.");
+            if (IsAttendanceTypeBiometric())
+            {
+                if (string.IsNullOrWhiteSpace(ValueOf(txtPunchingDeviceId))) return FieldError(txtPunchingDeviceId.ClientID, "punchingDeviceIdRequiredMessage", "Punching Device ID is required.");
+                if (string.IsNullOrWhiteSpace(ValueOf(txtBiometricId))) return FieldError(txtBiometricId.ClientID, "biometricIdRequiredMessage", "Biometric ID is required.");
+            }
             if (chkOvertimeEligible.Checked && string.IsNullOrWhiteSpace(ValueOf(txtOvertimeRate))) return FieldError(txtOvertimeRate.ClientID, "overtimeRateRequiredMessage", "Overtime Rate is required.");
             if (string.IsNullOrWhiteSpace(SelectedValueOf(ddlWorkLocation))) return FieldError(ddlWorkLocation.ClientID, "workLocationRequiredMessage", "Work Location is required.");
 
@@ -621,6 +624,12 @@ namespace HRMS.View.Modules
         private string ValueOf(HtmlInputControl input)
         {
             return input == null ? string.Empty : Convert.ToString(input.Value ?? string.Empty).Trim();
+        }
+
+        private bool IsAttendanceTypeBiometric()
+        {
+            return ddlAttendanceType.SelectedIndex > 0
+                && string.Equals(ddlAttendanceType.SelectedItem.Text.Trim(), "Biometric", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool IsYesValue(string value, string text)

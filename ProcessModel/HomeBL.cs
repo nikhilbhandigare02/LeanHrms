@@ -557,13 +557,14 @@ namespace ProcessModel
         {
             List<DashboardBannerDO> bannerList = new List<DashboardBannerDO>();
 
+            //  Next Event + Latest News + every upcoming Holiday, in one
+            //  UNION ALL result set (sp_get_dashboard_banner). Each row's
+            //  ImageBase64 comes from app_image_library (Event/News/Festival)
+            //  when an admin has uploaded one, else the SP's hardcoded ImageUrl.
             try
             {
-                //  Event + News + Holiday
-             
                 getDrtolist getDrtolistParam = new getDrtolist();
                 List<MySqlParameter> mysqlParameters = new List<MySqlParameter>();
-
 
                 List<DashboardBannerDO> dashboardData =
                     getDrtolistParam.getdatafromreder<DashboardBannerDO>(
@@ -591,11 +592,21 @@ namespace ProcessModel
 
                     bannerList.AddRange(dashboardData);
                 }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HomeBL",
+                    "GetDashboardBanner(EventsNewsHolidays)",
+                    "Exception Message : " + ex.Message +
+                    " StackTrace : " + ex.StackTrace,
+                    UserId);
+            }
 
-
-
-                //  Today's Birthday
-
+            //  Today's Birthday
+            try
+            {
                 if (!string.IsNullOrWhiteSpace(Sqlconnection))
                 {
                     using (MySqlConnection con = new MySqlConnection(Sqlconnection))

@@ -115,7 +115,7 @@ namespace HRMS.View.Modules
                 if (searchResults != null && searchResults.Count > 0)
                 {
                     Session["SearchResults"] = searchResults;
-                    gridview.PageIndex = 0;
+                    Session["CurrentPageIndex"] = 0;
                     BindGridView();
                     advancedSearchFields.Visible = false;
                     gridview.Visible = true;
@@ -395,42 +395,23 @@ namespace HRMS.View.Modules
             public string PageNumber { get; set; }
             public bool IsActive { get; set; }
         }
-        protected void OnPageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            Session["CurrentPageIndex"] = e.NewPageIndex;
-            BindGridView();
-        }
         protected void gridview_Sorting(object sender, GridViewSortEventArgs e)
         {
-            AssignRoleBL assignrole = new AssignRoleBL();
-            List<AssignRoleDO> assignroles = assignrole.ViewAllAssignRoles();
-
-            List<AssignRoleDO> lstread = new List<AssignRoleDO>();
-            lstread = assignrole.ViewAllAssignRoles();
-            if (lstread != null)
+            try
             {
-                try
-                {
-                    string sortExpression = e.SortExpression;
-                    string sortDirection = GetSortDirection(sortExpression);
-
-                    if (sortDirection == "ASC")
-                    {
-                        lstread = lstread.OrderBy(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-                    else
-                    {
-                        lstread = lstread.OrderByDescending(p => p.GetType().GetProperty(sortExpression).GetValue(p, null)).ToList();
-                    }
-
-                    gridview.DataSource = lstread;
-                    gridview.DataBind();
-                }
-                catch (Exception ex)
-                {
-                    CommonBL errorlog = new CommonBL();
-                    errorlog.fnStoreErrorLog("ViewassignRole", "gridview_Sorting", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
-                }
+                // Toggle/record the sort column and direction in ViewState; BindGridView()
+                // already applies it via ApplySorting() to whichever dataset is current
+                // (Session["SearchResults"] if a search is active, otherwise the full
+                // list) and re-paginates. This used to rebuild an unrelated AssignRoleDO
+                // list from scratch, ignoring any active search and its own pagination.
+                GetSortDirection(e.SortExpression);
+                Session["CurrentPageIndex"] = 0;
+                BindGridView();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("ViewassignRole", "gridview_Sorting", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
             }
         }
         private string GetSortDirection(string column)
@@ -514,7 +495,32 @@ namespace HRMS.View.Modules
 
         protected void btnBack1_click(object sender, EventArgs e)
         {
-            Response.Redirect("~/view/modules/ViewassignRole.aspx", false);
+            try
+            {
+                // Clear search state and rebind grid instead of redirecting
+                Session["SearchResults"] = null;
+                Session["CurrentPageIndex"] = 0;
+                
+                // Reset UI state
+                searchdata.Visible = true;
+                btn_advanceserach.Visible = true;
+                btn_assignrole.Visible = true;
+                advancedSearchFields.Visible = false;
+                gridview.Visible = true;
+                btnBack1.Visible = false;
+                
+                // Reset button styling
+                btn_advanceserach.Attributes["class"] = "btn  btn-outline-dark ms-2 light-border";
+                btn_advanceserach.Style["color"] = "black";
+                
+                // Rebind grid with full data
+                BindGridView();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("ViewassignRole", "btnBack1_click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
         }
     }
 }

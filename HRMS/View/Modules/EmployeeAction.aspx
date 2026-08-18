@@ -86,6 +86,117 @@
             }
     </style>
 
+    <style>
+        .termination-page-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .termination-page-header .icon-badge {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e03131, #ff6b6b);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(224, 49, 49, 0.25);
+        }
+
+        .termination-page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #212529;
+            margin: 0;
+        }
+
+        .termination-page-header p {
+            margin: 2px 0 0;
+            font-size: 13.5px;
+            color: #6c757d;
+        }
+
+        .custom-gridview thead th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 2px solid #e9ecef;
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+
+        .custom-gridview tbody td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            font-size: 13.5px;
+            color: #343a40;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .custom-gridview tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .emp-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #556ee6;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 10px;
+            flex: 0 0 34px;
+        }
+
+        .emp-name-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .badge-emp-code {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #556ee6;
+            background-color: rgba(85, 110, 230, 0.1);
+            border-radius: 20px;
+        }
+
+        .btn-terminate {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #e03131;
+            background-color: rgba(224, 49, 49, 0.08);
+            border: 1px solid rgba(224, 49, 49, 0.2);
+            border-radius: 20px;
+            text-decoration: none;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+            .btn-terminate:hover {
+                background-color: rgba(224, 49, 49, 0.16);
+                color: #c92a2a;
+                text-decoration: none;
+            }
+    </style>
+
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -191,6 +302,7 @@
                     <asp:HiddenField ID="hfEmployeeCode" runat="server" />
                     <asp:HiddenField ID="hfEmployeeEmail" runat="server" />
                     <asp:HiddenField ID="hfEmployeeName" runat="server" />
+                    <asp:HiddenField ID="hfCompanyId" runat="server" />
 
                     <asp:HiddenField ID="hfTerminationType" runat="server" Value="Performance" />
                     <asp:HiddenField ID="hfPerformanceRating" runat="server" />
@@ -400,51 +512,27 @@
 
 
 
+    <div class="termination-page-header">
+        <div class="icon-badge">
+            <i class="fa fa-user-times"></i>
+        </div>
+        <div>
+            <h1>Termination List</h1>
+            <p>Select an employee below to initiate the termination process.</p>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-lg rounded-3">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <asp:Label runat="server" ID="lbluser" CssClass="card-title mb-4"
-                            Style="font-size: 2.0em; font-weight: bold;">Employee Action</asp:Label>
-                        <div class="d-flex justify-content-end align-items-center">
-                            <div class="app-search d-none d-lg-block" id="searchdata" runat="server">
-                                <div class="position-relative">
-                                    <input type="text" class="form-control" id="searchInput" placeholder="Search..." onkeydown="searchOnEnter(event)">
-                                    <span class="bx bx-search-alt"></span>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                    <div class="row mb-3 align-items-end">
-                        <!-- Dropdown -->
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="ddlcompany" class="fw-bold">Select Company</label>
-                                <asp:DropDownList ID="ddlcompany" runat="server" CssClass="form-control custom-dropdown" TabIndex="6">
-                                    <asp:ListItem Text="-- Select Company --" Value="" />
-                                </asp:DropDownList>
-                            </div>
-                        </div>
-
-                        <!-- Buttons: Search + Clear -->
-                        <div class="col-md-8 d-flex align-items-end">
-                            <div class="d-flex gap-2">
-                                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-success" OnClick="btnsearch_click" />
-                                <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-secondary" OnClick="btnclear_click" />
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- GridView -->
                     <div class="row">
                         <div class="col-12">
                             <asp:HiddenField ID="hfPageIndexViewUser" runat="server" />
                             <asp:GridView runat="server" ID="gridview" class="table custom-gridview" AutoGenerateColumns="false"
-                                DataKeyNames="UserId,EmployeeCode,user_mail_id,user_fullname" EnablePersistedSelection="true"
+                                DataKeyNames="UserId,EmployeeCode,user_mail_id,user_fullname,company_id" EnablePersistedSelection="true"
                                 OnPageIndexChanging="OnPageIndexChanging" PageSize="10"
                                 AllowSorting="true" OnSorting="gridview_Sorting" OnRowCommand="gvEmployees_RowCommand"
                                 Style="margin: 0 auto;" EmptyDataText="No records found.">
@@ -454,10 +542,21 @@
                                             <%# (gridview.PageIndex * gridview.PageSize) + Container.DataItemIndex + 1 %>
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:BoundField DataField="EmployeeCode" HeaderText="Employee Code"  Visible="true" />
+                                    <asp:TemplateField HeaderText="Employee Code">
+                                        <ItemTemplate>
+                                            <span class="badge-emp-code"><%# Eval("EmployeeCode") %></span>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                     <asp:BoundField DataField="UserId" HeaderText="User Id"  Visible="false" />
                                     <asp:BoundField DataField="Username" HeaderText="Username"  />
-                                    <asp:BoundField DataField="user_fullname" HeaderText="Employee Name"  />
+                                    <asp:TemplateField HeaderText="Employee Name">
+                                        <ItemTemplate>
+                                            <div class="emp-name-cell">
+                                                <span class="emp-avatar"><%# GetInitials(Eval("user_fullname").ToString()) %></span>
+                                                <span><%# Eval("user_fullname") %></span>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                     <asp:BoundField DataField="user_mail_id" HeaderText="Email Id"  />
                                     <asp:BoundField DataField="contact_detail" HeaderText="Contact Number"/>
 
@@ -522,11 +621,11 @@
                                             <asp:LinkButton
                                                 ID="lnkTerminate"
                                                 runat="server"
-                                                CssClass="me-1"
+                                                CssClass="btn-terminate"
                                                 ToolTip="Terminate Employee"
                                                 CommandName="SelectEmployee"
-                                                CommandArgument='<%# Container.DataItemIndex %>'>  
-    <i class="fa fa-user-times text-danger"></i>
+                                                CommandArgument='<%# Container.DataItemIndex %>'>
+    <i class="fa fa-user-times"></i> Terminate
                                             </asp:LinkButton>
 
                                         </ItemTemplate>
@@ -578,46 +677,6 @@
                 showConfirmButton: false
             });
         }
-    </script>
-    <script>
-        function initializeSearch() {
-            $(document).on('input', '#searchInput', function () {
-                var searchTerm = $(this).val().toLowerCase();
-                filterGrid(searchTerm);
-            });
-            $(document).on('keydown', '#searchInput', searchOnEnter);
-        }
-
-        function filterGrid(searchTerm) {
-            $('#<%= gridview.ClientID %> tr:has(td)').hide();
-
-            if (searchTerm === '') {
-                $('#<%= gridview.ClientID %> tr:has(td)').show();
-            } else {
-                $('#<%= gridview.ClientID %> tr:has(td)').filter(function () {
-                    var found = false;
-                    $(this).find('td').each(function () {
-                        if ($(this).text().toLowerCase().includes(searchTerm)) {
-                            found = true;
-                            return false;
-                        }
-                    });
-                    return found;
-                }).show();
-            }
-        }
-
-        function searchOnEnter(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                var searchTerm = $('#searchInput').val().toLowerCase();
-                filterGrid(searchTerm);
-            }
-        }
-
-        $(document).ready(function () {
-            initializeSearch();
-        });
     </script>
     <script>
         function openTerminationModal(userId, employeeCode, email, name) {

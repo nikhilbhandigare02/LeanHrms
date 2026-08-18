@@ -611,6 +611,33 @@ namespace HRMS.View.Modules
             }
         }
 
+        // Prefers the uploaded image (ImageBase64 from app_image_library, via
+        // sp_get_dashboard_banner) for the banner slide; falls back to the
+        // existing hardcoded ImageUrl when no uploaded image is available.
+        protected string GetBannerImageSrc(object imageBase64, object imageUrl)
+        {
+            string base64 = Convert.ToString(imageBase64);
+            if (!string.IsNullOrWhiteSpace(base64))
+            {
+                return "data:" + GetImageMimeFromBase64(base64) + ";base64," + base64;
+            }
+            return Convert.ToString(imageUrl);
+        }
+
+        // Detects the actual image format from the base64 payload's leading
+        // bytes, since sp_get_dashboard_banner returns raw base64 without a
+        // content-type column and uploaded images can be JPEG, PNG, GIF, etc.
+        private static string GetImageMimeFromBase64(string base64)
+        {
+            if (base64.StartsWith("/9j/")) return "image/jpeg";
+            if (base64.StartsWith("iVBORw0KGgo")) return "image/png";
+            if (base64.StartsWith("R0lGOD")) return "image/gif";
+            if (base64.StartsWith("Qk")) return "image/bmp";
+            if (base64.StartsWith("UklGR")) return "image/webp";
+            if (base64.StartsWith("PHN2Zy") || base64.StartsWith("PD94bWwg")) return "image/svg+xml";
+            return "image/png";
+        }
+
         protected void rptNews_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "ViewNews")

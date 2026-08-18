@@ -21,6 +21,15 @@ namespace HRMS.View.Modules
     public partial class EmployeeAction : System.Web.UI.Page
     {
         protected string UserId = null;
+
+        protected string GetInitials(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName)) return "?";
+            var parts = fullName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
+            return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
@@ -43,37 +52,15 @@ namespace HRMS.View.Modules
                     userId = 0;
                 }
 
-                Bindcompany();
-               
+                // List view is unfiltered (no Select Company / search UI) - load
+                // everyone straight away. Session["SelectedCompanyId"] is kept at
+                // 0 purely so the existing paging/sorting handlers (which read it
+                // to re-bind the grid) keep working unchanged.
+                Session["SelectedCompanyId"] = 0;
+                Session["CurrentPageIndex"] = 0;
+                BindGridViewFromAPI(0);
+
                 //BindDropdownTerminationReason();
-            }
-        }
-        public void Bindcompany()
-        {
-            List<DropDownData> list1 = new List<DropDownData>();
-            CommonBL commonbl = new CommonBL();
-            try
-            {
-                list1 = commonbl.dropdowCompany();
-                if (list1 != null)
-                {
-                    ddlcompany.DataSource = list1;
-                    ddlcompany.DataTextField = "Text";
-                    ddlcompany.DataValueField = "Id";
-                }
-                else
-                {
-                    ddlcompany.DataSource = null;
-                }
-                ddlcompany.DataBind();
-                ddlcompany.Items.Insert(0, new ListItem("-- Please Select --", ""));
-
-
-            }
-            catch (Exception ex)
-            {
-                CommonBL errorlog = new CommonBL();
-                errorlog.fnStoreErrorLog("EmployeeAction", "Bindcompany", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
             }
         }
         //public void BindDropdownTerminationReason()
@@ -104,52 +91,6 @@ namespace HRMS.View.Modules
         //        errorlog.fnStoreErrorLog("EmployeeAction", "BindDropdownTerminationReason", "Exception Message" + ex.Message + "StackTrace=" + ex.StackTrace, UserId);
         //    }
         //}
-        protected void btnsearch_click(object sender, EventArgs e)
-        {
-            try
-            {
-                int companyId = Convert.ToInt32(ddlcompany.SelectedValue);
-                Session["SelectedCompanyId"] = companyId;  // save for later (paging, sorting)
-
-                // Always bind using selected companyId
-                BindGridViewFromAPI(companyId);
-
-                gridview.Visible = gridview.Rows.Count > 0;
-                paginationContainer.Visible = gridview.Rows.Count > 0;
-            }
-            catch (Exception ex)
-            {
-                gridview.Visible = false;
-                paginationContainer.Visible = false;
-                ClientScript.RegisterStartupScript(
-                    this.GetType(),
-                    "Error",
-                    $"showUserSavedMessage('Error', 'Please search Company');",
-                    true
-                );
-            }
-        }
-
-
-
-
-        protected void btnclear_click(object sender, EventArgs e)
-        {
-            try
-            {
-                ddlcompany.SelectedIndex = 0; // reset company dropdown
-                gridview.DataSource = null;
-                gridview.DataBind();
-                gridview.Visible = false;     // hide grid on clear
-                paginationContainer.Visible = false; // hide pagination controls
-            }
-            catch (Exception ex)
-            {
-                ClientScript.RegisterStartupScript(this.GetType(), "Error",
-                    $"showsalarySavedMessage('Error', 'Clear failed: {ex.Message}');", true);
-            }
-        }
-
         protected void BindGridViewFromAPI(int companyId)
         {
             try
@@ -476,7 +417,7 @@ namespace HRMS.View.Modules
 
             TerminationProcessDO obj = new TerminationProcessDO
             {
-                CompanyId = Convert.ToInt32(Session["SelectedCompanyId"]),
+                CompanyId = Convert.ToInt32(hfCompanyId.Value),
                 UserId = Convert.ToInt32(hfUserId.Value),
                 EmployeeCode = hfEmployeeCode.Value,
                 TerminationDate = Convert.ToDateTime(txtTerminationDate.Text),
@@ -845,8 +786,8 @@ namespace HRMS.View.Modules
 
                 TerminationProcessDO obj = new TerminationProcessDO();
 
-                obj.CompanyId = Convert.ToInt32(Session["SelectedCompanyId"]);
-                obj.UserId = Convert.ToInt32(hfUserId.Value); 
+                obj.CompanyId = Convert.ToInt32(hfCompanyId.Value);
+                obj.UserId = Convert.ToInt32(hfUserId.Value);
                 obj.EmployeeCode = hfEmployeeCode.Value;
 
                 obj.NoticeLetter = issue;
@@ -937,6 +878,7 @@ namespace HRMS.View.Modules
                 hfEmployeeCode.Value = keys["EmployeeCode"].ToString();
                 hfEmployeeEmail.Value = keys["user_mail_id"].ToString();
                 hfEmployeeName.Value = keys["user_fullname"].ToString();
+                hfCompanyId.Value = keys["company_id"].ToString();
 
                 LoadShowCauseButtonStatus();
 

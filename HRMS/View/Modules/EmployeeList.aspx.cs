@@ -348,14 +348,141 @@ namespace HRMS.View.Modules
             if (!string.IsNullOrWhiteSpace(criteria.contact_detail))
             {
                 string contact = criteria.contact_detail.Trim();
+                string digitsOnlyContact = DigitsOnly(contact);
+
+                // Contact numbers can be stored with a country code, spaces, dashes,
+                // etc. (e.g. "+91 9876543210") while a search is typically a plain
+                // digit string (e.g. "9876543210", full or partial). Try an exact
+                // substring match first (keeps existing behavior when formats
+                // already line up), then fall back to comparing digits-only in
+                // either direction so the match works regardless of formatting on
+                // either side. Never parsed as a number, so no leading zeroes or
+                // digits are ever dropped/altered.
                 users = users
-                    .Where(u => !string.IsNullOrWhiteSpace(u.contact_detail) &&
-                                u.contact_detail.IndexOf(contact, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Where(u =>
+                    {
+                        if (string.IsNullOrWhiteSpace(u.contact_detail))
+                        {
+                            return false;
+                        }
+
+                        if (u.contact_detail.IndexOf(contact, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            return true;
+                        }
+
+                        if (digitsOnlyContact.Length == 0)
+                        {
+                            return false;
+                        }
+
+                        string storedDigits = DigitsOnly(u.contact_detail);
+                        return storedDigits.Length > 0 &&
+                               (storedDigits.IndexOf(digitsOnlyContact, StringComparison.Ordinal) >= 0 ||
+                                digitsOnlyContact.IndexOf(storedDigits, StringComparison.Ordinal) >= 0);
+                    })
                     .ToList();
             }
 
             return users;
         }
+
+        // Quick search box in the toolbar. Unlike the old client-side jQuery
+        // filter, this searches the full employee list on the server (not just
+        // whichever page of the grid happened to already be rendered) and reuses
+        // the same session-backed pagination as Advanced Search, so paging,
+        // sorting, and postbacks no longer wipe out the search results.
+        protected void QuickSearchButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string term = (txtQuickSearch.Text ?? string.Empty).Trim();
+                Session["CurrentPageIndex"] = 0;
+
+                if (string.IsNullOrWhiteSpace(term))
+                {
+                    Session["AdvSearchResViewUser"] = null;
+                    BindGridView();
+                    return;
+                }
+
+                List<UserDetailsDO> userDo = SearchByQuickTerm(term)
+                    .OrderByDescending(t => t.UserId)
+                    .ToList();
+
+                UpdateSummaryCards(userDo);
+
+                int totalRecords = userDo.Count;
+                int pageSize = 10;
+                hfPageIndexViewUser.Value = "0";
+
+                Session["AdvSearchResViewUser"] = userDo;
+
+                if (totalRecords > 0)
+                {
+                    int endRowIndex = Math.Min(pageSize, totalRecords);
+                    gridview.DataSource = userDo.GetRange(0, endRowIndex);
+                    gridview.DataBind();
+
+                    if (totalRecords > pageSize)
+                    {
+                        pagerContainer.Visible = true;
+                        UpdatePageInfoLabel(0, totalRecords);
+                    }
+                    else
+                    {
+                        pagerContainer.Visible = false;
+                    }
+                }
+                else
+                {
+                    gridview.DataSource = null;
+                    gridview.DataBind();
+                    pagerContainer.Visible = false;
+                    UpdatePageInfoLabel(0, 0);
+                }
+
+                gridview.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("Viewuser", "QuickSearchButton_Click", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+        }
+
+        private List<UserDetailsDO> SearchByQuickTerm(string term)
+        {
+            List<UserDetailsDO> users = GetUsersForCurrentFlow() ?? new List<UserDetailsDO>();
+
+            // Contact numbers can be stored with a country code, spaces, dashes,
+            // etc. (e.g. "+91 9876543210") while a user typically searches with
+            // just the plain digits (e.g. "9876543210"), so an exact substring
+            // match on the raw text often misses. Comparing the digits-only form
+            // of both sides makes the match work regardless of formatting.
+            string digitsOnlyTerm = DigitsOnly(term);
+
+            return users.Where(u =>
+                (!string.IsNullOrWhiteSpace(u.EmployeeCode) && u.EmployeeCode.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                (!string.IsNullOrWhiteSpace(u.Username) && u.Username.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                (!string.IsNullOrWhiteSpace(u.user_fullname) && u.user_fullname.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                (!string.IsNullOrWhiteSpace(u.user_mail_id) && u.user_mail_id.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                (!string.IsNullOrWhiteSpace(u.contact_detail) &&
+                    (u.contact_detail.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     (digitsOnlyTerm.Length > 0 && DigitsOnly(u.contact_detail).IndexOf(digitsOnlyTerm, StringComparison.Ordinal) >= 0)))
+            ).ToList();
+        }
+
+        private static string DigitsOnly(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            return new string(value.Where(char.IsDigit).ToArray());
+        }
+
         protected void AdvSearchFunction(object sender, EventArgs e)
         {
             try

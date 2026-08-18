@@ -897,7 +897,6 @@
 
         .wizard-actions {
             border-top: 1px solid #DDE7F3;
-            justify-content: flex-end;
             margin-top: 18px;
             padding-top: 20px;
         }
@@ -1181,6 +1180,7 @@
 
                    <%-- </div>--%>
                     </div>
+                    </div>
                     <div class="section-save-row"><button type="button" class="btn-modern btn-secondary-modern" data-collapse-step="2">Save</button>
                     </div>
          
@@ -1221,8 +1221,8 @@
                             <div class="form-group"><label class="is-required">Weekly Off</label><asp:DropDownList ID="ddlWeeklyOff" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="weeklyOffRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group"><label class="is-required">Working Hours</label><input id="txtWorkingHours" runat="server" class="form-control-modern" placeholder="HH:mm" inputmode="numeric" /><span id="workingHoursValidationMessage" class="validation-message"></span></div>
                             <div class="form-group"><label class="is-required">Attendance Policy</label><asp:DropDownList ID="ddlAttendancePolicy" runat="server" CssClass="form-select-modern"></asp:DropDownList><span id="attendancePolicyRequiredMessage" class="validation-message"></span></div>
-                            <div class="form-group"><label class="is-required">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /><span id="punchingDeviceIdRequiredMessage" class="validation-message"></span></div>
-                            <div class="form-group"><label class="is-required">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /><span id="biometricIdRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label id="punchingDeviceIdLabel">Punching Device ID</label><input id="txtPunchingDeviceId" runat="server" class="form-control-modern" placeholder="Device ID" /><span id="punchingDeviceIdRequiredMessage" class="validation-message"></span></div>
+                            <div class="form-group"><label id="biometricIdLabel">Biometric ID</label><input id="txtBiometricId" runat="server" class="form-control-modern" placeholder="Biometric ID" /><span id="biometricIdRequiredMessage" class="validation-message"></span></div>
                             <div class="form-group">
                                 <label class="is-required">Overtime Eligible</label>
                                 <div class="toggle-field">
@@ -1351,8 +1351,6 @@
                 { id: '<%= ddlWeeklyOff.ClientID %>', name: 'Weekly Off', msgId: 'weeklyOffRequiredMessage' },
                 { id: '<%= txtWorkingHours.ClientID %>', name: 'Working Hours', msgId: 'workingHoursValidationMessage' },
                 { id: '<%= ddlAttendancePolicy.ClientID %>', name: 'Attendance Policy', msgId: 'attendancePolicyRequiredMessage' },
-                { id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID', msgId: 'punchingDeviceIdRequiredMessage' },
-                { id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID', msgId: 'biometricIdRequiredMessage' },
                 { id: '<%= ddlWorkLocation.ClientID %>', name: 'Work Location', msgId: 'workLocationRequiredMessage' }
             ];
         }
@@ -1458,10 +1456,24 @@
             return !!(overtimeToggle && overtimeToggle.checked);
         }
 
+        function isAttendanceTypeBiometric() {
+            var attendanceTypeDdl = document.getElementById('<%= ddlAttendanceType.ClientID %>');
+            if (!attendanceTypeDdl || attendanceTypeDdl.selectedIndex < 0) {
+                return false;
+            }
+            var selectedOption = attendanceTypeDdl.options[attendanceTypeDdl.selectedIndex];
+            var selectedText = selectedOption ? (selectedOption.text || '') : '';
+            return selectedText.trim().toLowerCase() === 'biometric';
+        }
+
         function validateEmployeeFields(section) {
             var requiredFields = getEmployeeRegistrationRequiredFields();
             if (isOvertimeEligibleChecked()) {
                 requiredFields.push({ id: '<%= txtOvertimeRate.ClientID %>', name: 'Overtime Rate', msgId: 'overtimeRateRequiredMessage' });
+            }
+            if (isAttendanceTypeBiometric()) {
+                requiredFields.push({ id: '<%= txtPunchingDeviceId.ClientID %>', name: 'Punching Device ID', msgId: 'punchingDeviceIdRequiredMessage' });
+                requiredFields.push({ id: '<%= txtBiometricId.ClientID %>', name: 'Biometric ID', msgId: 'biometricIdRequiredMessage' });
             }
             var missing = [];
             var firstInvalid = null;
@@ -1757,6 +1769,11 @@
             var overtimeEligible = document.getElementById('<%= chkOvertimeEligible.ClientID %>');
             var overtimeRate = document.getElementById('<%= txtOvertimeRate.ClientID %>');
             var overtimeRateLabel = document.getElementById('overtimeRateLabel');
+            var attendanceType = document.getElementById('<%= ddlAttendanceType.ClientID %>');
+            var punchingDeviceId = document.getElementById('<%= txtPunchingDeviceId.ClientID %>');
+            var biometricId = document.getElementById('<%= txtBiometricId.ClientID %>');
+            var punchingDeviceIdLabel = document.getElementById('punchingDeviceIdLabel');
+            var biometricIdLabel = document.getElementById('biometricIdLabel');
             var employeeCode = document.getElementById('<%= txtEmployeeCode.ClientID %>');
             var employeeUsername = document.getElementById('<%= txtUsername.ClientID %>');
             var firstName = document.getElementById('<%= txtFirstName.ClientID %>');
@@ -1854,6 +1871,33 @@
                 }
             }
 
+            function syncAttendanceBiometricState() {
+                var isBiometric = isAttendanceTypeBiometric();
+
+                if (punchingDeviceIdLabel) {
+                    punchingDeviceIdLabel.classList.toggle('is-required', isBiometric);
+                }
+                if (biometricIdLabel) {
+                    biometricIdLabel.classList.toggle('is-required', isBiometric);
+                }
+
+                if (!isBiometric) {
+                    [
+                        { input: punchingDeviceId, msgId: 'punchingDeviceIdRequiredMessage' },
+                        { input: biometricId, msgId: 'biometricIdRequiredMessage' }
+                    ].forEach(function (item) {
+                        if (item.input) {
+                            item.input.classList.remove('validation-error');
+                        }
+                        var msgElement = document.getElementById(item.msgId);
+                        if (msgElement) {
+                            msgElement.textContent = '';
+                            msgElement.style.display = '';
+                        }
+                    });
+                }
+            }
+
             function generateUsername() {
                 if (!employeeUsername || !firstName || !lastName || !employeeCode) {
                     return;
@@ -1887,6 +1931,11 @@
             if (overtimeEligible) {
                 overtimeEligible.addEventListener('change', syncOvertimeRateState);
                 syncOvertimeRateState();
+            }
+
+            if (attendanceType) {
+                attendanceType.addEventListener('change', syncAttendanceBiometricState);
+                syncAttendanceBiometricState();
             }
 
             // Auto-generate username when first name, last name, or employee code changes
@@ -2241,7 +2290,9 @@
             function applyNoFutureDates(scope) {
                 var root = scope || document;
                 var today = new Date().toISOString().split('T')[0];
+                var joiningDateId = '<%= txtJoiningDate.ClientID %>';
                 root.querySelectorAll('input[type="date"]').forEach(function (input) {
+                    if (input.id === joiningDateId) return;
                     input.setAttribute('max', today);
                 });
             }

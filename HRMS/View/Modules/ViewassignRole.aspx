@@ -310,7 +310,7 @@
                             <div>
                                 <asp:Button runat="server" ID="Button1" Text="Search" CssClass="btn btn-primary" OnClick="AdvSearchButton_Click" />
                                 <asp:Button runat="server" ID="Button7" Text="Clear" CssClass="btn btn-primary" OnClick="AdvClearButton_Click" />
-                                <asp:Button runat="server" ID="Button8" Text="Back" CssClass="btn btn-primary" OnClientClick="highlightBackButton();" OnClick="AdvBackButton_Click" />
+                                <asp:Button runat="server" ID="Button8" Text="Back" CssClass="btn btn-primary" OnClick="AdvBackButton_Click" />
                             </div>
                         </div>
                         <%--<div class="row">
@@ -330,7 +330,7 @@
                     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
                         <ContentTemplate>
                             <div class="table-responsive">
-                                <asp:GridView runat="server" ID="gridview" class="table custom-gridview" AutoGenerateColumns="false" DataKeyNames="Userroledetailsid" OnRowCommand="gv_RowCommand" EnablePersistedSelection="true" OnPageIndexChanging="OnPageIndexChanging" PageSize="10"
+                                <asp:GridView runat="server" ID="gridview" class="table custom-gridview" AutoGenerateColumns="false" DataKeyNames="Userroledetailsid" OnRowCommand="gv_RowCommand" EnablePersistedSelection="true" PageSize="10"
                                     AllowSorting="true" OnSorting="gridview_Sorting" Style="margin: 0 auto;" EmptyDataText="No records found.">
                                     <Columns>
 

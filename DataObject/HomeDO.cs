@@ -140,6 +140,7 @@ namespace DataObject
             public string ImageUrl { get; set; }
             public string Background { get; set; }
             public DateTime inserted_date { get; set; }
+            public string ImageBase64 { get; set; }
             // Used only for UI
             public string IconHtml { get; set; }
         }

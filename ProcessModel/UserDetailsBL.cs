@@ -1267,6 +1267,54 @@ namespace ProcessModel
             return users;
         }
 
+        // Termination List screen (first screen only): loads strictly from the
+        // existing Sp_getalluser stored procedure with p_type='GetAllUser', as
+        // required - no fallback to any other procedure/connection, and the SP
+        // itself is neither created nor modified.
+        public List<UserDetailsDO> GetAllUsersForTerminationList()
+        {
+            List<UserDetailsDO> users = new List<UserDetailsDO>();
+
+            try
+            {
+                string normalizedConnection = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalizedConnection))
+                using (MySqlCommand cmd = new MySqlCommand("Sp_getalluser", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_type", "GetAllUser");
+                    con.Open();
+
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            users.Add(new UserDetailsDO
+                            {
+                                EmployeeCode = dr["EmployeeCode"] != DBNull.Value ? Convert.ToString(dr["EmployeeCode"]) : string.Empty,
+                                UserId = dr["UserId"] != DBNull.Value ? Convert.ToInt32(dr["UserId"]) : 0,
+                                Username = dr["Username"] != DBNull.Value ? Convert.ToString(dr["Username"]) : string.Empty,
+                                user_fullname = dr["user_fullname"] != DBNull.Value ? Convert.ToString(dr["user_fullname"]) : string.Empty,
+                                user_mail_id = dr["user_mail_id"] != DBNull.Value ? Convert.ToString(dr["user_mail_id"]) : string.Empty,
+                                contact_detail = dr["contact_detail"] != DBNull.Value ? Convert.ToString(dr["contact_detail"]) : string.Empty,
+                                user_type = dr["user_type"] != DBNull.Value ? Convert.ToString(dr["user_type"]) : string.Empty,
+                                roledescription = dr["roledescription"] != DBNull.Value ? Convert.ToString(dr["roledescription"]) : string.Empty,
+                                designation_name = dr["designation_name"] != DBNull.Value ? Convert.ToString(dr["designation_name"]) : string.Empty,
+                                company_id = dr["company_id"] != DBNull.Value ? Convert.ToInt32(dr["company_id"]) : 0,
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog("UserDetailsBL", "GetAllUsersForTerminationList", "Exception Message" + ex.Message + "Strace=" + ex.StackTrace, UserId);
+            }
+
+            return users;
+        }
+
         public List<UserDetailsDO> ViewAllUsersMainDb()
         {
             List<UserDetailsDO> users = GetAllUsersFallbackFromPrimary();
@@ -1452,6 +1500,8 @@ namespace ProcessModel
                             object probationVal = getVal(dr, new[] { "probation_period_months", "ProbationPeriodMonths", "probation_months" });
                             object employeeTypeVal = getVal(dr, new[] { "employee_type", "EmployeeType", "employment_type" });
                             object probationEndDate = getVal(dr, new[] { "probation_end_date", "ProbationEndDate", "probation_end_date" });
+                            object departmentVal = getVal(dr, new[] { "department", "Department", "department_name" });
+                            object reportingManagerVal = getVal(dr, new[] { "reporting_manager", "ReportingManager", "reporting_manager_name" });
                             string designationName = designationNameVal != null ? Convert.ToString(designationNameVal) : string.Empty;
                             string designationIdRaw = designationIdVal != null ? Convert.ToString(designationIdVal) : string.Empty;
                             int designationIdParsed = 0;
@@ -1483,6 +1533,8 @@ namespace ProcessModel
                                 probation_period_months = probationVal != null && int.TryParse(Convert.ToString(probationVal), out var probationParsed) ? probationParsed : 0,
                                 employee_type = employeeTypeVal != null ? Convert.ToString(employeeTypeVal) : string.Empty,
                                 ProbationEndDate= dojVal != null ? Convert.ToDateTime(probationEndDate) : DateTime.MinValue,
+                                department = departmentVal != null ? Convert.ToString(departmentVal) : string.Empty,
+                                reporting_manager = reportingManagerVal != null ? Convert.ToString(reportingManagerVal) : string.Empty,
                             });
                         }
                     }

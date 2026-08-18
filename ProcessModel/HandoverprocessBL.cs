@@ -654,6 +654,7 @@ namespace ProcessModel
                             model.ProposedLastWorkingDate = GetDateSafe(dr, "ProposedLastWorkingDate");
                             model.Reason = GetStringSafe(dr, "Reason");
                             model.ResignationStatus = GetStringSafe(dr, "ResignationStatus");
+                            model.ManagerRemark = GetStringSafe(dr, "Remarks");
                         }
 
                         // Result set 2: tbl_hr_review (PascalCase columns)
@@ -1113,6 +1114,96 @@ namespace ProcessModel
             }
 
             return mail;
+        }
+
+        // Recipients/Subject/Body for the Full and Final settlement email
+        // (AddFullandFinal.aspx) come from sp_get_full_and_final_mail_details, not
+        // built in C#. There's no LetterHtml here - the Relieving/Experience letters
+        // are generated separately via CommonBL.GetOnboardingDocumentHtml and attached
+        // as PDFs by the caller, same as SendDocuments.aspx does for onboarding letters.
+        public ResignationMailDO GetFullAndFinalMailDetails(int resignationId)
+        {
+            ResignationMailDO mail = null;
+
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(MySqlconnection))
+            {
+                return mail;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(MySqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand("sp_get_full_and_final_mail_details", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@p_resignation_id", resignationId);
+                    con.Open();
+
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            mail = new ResignationMailDO
+                            {
+                                ToEmail = GetStringSafe(dr, "ToEmail"),
+                                CcEmail = GetStringSafe(dr, "CcEmail"),
+                                BccEmail = GetStringSafe(dr, "BccEmail"),
+                                Subject = GetStringSafe(dr, "Subject"),
+                                Body = GetStringSafe(dr, "Body")
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetFullAndFinalMailDetails",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return mail;
+        }
+
+        // Marks employee_resignation.relieving_mail_sent (an existing column, not
+        // added for this feature) once the Full and Final mail has gone out
+        // successfully, so AddFullandFinal.aspx can show that it was already sent.
+        public bool MarkRelievingMailSent(int resignationId)
+        {
+            if (resignationId <= 0 || string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return false;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand(
+                    "UPDATE employee_resignation SET relieving_mail_sent = 1, relieving_mail_sent_date = NOW() WHERE employee_resignation_id = @p_id",
+                    con))
+                {
+                    cmd.Parameters.AddWithValue("@p_id", resignationId);
+                    con.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "MarkRelievingMailSent",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+                return false;
+            }
         }
 
         public KTHandoverDO GetKTHandoverByResignationId(int resignationId)

@@ -66,6 +66,7 @@ namespace DataObject
         public DateTime ProposedLastWorkingDate { get; set; }
         public string Reason { get; set; }
         public string ResignationStatus { get; set; }
+        public string ManagerRemark { get; set; }
 
         // HR Review section
         public int HRReviewId { get; set; }

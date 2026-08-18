@@ -469,7 +469,7 @@
 
     <i class="fa fa-plus"></i>
 </asp:LinkButton>
-                                            <asp:LinkButton ID="lnkViews" runat="server" CommandName="viewUsers" CommandArgument='<%# Eval("UserId") %>' CssClass="me-1" ToolTip="View User">
+                                            <asp:LinkButton ID="lnkViews" runat="server" CommandName="viewUsers" CommandArgument='<%# Eval("UserId") %>' CssClass="me-1 no-global-loader" ToolTip="View User">
     <i class="fa fa-eye"></i>
                                             </asp:LinkButton>
                                             <%--<asp:LinkButton ID="lnkViews" runat="server" CommandName="viewUsers" CommandArgument='<%# Eval("UserId") %>' CssClass="me-1" ToolTip="View">

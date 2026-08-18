@@ -176,12 +176,12 @@
                                         <td>
                                             <asp:Button ID="btnDownload" runat="server" Text="Download"
                                                 CommandArgument='<%# Eval("UserDocDetId") %>'
-                                                CssClass="btn btn-sm btn-primary"
+                                                CssClass="btn btn-sm btn-primary no-global-loader"
                                                 OnClick="btnDownload_Click"
                                                 Visible='<%# Convert.ToInt32(Eval("UserDocDetId")) != 0 %>' />
                                             <asp:Button ID="btnView" runat="server" Text="View"
                                                 CommandArgument='<%# Eval("UserDocDetId") %>'
-                                                CssClass="btn btn-sm btn-secondary"
+                                                CssClass="btn btn-sm btn-secondary no-global-loader"
                                                 OnClick="btnView_Click"
                                                 Visible='<%# Convert.ToInt32(Eval("UserDocDetId")) != 0 %>' />
                                             <asp:LinkButton ID="btnDelete" runat="server"

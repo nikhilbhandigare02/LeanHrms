@@ -933,7 +933,7 @@
                                         <asp:TemplateField HeaderText="Action" ItemStyle-Width="100px">
                                             <ItemTemplate>
                                                 <div class="employee-action-stack">
-                                                    <asp:LinkButton ID="lnkView" runat="server" CssClass="employee-action-btn" CommandName="viewUser" CommandArgument='<%# Eval("UserId") + "|" + Eval("EmployeeCode") %>' title="Update Employee">
+                                                    <asp:LinkButton ID="lnkView" runat="server" CssClass="employee-action-btn no-global-loader" CommandName="viewUser" CommandArgument='<%# Eval("UserId") + "|" + Eval("EmployeeCode") %>' title="Update Employee">
                                                         <i class="far fa-edit"></i>
                                                     </asp:LinkButton>
                                                     <asp:LinkButton ID="lnkDelete" CommandName="deleteUser" CssClass="employee-action-btn danger" runat="server" CommandArgument='<%# Eval("UserId") + "|" + Eval("EmployeeCode") %>' title="Delete Employee">

@@ -932,7 +932,7 @@
                             <%--                            <div class="hb-item">--%>
                             <asp:LinkButton ID="lnkNews"
                                 runat="server"
-                                CssClass="hb-item"
+                                CssClass="hb-item no-global-loader"
                                 CommandName="ViewNews"
                                 CommandArgument='<%# Eval("news_announcement_id") %>'
                                 Style="text-decoration: none; color: inherit; display: flex;">
@@ -1335,7 +1335,7 @@
                             <asp:LinkButton
                                 ID="lnkEvents"
                                 runat="server"
-                                CssClass="hb-item"
+                                CssClass="hb-item no-global-loader"
                                 CommandName="ViewEvents"
                                 CommandArgument='<%# Eval("record_type") + "|" + Eval("id") %>'
                                 Style="text-decoration: none; color: inherit; display: flex;">
@@ -1379,7 +1379,7 @@
                                 <asp:LinkButton
                                     ID="lnkEvents"
                                     runat="server"
-                                    CssClass="hb-item"
+                                    CssClass="hb-item no-global-loader"
                                     CommandName="ViewEvents"
                                     CommandArgument='<%# Eval("record_type") + "|" + Eval("id") %>'
                                     Style="text-decoration: none; color: inherit; display: flex;">
@@ -1668,7 +1668,7 @@
                             ID="btnDownloadAttachment"
                             runat="server"
                             Text="Download Attachment"
-                            CssClass="hb-btn hb-btn-primary"
+                            CssClass="hb-btn hb-btn-primary no-global-loader"
                             Visible="false"
                             OnClick="btnDownloadAttachment_Click" />
 

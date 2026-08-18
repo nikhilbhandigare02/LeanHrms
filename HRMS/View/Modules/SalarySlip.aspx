@@ -169,7 +169,7 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="Action">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="lnkDownload" runat="server" CssClass="ss-dl"
+                                            <asp:LinkButton ID="lnkDownload" runat="server" CssClass="ss-dl no-global-loader"
                                                 CommandName="DownloadSlip"
                                                 CommandArgument='<%# string.Format("{0}|{1}|{2}", Eval("employeecode"), Eval("Year"), Eval("Month")) %>'
                                                 title="Password: Employee Code + Date of Birth (ddMMyyyy)">

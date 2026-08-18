@@ -132,6 +132,24 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Label lblReason;
 
         /// <summary>
+        /// divManagerRemark control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divManagerRemark;
+
+        /// <summary>
+        /// lblManagerRemark control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblManagerRemark;
+
+        /// <summary>
         /// ddlNoticePeriodRequired control.
         /// </summary>
         /// <remarks>
@@ -141,13 +159,13 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.DropDownList ddlNoticePeriodRequired;
 
         /// <summary>
-        /// txtNoticeStartDate control.
+        /// rfvNoticePeriodRequired control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNoticeStartDate;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvNoticePeriodRequired;
 
         /// <summary>
         /// txtNoticeDays control.
@@ -159,13 +177,22 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtNoticeDays;
 
         /// <summary>
-        /// ddlBuyoutApplicable control.
+        /// txtNoticeStartDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlBuyoutApplicable;
+        protected global::System.Web.UI.WebControls.TextBox txtNoticeStartDate;
+
+        /// <summary>
+        /// rfvNoticeStartDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvNoticeStartDate;
 
         /// <summary>
         /// txtRevisedLastWorkingDate control.
@@ -177,6 +204,33 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtRevisedLastWorkingDate;
 
         /// <summary>
+        /// rfvRevisedLastWorkingDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvRevisedLastWorkingDate;
+
+        /// <summary>
+        /// ddlBuyoutApplicable control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlBuyoutApplicable;
+
+        /// <summary>
+        /// rfvBuyoutApplicable control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvBuyoutApplicable;
+
+        /// <summary>
         /// txtHRRemarks control.
         /// </summary>
         /// <remarks>
@@ -184,6 +238,15 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtHRRemarks;
+
+        /// <summary>
+        /// rfvHRRemarks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvHRRemarks;
 
         /// <summary>
         /// btnAcceptResignation control.

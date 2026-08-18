@@ -78,6 +78,13 @@ namespace HRMS.View.Modules
                 lblProposedLastWorkingDate.Text = model.ProposedLastWorkingDate == DateTime.MinValue ? "-" : model.ProposedLastWorkingDate.ToString("dd-MM-yyyy");
                 lblReason.Text = string.IsNullOrWhiteSpace(model.Reason) ? "-" : model.Reason;
 
+                bool hasManagerRemark = !string.IsNullOrWhiteSpace(model.ManagerRemark);
+                divManagerRemark.Visible = hasManagerRemark;
+                if (hasManagerRemark)
+                {
+                    lblManagerRemark.Text = model.ManagerRemark;
+                }
+
                 bool alreadyReviewed = existingReview != null &&
                     string.Equals(existingReview.Status, "Accepted", StringComparison.OrdinalIgnoreCase);
                 lblReviewStatus.Text = alreadyReviewed ? "HR review completed" : "HR review pending";

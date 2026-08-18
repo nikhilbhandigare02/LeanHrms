@@ -46,6 +46,7 @@
                                                 <asp:LinkButton
                                                     ID="lnkView"
                                                     runat="server"
+                                                    CssClass="no-global-loader"
                                                     CommandName="viewLeave"
                                                     CommandArgument='<%# Eval("leave_id") + "|" + Eval("emp_id") %>'
                                                     title="View Leave">

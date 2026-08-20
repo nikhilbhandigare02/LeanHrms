@@ -170,7 +170,7 @@ namespace Lean.View.Layout
                 resignationMenu.SubMenus = new List<SubMenuData>();
             }
 
-            SubMenuData existing = resignationMenu.SubMenus.FirstOrDefault(s => IsMenuName(s.SubMenu, "Notice"));
+            SubMenuData existing = resignationMenu.SubMenus.FirstOrDefault(s => IsMenuName(s.SubMenu, "Notice Period List"));
             if (existing == null)
             {
                 resignationMenu.SubMenus.Add(new SubMenuData

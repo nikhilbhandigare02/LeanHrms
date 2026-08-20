@@ -1740,6 +1740,7 @@
     <Content Include="View\Modules\AddAppraisalForm.aspx" />
     <Content Include="View\Modules\AddBioxiasalaryform.aspx" />
     <Content Include="View\Modules\AddEmployee.aspx" />
+    <Content Include="View\Modules\AddFullandFinal.aspx" />
     <Content Include="View\Modules\AddReimbursementForm.aspx" />
     <Content Include="View\Modules\AppraisalDetails.aspx" />
     <Content Include="View\Modules\AppraisalHistory.aspx" />
@@ -1762,6 +1763,8 @@
     <Content Include="View\Modules\AssignRights.aspx" />
     <Content Include="View\Modules\assignRole.aspx" />
     <Content Include="View\Modules\EmployeeAction.aspx" />
+    <Content Include="View\Modules\TerminationDetailsView.aspx" />
+    <Content Include="View\Modules\TerminationHistoryList.aspx" />
     <Content Include="View\Modules\EmployeeLeaveView.aspx" />
     <Content Include="View\Modules\HandoverProcess.aspx" />
     <Content Include="View\Modules\Home.aspx" />
@@ -1880,6 +1883,13 @@
     <Compile Include="View\Modules\AddEmployee.aspx.cs">
       <DependentUpon>AddEmployee.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddFullandFinal.aspx.cs">
+      <DependentUpon>AddFullandFinal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddFullandFinal.aspx.designer.cs">
+      <DependentUpon>AddFullandFinal.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\AddReimbursementForm.aspx.cs">
       <DependentUpon>AddReimbursementForm.aspx</DependentUpon>
@@ -2024,6 +2034,20 @@
     </Compile>
     <Compile Include="View\Modules\EmployeeAction.aspx.designer.cs">
       <DependentUpon>EmployeeAction.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\TerminationDetailsView.aspx.cs">
+      <DependentUpon>TerminationDetailsView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\TerminationDetailsView.aspx.designer.cs">
+      <DependentUpon>TerminationDetailsView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\TerminationHistoryList.aspx.cs">
+      <DependentUpon>TerminationHistoryList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\TerminationHistoryList.aspx.designer.cs">
+      <DependentUpon>TerminationHistoryList.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\EmployeeLeaveView.aspx.cs">
       <DependentUpon>EmployeeLeaveView.aspx</DependentUpon>

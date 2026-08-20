@@ -43,11 +43,15 @@ namespace HRMS.View.Modules
 
             try
             {
-                List<ResignationDO> resignations = new HandoverprocessBL().GetEmployeeResignationDetails(0);
+                HandoverprocessBL bl = new HandoverprocessBL();
+                List<ResignationDO> resignations = bl.GetEmployeeResignationDetails(0);
                 if (resignations != null)
                 {
+                    HashSet<int> mailAlreadySentIds = bl.GetRelievingMailSentResignationIds();
+
                     var accepted = resignations
-                        .Where(r => string.Equals(r.hr_status, "Accepted", StringComparison.OrdinalIgnoreCase))
+                        .Where(r => string.Equals(r.hr_status, "Accepted", StringComparison.OrdinalIgnoreCase)
+                            && !mailAlreadySentIds.Contains(r.EmployeeResignationId))
                         .OrderBy(r => r.EmployeeName);
 
                     foreach (ResignationDO r in accepted)
@@ -176,6 +180,9 @@ namespace HRMS.View.Modules
                 SendMailWithAttachments(txtTo.Text.Trim(), txtCc.Text.Trim(), txtSubject.Text.Trim(), bodyHtml, attachments);
 
                 bl.MarkRelievingMailSent(resignationId);
+
+                BindEmployeeDropdown();
+                pnlMail.Visible = false;
 
                 ShowResult("Success", "Full and Final settlement mail sent successfully with " + attachments.Count + " attachment(s).");
             }

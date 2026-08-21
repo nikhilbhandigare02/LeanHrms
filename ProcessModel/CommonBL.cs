@@ -297,7 +297,7 @@ namespace ProcessModel
                 mysqlParameters.Add(DataClass.GetParameter("@p_UserId", userId));
 
                 listdata = getDrtolistParam.getdatafromreder<CompanyLogoDO>(
-                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_GetCompanyLogoNew_360")
+                    DataClass.GetDataReaderFromSpWithParam(mysqlParameters, DBName, "sp_GetCompanyLogoNew")
                 ).ToList();
             }
             catch (Exception ex)

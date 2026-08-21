@@ -22,14 +22,6 @@ namespace HRMS.View.Modules
     {
         protected string UserId = null;
 
-        protected string GetInitials(string fullName)
-        {
-            if (string.IsNullOrWhiteSpace(fullName)) return "?";
-            var parts = fullName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
-            return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
-        }
-
         // Label for the grid's action link - reflects the NEXT step for this
         // employee's current status, not a generic "Terminate" once a CAP
         // round is already in progress.
@@ -504,6 +496,11 @@ namespace HRMS.View.Modules
 
             HandoverprocessBL bl = new HandoverprocessBL();
 
+            // Captured so the success message can reflect exactly which
+            // action just completed (CAP1 / CAP2 / final) instead of a
+            // generic "termination saved" message.
+            int? capRoundForMessage = null;
+
             // PERFORMANCE BASED - 2 CAP rounds before the actual termination.
             // Each click is a new row: 1st -> CAP1, 2nd -> CAP2, 3rd -> final
             // Terminated (which is when is_terminated gets set in userm).
@@ -530,6 +527,7 @@ namespace HRMS.View.Modules
                 }
 
                 obj.CapRound = nextCapRound;
+                capRoundForMessage = nextCapRound;
                 obj.termination_reason = reasonText;
 
                 if (!string.IsNullOrEmpty(hfPerformanceRating.Value))
@@ -604,9 +602,10 @@ namespace HRMS.View.Modules
 
                 ClearTerminationForm();
 
+                string successMessage = GetTerminationSuccessMessage(hfTerminationType.Value, capRoundForMessage);
                 ScriptManager.RegisterStartupScript(
                     this, GetType(), "ok",
-                    $"showUserSavedMessage('Success','{result[0].Message}');", true);
+                    $"showUserSavedMessage('Success','{successMessage}');", true);
 
                 ScriptManager.RegisterStartupScript(
                     this, GetType(), "close",
@@ -615,6 +614,23 @@ namespace HRMS.View.Modules
 
                 BindGridViewFromAPI(obj.CompanyId);
             }
+        }
+
+        // One specific success message per action, instead of always showing
+        // the save SP's generic "Termination record saved successfully."
+        private string GetTerminationSuccessMessage(string terminationType, int? capRound)
+        {
+            if (terminationType == "Performance")
+            {
+                if (capRound == 1) return "CAP 1 issued successfully.";
+                if (capRound == 2) return "CAP 2 issued successfully.";
+                return "Employee terminated successfully.";
+            }
+
+            if (terminationType == "DirectTerminate")
+                return "Direct Termination sent successfully.";
+
+            return "Termination record saved successfully.";
         }
 
         private bool ValidateTerminationForm(out string errorMessage)
@@ -934,7 +950,7 @@ namespace HRMS.View.Modules
                     }
                 }
 
-                ShowMessage("Show cause notice sent successfully.", "Success");
+                ShowMessage("Show Cause Notice is issued successfully.", "Success");
 
                 // Refresh which of Send Show Cause Notice / Remove Termination
                 // should be visible now, and keep the modal open on this tab so

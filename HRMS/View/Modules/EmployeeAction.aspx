@@ -145,21 +145,6 @@
             background-color: #f8f9ff;
         }
 
-        .emp-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #556ee6;
-            color: #fff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 600;
-            margin-right: 10px;
-            flex: 0 0 34px;
-        }
-
         .emp-name-cell {
             display: flex;
             align-items: center;
@@ -735,7 +720,6 @@
                                     <asp:TemplateField HeaderText="Employee Name">
                                         <ItemTemplate>
                                             <div class="emp-name-cell">
-                                                <span class="emp-avatar"><%# GetInitials(Eval("user_fullname").ToString()) %></span>
                                                 <span><%# Eval("user_fullname") %></span>
                                             </div>
                                         </ItemTemplate>

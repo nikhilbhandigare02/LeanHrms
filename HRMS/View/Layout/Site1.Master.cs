@@ -211,7 +211,9 @@ namespace Lean.View.Layout
                         string.Equals(lastSegment, "ImageLibrary.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AppraisalHistory.aspx", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(lastSegment, "AttendanceDetails.aspx", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(lastSegment, "SendDocuments.aspx", StringComparison.OrdinalIgnoreCase);
+                        string.Equals(lastSegment, "SendDocuments.aspx", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(lastSegment, "TerminationDetailsView.aspx", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(lastSegment, "TerminationHistoryList.aspx", StringComparison.OrdinalIgnoreCase);
 
                     //bool isAddProjectViewMode = url.Contains("Addproject") && url.Contains("mode=view");
                     int roleId = Convert.ToInt32(Session["roleid"]);

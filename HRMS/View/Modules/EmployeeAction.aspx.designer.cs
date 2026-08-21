@@ -78,13 +78,22 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.HiddenField hfPerformanceRating;
 
         /// <summary>
-        /// ddlNoticePeriod control.
+        /// hfCapStage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlNoticePeriod;
+        protected global::System.Web.UI.WebControls.HiddenField hfCapStage;
+
+        /// <summary>
+        /// txtNoticePeriod control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNoticePeriod;
 
         /// <summary>
         /// txtLetterPreview control.
@@ -105,6 +114,15 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.TextBox txtResponseDeadline;
 
         /// <summary>
+        /// txtShowCauseNoticeDays control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtShowCauseNoticeDays;
+
+        /// <summary>
         /// txtNoticeLetter control.
         /// </summary>
         /// <remarks>
@@ -123,6 +141,42 @@ namespace HRMS.View.Modules
         protected global::System.Web.UI.WebControls.Button btnSendShowCause;
 
         /// <summary>
+        /// btnRemoveTermination control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRemoveTermination;
+
+        /// <summary>
+        /// btnEscalateShowCause control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnEscalateShowCause;
+
+        /// <summary>
+        /// txtDirectTerminationReason control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtDirectTerminationReason;
+
+        /// <summary>
+        /// txtDirectTerminationRemarks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtDirectTerminationRemarks;
+
+        /// <summary>
         /// txtTerminationDate control.
         /// </summary>
         /// <remarks>
@@ -139,6 +193,33 @@ namespace HRMS.View.Modules
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnConfirmTermination;
+
+        /// <summary>
+        /// btnSendTerminationNotice control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSendTerminationNotice;
+
+        /// <summary>
+        /// btnRemovePerformanceCap control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRemovePerformanceCap;
+
+        /// <summary>
+        /// btnEscalateToTerminationPerf control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnEscalateToTerminationPerf;
 
         /// <summary>
         /// hfPageIndexViewUser control.

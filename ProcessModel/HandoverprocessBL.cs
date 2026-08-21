@@ -1587,6 +1587,49 @@ namespace ProcessModel
             }
         }
 
+        // IDs of resignations whose Full and Final mail has already been sent,
+        // so AddFullandFinal.aspx can hide them from the employee dropdown.
+        public HashSet<int> GetRelievingMailSentResignationIds()
+        {
+            var sentIds = new HashSet<int>();
+
+            if (string.IsNullOrWhiteSpace(Sqlconnection))
+            {
+                return sentIds;
+            }
+
+            try
+            {
+                string normalized = NormalizeMySqlConnectionString(Sqlconnection);
+                using (MySqlConnection con = new MySqlConnection(normalized))
+                using (MySqlCommand cmd = new MySqlCommand(
+                    "SELECT employee_resignation_id FROM employee_resignation WHERE relieving_mail_sent = 1",
+                    con))
+                {
+                    con.Open();
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            sentIds.Add(Convert.ToInt32(dr["employee_resignation_id"]));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetRelievingMailSentResignationIds",
+                    "Exception Message=" + ex.Message + " Strace=" + ex.StackTrace,
+                    UserId
+                );
+            }
+
+            return sentIds;
+        }
+
         public KTHandoverDO GetKTHandoverByResignationId(int resignationId)
         {
             KTHandoverDO model = null;

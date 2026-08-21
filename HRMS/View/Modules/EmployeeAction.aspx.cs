@@ -30,6 +30,40 @@ namespace HRMS.View.Modules
             return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
         }
 
+        // Label for the grid's action link - reflects the NEXT step for this
+        // employee's current status, not a generic "Terminate" once a CAP
+        // round is already in progress.
+        protected string GetTerminateActionLabel(object status)
+        {
+            string s = status?.ToString();
+            if (s == "CAP1") return "Save CAP 2";
+            // While CAP2's target date hasn't passed, this stays labeled Edit -
+            // same underlying action as before, just relabeled per CAP2 window.
+            if (s == "CAP2") return "Edit";
+            // Notice already sent - still opens the same modal (to remove/
+            // escalate), just reflects the current state instead of "Terminate".
+            if (s == "ShowCauseIssued") return "Sent Show Cause Notice";
+            return "Terminate";
+        }
+
+        // Once CAP2's target date has passed (SP_GetEmployeeTerminationStatus
+        // reports CAP2_EXPIRED), neither Edit nor Terminate show anymore -
+        // what happens next from there is handled by a separate scheduler.
+        protected bool ShouldShowActionButton(object status)
+        {
+            string s = status?.ToString();
+            return s != "Terminated" && s != "CAP2_EXPIRED";
+        }
+
+        protected string GetCapBadgeText(object status)
+        {
+            string s = status?.ToString();
+            if (s == "CAP1") return "CAP 1 Issued";
+            if (s == "CAP2") return "CAP 2 Issued";
+            if (s == "CAP2_EXPIRED") return "CAP 2 Expired";
+            return "";
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             UserId = Convert.ToString(Session["userId"]);
@@ -59,6 +93,16 @@ namespace HRMS.View.Modules
                 Session["SelectedCompanyId"] = 0;
                 Session["CurrentPageIndex"] = 0;
                 BindGridViewFromAPI(0);
+
+                // Employees with an in-progress CAP/Show Cause case no longer
+                // appear in the main grid at all, so History's "Manage" link
+                // comes back here with this instead of a grid row click.
+                int manageUserId = 0;
+                int.TryParse(Request.QueryString["manage_user_id"], out manageUserId);
+                if (manageUserId > 0)
+                {
+                    OpenManageModalForUser(manageUserId);
+                }
 
                 //BindDropdownTerminationReason();
             }
@@ -96,6 +140,27 @@ namespace HRMS.View.Modules
             try
             {
                 var users = GetUsersFromAPI(companyId); // ✅ pass companyId
+
+                // Resolve status for everyone up front - one batched round trip
+                // regardless of list size - so fully Terminated employees can be
+                // filtered out of the main grid before pagination. They stay
+                // fully visible/searchable in Termination History instead of
+                // being deleted; this only affects what this grid displays.
+                HandoverprocessBL statusBl = new HandoverprocessBL();
+                var statusByUserId = statusBl.GetEmployeeTerminationStatusBulk(
+                    users.Select(u => u.UserId).ToList());
+
+                foreach (var u in users)
+                {
+                    u.notice_status = statusByUserId.TryGetValue(u.UserId, out var s) ? s : "None";
+                }
+
+                // Main grid shows only untouched employees - anyone with ANY
+                // termination action in progress (CAP1/CAP2/Show Cause) or
+                // completed (Terminated) is managed from Termination History
+                // instead, per explicit confirmation this replaces the earlier
+                // "hide only Terminated" behavior.
+                users = users.Where(u => u.notice_status == "None").ToList();
 
                 ApplySorting(ref users); // existing sorting logic
 
@@ -422,8 +487,9 @@ namespace HRMS.View.Modules
                 EmployeeCode = hfEmployeeCode.Value,
                 TerminationDate = Convert.ToDateTime(txtTerminationDate.Text),
                 termination_reason = hfTerminationType.Value,
+                TerminationType = hfTerminationType.Value,
                 InsertedBy = Convert.ToInt32(Session["UserId"]),
-                EmployeeEmail = hfEmployeeEmail.Value,   
+                EmployeeEmail = hfEmployeeEmail.Value,
                 EmployeeName = hfEmployeeName.Value
                 //CompanyId = Convert.ToInt32(Session["SelectedCompanyId"]),
                 //UserId = userId,                
@@ -436,18 +502,42 @@ namespace HRMS.View.Modules
 
             };
 
-            // PERFORMANCE BASED
+            HandoverprocessBL bl = new HandoverprocessBL();
+
+            // PERFORMANCE BASED - 2 CAP rounds before the actual termination.
+            // Each click is a new row: 1st -> CAP1, 2nd -> CAP2, 3rd -> final
+            // Terminated (which is when is_terminated gets set in userm).
             if (hfTerminationType.Value == "Performance")
             {
+                string existingStatus = bl.GetEmployeeTerminationStatus(obj.UserId);
 
-                obj.termination_reason = "Performance Based Letter";
+                int? nextCapRound;
+                string reasonText;
+                if (existingStatus == "CAP1")
+                {
+                    nextCapRound = 2;
+                    reasonText = "Performance Based Letter - CAP 2";
+                }
+                else if (existingStatus == "CAP2" || existingStatus == "CAP2_EXPIRED")
+                {
+                    nextCapRound = null;
+                    reasonText = "Performance Based Letter";
+                }
+                else
+                {
+                    nextCapRound = 1;
+                    reasonText = "Performance Based Letter - CAP 1";
+                }
+
+                obj.CapRound = nextCapRound;
+                obj.termination_reason = reasonText;
 
                 if (!string.IsNullOrEmpty(hfPerformanceRating.Value))
                     obj.PerformanceRating = Convert.ToInt32(hfPerformanceRating.Value);
                 else
                     obj.PerformanceRating = null;
 
-                obj.NoticePeriodDays = Convert.ToInt32(ddlNoticePeriod.SelectedValue);
+                obj.NoticePeriodDays = Convert.ToInt32(txtNoticePeriod.Text.Trim());
                 obj.TerminationLetter = txtLetterPreview.Text.Trim();
             }
 
@@ -464,12 +554,54 @@ namespace HRMS.View.Modules
                 obj.NoticeLetter = txtNoticeLetter.Text.Trim();
             }
 
-            HandoverprocessBL bl = new HandoverprocessBL();
+            // DIRECT TERMINATE
+            if (hfTerminationType.Value == "DirectTerminate")
+            {
+                obj.termination_reason = txtDirectTerminationReason.Text.Trim();
+                obj.TerminationLetter = txtDirectTerminationRemarks.Text.Trim();
+            }
+
             var result = bl.SaveEmployeeTermination(obj);
 
             if (result.Count > 0 && result[0].Status == 1)
             {
+                // SP resolves and returns the To/CC email addresses (employee's own
+                // mail id + reporting manager's mail id) and the letter preview that
+                // was actually saved - use those rather than re-deriving them here.
+                var saved = result[0];
+                obj.ToEmail = saved.ToEmail;
+                obj.CCEmail = saved.CCEmail;
+                obj.TerminationLetterPreview = saved.TerminationLetterPreview;
+                if (!string.IsNullOrWhiteSpace(saved.EmployeeEmail))
+                    obj.EmployeeEmail = saved.EmployeeEmail;
+                if (!string.IsNullOrWhiteSpace(saved.EmployeeName))
+                    obj.EmployeeName = saved.EmployeeName;
+
+                // Separate SP call that reads the just-saved row back (by UserId,
+                // not the row's id) and returns ToEmail, CCEmail, EmailSubject,
+                // EmailBody together - use these as the authoritative values.
+                var emailContent = bl.GetTerminationEmailContent(obj.UserId);
+                if (emailContent != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(emailContent.ToEmail))
+                        obj.ToEmail = emailContent.ToEmail;
+                    if (!string.IsNullOrWhiteSpace(emailContent.CCEmail))
+                        obj.CCEmail = emailContent.CCEmail;
+                    obj.EmailSubject = emailContent.EmailSubject;
+                    obj.EmailBody = emailContent.EmailBody;
+                }
+
                 SendTerminationEmail(obj);
+
+                // Escalating from the Show Cause tab reuses this same Submit
+                // handler (per the Direct Terminate flow) - also mark the
+                // original show-cause row Terminated so its own history
+                // doesn't stay stuck at "Show Cause Issued".
+                if (sender == btnEscalateShowCause)
+                {
+                    bl.MarkShowCauseAsTerminated(obj.UserId, obj.InsertedBy);
+                }
+
                 ClearTerminationForm();
 
                 ScriptManager.RegisterStartupScript(
@@ -498,9 +630,11 @@ namespace HRMS.View.Modules
                     return false;
                 }
 
-                if (ddlNoticePeriod.SelectedIndex == 0)
+                if (string.IsNullOrWhiteSpace(txtNoticePeriod.Text) ||
+                    !int.TryParse(txtNoticePeriod.Text.Trim(), out int noticeDaysCheck) ||
+                    noticeDaysCheck < 0)
                 {
-                    errorMessage = "Please select notice period.";
+                    errorMessage = "Please enter a valid notice period (0 or more days).";
                     return false;
                 }
 
@@ -524,6 +658,14 @@ namespace HRMS.View.Modules
 
             if (hfTerminationType.Value == "ShowCause")
             {
+                if (string.IsNullOrWhiteSpace(txtShowCauseNoticeDays.Text) ||
+                    !int.TryParse(txtShowCauseNoticeDays.Text.Trim(), out int showCauseNoticeDaysCheck) ||
+                    showCauseNoticeDaysCheck < 0)
+                {
+                    errorMessage = "Please enter a valid notice days value (0 or more days).";
+                    return false;
+                }
+
                 if (string.IsNullOrWhiteSpace(txtResponseDeadline.Text))
                 {
                     errorMessage = "Response deadline is required.";
@@ -541,7 +683,28 @@ namespace HRMS.View.Modules
                     errorMessage = "Notice letter cannot be empty.";
                     return false;
                 }
-                
+
+            }
+
+            if (hfTerminationType.Value == "DirectTerminate")
+            {
+                if (string.IsNullOrWhiteSpace(txtDirectTerminationReason.Text))
+                {
+                    errorMessage = "Termination reason is required.";
+                    return false;
+                }
+
+                if (string.IsNullOrWhiteSpace(txtTerminationDate.Text))
+                {
+                    errorMessage = "Please select termination date.";
+                    return false;
+                }
+
+                if (!DateTime.TryParse(txtTerminationDate.Text, out _))
+                {
+                    errorMessage = "Invalid termination date.";
+                    return false;
+                }
             }
 
             return true;
@@ -554,66 +717,25 @@ namespace HRMS.View.Modules
                 if (obj == null)
                     return;
 
-                string employeeEmail = obj.EmployeeEmail;
+                // "To" is always the employee's own mail id from the user master
+                // (returned by the save SP as ToEmail); never hard-coded here.
+                string employeeEmail = !string.IsNullOrWhiteSpace(obj.ToEmail) ? obj.ToEmail : obj.EmployeeEmail;
                 string employeeName = obj.EmployeeName;
 
-
                 if (string.IsNullOrEmpty(employeeEmail))
-                    return;
+                    return; // Employee email unavailable - skip sending; save has already succeeded.
 
-                string subject = "Employment Termination Notice";
+                // Subject/body are built by the save SP (EmailSubject/EmailBody) from
+                // the same data it just persisted, so the HTML lives in one place in
+                // the DB instead of being duplicated here. Fall back to a minimal
+                // subject/body only if the SP hasn't been updated to return them yet.
+                string subject = !string.IsNullOrWhiteSpace(obj.EmailSubject)
+                    ? obj.EmailSubject
+                    : "Employee Termination Letter";
 
-                string body = $@"
-<div style='font-family: Arial, sans-serif; line-height:1.6; color:#333;'>
-    <h2 style='color:#dc3545;'>Employment Termination</h2>
-    <p>Dear <strong>{employeeName}</strong>,</p>
-
-    <p>This is to formally inform you that your employment has been terminated.</p>
-
-    <table style='border-collapse:collapse; width:100%; margin-top:10px;'>
-        <tr>
-            <td style='padding:8px; border:1px solid #ddd;'><strong>Termination Reason</strong></td>
-            <td style='padding:8px; border:1px solid #ddd;'>{obj.termination_reason}</td>
-        </tr>
-        <tr>
-            <td style='padding:8px; border:1px solid #ddd;'><strong>Termination Date</strong></td>
-            <td style='padding:8px; border:1px solid #ddd;'>{obj.TerminationDate:dd-MMM-yyyy}</td>
-        </tr>";
-
-                if (obj.termination_reason == "Performance Based Letter")
-                {
-                    body += $@"
-        <tr>
-            <td style='padding:8px; border:1px solid #ddd;'><strong>Notice Period</strong></td>
-            <td style='padding:8px; border:1px solid #ddd;'>{obj.NoticePeriodDays} days</td>
-        </tr>
-    </table>
-
-    <h4 style='margin-top:15px;'>Termination Letter</h4>
-    <div style='padding:10px; border:1px solid #ccc;'>
-        {obj.TerminationLetter}
-    </div>";
-                }
-
-                else if (obj.termination_reason == "Show Cause Notice")
-                {
-                    body += $@"
-        <tr>
-            <td style='padding:8px; border:1px solid #ddd;'><strong>Response Deadline</strong></td>
-            <td style='padding:8px; border:1px solid #ddd;'>{obj.ResponseDeadline:dd-MMM-yyyy}</td>
-        </tr>
-    </table>
-
-    <h4 style='margin-top:15px;'>Notice</h4>
-    <div style='padding:10px; border:1px solid #ccc;'>
-        {obj.NoticeLetter}
-    </div>";
-                }
-
-                body += @"
-    <hr style='border:none; border-top:1px solid #ccc;'/>
-    <p>Regards,<br/>HR Team</p>
-</div>";
+                string body = !string.IsNullOrWhiteSpace(obj.EmailBody)
+                    ? obj.EmailBody
+                    : $"<p>Dear {employeeName},</p><p>This is to formally inform you that your employment has been terminated.</p>";
 
                 string Email = ConfigurationManager.AppSettings["SenderEmail"];
                 string Password = ConfigurationManager.AppSettings["SenderPassword"];
@@ -624,6 +746,19 @@ namespace HRMS.View.Modules
                 {
                     mail.From = new MailAddress(Email, "HRMS System");
                     mail.To.Add(employeeEmail);
+
+                    // CC = HR / reporting manager mail id resolved by the SP. If it
+                    // isn't available, just send without CC rather than failing.
+                    if (!string.IsNullOrWhiteSpace(obj.CCEmail))
+                    {
+                        foreach (string cc in obj.CCEmail.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            string trimmedCc = cc.Trim();
+                            if (!string.IsNullOrWhiteSpace(trimmedCc))
+                                mail.CC.Add(trimmedCc);
+                        }
+                    }
+
                     mail.Subject = subject;
                     mail.Body = body;
                     mail.IsBodyHtml = true;
@@ -639,6 +774,18 @@ namespace HRMS.View.Modules
             }
             catch (Exception ex)
             {
+                // Email failure must never fail the termination save - it has
+                // already been committed by the time this method is called.
+                // Still log it the same way every other module does, otherwise
+                // a silent SMTP/config failure is invisible to HR.
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "EmployeeAction",
+                    "SendTerminationEmail",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace,
+                    UserId
+                );
+
                 ScriptManager.RegisterStartupScript(
                     this, GetType(), "emailError",
                     $"console.error('Email Error: {ex.Message}');", true);
@@ -647,23 +794,25 @@ namespace HRMS.View.Modules
 
 
         private void ClearTerminationForm()
-            {
-                txtTerminationDate.Text = string.Empty;
+        {
+            txtTerminationDate.Text = string.Empty;
 
-                hfUserId.Value = string.Empty;
-                hfEmployeeCode.Value = string.Empty;
-                hfTerminationType.Value = string.Empty;
-                hfPerformanceRating.Value = string.Empty;
+            hfUserId.Value = string.Empty;
+            hfEmployeeCode.Value = string.Empty;
+            hfTerminationType.Value = string.Empty;
+            hfPerformanceRating.Value = string.Empty;
 
-                txtLetterPreview.Text = string.Empty;
+            txtLetterPreview.Text = string.Empty;
 
-                if (ddlNoticePeriod.Items.Count > 0)
-                    ddlNoticePeriod.SelectedIndex = 0;
+            txtNoticePeriod.Text = "0";
 
-                txtResponseDeadline.Text = string.Empty;
-                txtNoticeLetter.Text = string.Empty;
+            txtResponseDeadline.Text = string.Empty;
+            txtNoticeLetter.Text = string.Empty;
 
-            }
+            txtDirectTerminationReason.Text = string.Empty;
+            txtDirectTerminationRemarks.Text = string.Empty;
+
+        }
 
         private void ShowMessage(string msg, string type)
         {
@@ -676,77 +825,23 @@ namespace HRMS.View.Modules
             );
         }
 
-        private string GetShowCauseEmailTemplate(
-    string employeeName,
-    string companyName,
-    string issueDetails,
-    DateTime deadline,
-    string signatoryName,
-    string designation)
-        {
-            return $@"
-<div style='font-family:Calibri,Arial; line-height:1.7; color:#000;'>
-
-    <h3 style='text-align:center;'>Sample Show Cause Notice – Misconduct / Performance Issue</h3>
-
-    <p><strong>Subject:</strong> Show Cause Notice – Explanation Required</p>
-
-    <p>Dear {employeeName},</p>
-
-    <p>
-    This is to formally inform you that certain concerns have been observed
-    with respect to your performance / conduct / adherence to company policies
-    during the course of your employment with <strong>{companyName}</strong>.
-    </p>
-
-    <p>
-    It has been noted that <strong>{issueDetails}</strong>, which is not in line
-    with the expectations and policies of the organization. Despite previous
-    discussions, the matter remains unresolved.
-    </p>
-
-    <p>
-    You are hereby called upon to show cause in writing within
-    <strong>15 days</strong> from the date of receipt of this notice
-    (on or before <strong>{deadline:dd-MMM-yyyy}</strong>)
-    as to why disciplinary action should not be initiated.
-    </p>
-
-    <p>
-    Your explanation must clearly state the reasons along with
-    supporting documents, if any. Failure to respond within the
-    stipulated time will be treated as absence of explanation.
-    </p>
-
-    <p>
-    This notice is issued without prejudice and is part of an
-    internal review process.
-    </p>
-
-    <p>We expect your cooperation in this matter.</p>
-
-    <br/>
-
-    <p>
-    Sincerely,<br/>
-    <strong>{signatoryName}</strong><br/>
-    {designation}
-    </p>
-
-</div>";
-        }
-
-        
         protected void btnSendShowCause_Click(object sender, EventArgs e)
         {
             try
             {
-                string empName = hfEmployeeName.Value;
                 string empEmail = hfEmployeeEmail.Value;
 
-                
+                if (string.IsNullOrWhiteSpace(txtShowCauseNoticeDays.Text) ||
+                    !int.TryParse(txtShowCauseNoticeDays.Text.Trim(), out int noticeDaysCheck) ||
+                    noticeDaysCheck < 0)
+                {
+                    ShowMessage("Please enter a valid Notice Days value (0 or more days).", "error");
 
-          
+                    ScriptManager.RegisterStartupScript(this, GetType(), "openModal",
+                        "var myModal = new bootstrap.Modal(document.getElementById('terminationModal')); myModal.show();", true);
+                    return;
+                }
+
                 DateTime deadline = Convert.ToDateTime(txtResponseDeadline.Text);
 
                 if (!DateTime.TryParse(txtResponseDeadline.Text, out deadline))
@@ -771,10 +866,6 @@ namespace HRMS.View.Modules
                     return;
                 }
 
-                string companyName = "Alphonsol Pvt.Ltd";
-                string signatory = "HR Manager";
-                string designation = "Human Resources";
-
                 if (string.IsNullOrEmpty(empEmail))
                 {
                     ShowMessage("Employee email not found.", "error");
@@ -792,29 +883,43 @@ namespace HRMS.View.Modules
 
                 obj.NoticeLetter = issue;
                 obj.ResponseDeadline = deadline;
+                obj.NoticePeriodDays = int.TryParse(txtShowCauseNoticeDays.Text.Trim(), out int noticeDays) && noticeDays >= 0
+                    ? noticeDays
+                    : (int?)null;
                 obj.InsertedBy = Convert.ToInt32(Session["UserId"]);
 
-                string letterHtml = GetShowCauseEmailTemplate(
-                    empName,
-                    companyName,
-                    issue,
-                    deadline,
-                    signatory,
-                    designation
-                );
+                HandoverprocessBL bl = new HandoverprocessBL();
+                var result = bl.saveshowcausenotice(obj);
+
+                if (result == null || result.Count == 0)
+                {
+                    ShowMessage("Unable to save the show cause notice.", "error");
+                    return;
+                }
+
+                // Separate SP call, same pattern as the termination save flow -
+                // looked up by UserId rather than the new row's id.
+                var emailContent = bl.GetShowCauseEmailContent(obj.UserId);
+
+                string toEmail = (emailContent != null && !string.IsNullOrWhiteSpace(emailContent.ToEmail))
+                    ? emailContent.ToEmail
+                    : empEmail;
+                string subject = (emailContent != null && !string.IsNullOrWhiteSpace(emailContent.EmailSubject))
+                    ? emailContent.EmailSubject
+                    : "Show Cause Notice – Explanation Required";
+                string body = (emailContent != null && !string.IsNullOrWhiteSpace(emailContent.EmailBody))
+                    ? emailContent.EmailBody
+                    : $"<p>Dear Employee,</p><p>A Show Cause Notice has been issued. Response deadline: {deadline:dd-MMM-yyyy}.</p>";
 
                 string Email = ConfigurationManager.AppSettings["SenderEmail"];
                 string Password = ConfigurationManager.AppSettings["SenderPassword"];
                 int Port = Convert.ToInt32(ConfigurationManager.AppSettings["SenderPort"]);
                 string Host = ConfigurationManager.AppSettings["SenderHost"];
 
-                string subject = "Show Cause Notice – Explanation Required";
-                string body = letterHtml;
-
                 using (MailMessage mail = new MailMessage())
                 {
                     mail.From = new MailAddress(Email, "HRMS System");
-                    mail.To.Add(empEmail);
+                    mail.To.Add(toEmail);
                     mail.Subject = subject;
                     mail.Body = body;
                     mail.IsBodyHtml = true;
@@ -829,14 +934,79 @@ namespace HRMS.View.Modules
                     }
                 }
 
-                HandoverprocessBL bl = new HandoverprocessBL();
-                var result = bl.saveshowcausenotice(obj);
                 ShowMessage("Show cause notice sent successfully.", "Success");
 
+                // Refresh which of Send Show Cause Notice / Remove Termination
+                // should be visible now, and keep the modal open on this tab so
+                // HR sees the toggle flip immediately.
+                LoadShowCauseButtonStatus();
+                // Run after DOMContentLoaded (not immediately) - the page's own
+                // DOMContentLoaded handler always resets the modal to the
+                // Performance tab defaults on load, which would otherwise run
+                // AFTER this script and flip Send Termination Notice / Escalate
+                // to Termination back on top of Remove Termination.
+                ScriptManager.RegisterStartupScript(this, GetType(), "reopenShowCause",
+                    "window.addEventListener('DOMContentLoaded', function () { " +
+                    "var m = new bootstrap.Modal(document.getElementById('terminationModal')); m.show(); showShowCause(); " +
+                    "});", true);
 
             }
             catch (Exception ex)
             {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "EmployeeAction",
+                    "btnSendShowCause_Click",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace,
+                    UserId
+                );
+
+                ShowMessage(ex.Message, "error");
+            }
+        }
+
+        protected void btnRemoveTermination_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(hfUserId.Value);
+                int updatedBy = Convert.ToInt32(Session["UserId"]);
+
+                HandoverprocessBL bl = new HandoverprocessBL();
+                bool removed = bl.RemoveShowCauseNotice(userId, updatedBy);
+
+                if (removed)
+                {
+                    ShowMessage("Termination removed successfully.", "Success");
+                }
+                else
+                {
+                    ShowMessage("Unable to remove the termination.", "error");
+                }
+
+                // Reflects the actual saved state (is_active=0 now) - this is
+                // the same lookup used everywhere else, not a separate flag.
+                LoadShowCauseButtonStatus();
+                // Run after DOMContentLoaded (not immediately) - the page's own
+                // DOMContentLoaded handler always resets the modal to the
+                // Performance tab defaults on load, which would otherwise run
+                // AFTER this script and flip Send Termination Notice / Escalate
+                // to Termination back on top of Remove Termination.
+                ScriptManager.RegisterStartupScript(this, GetType(), "reopenShowCause",
+                    "window.addEventListener('DOMContentLoaded', function () { " +
+                    "var m = new bootstrap.Modal(document.getElementById('terminationModal')); m.show(); showShowCause(); " +
+                    "});", true);
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "EmployeeAction",
+                    "btnRemoveTermination_Click",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace,
+                    UserId
+                );
+
                 ShowMessage(ex.Message, "error");
             }
         }
@@ -852,17 +1022,116 @@ namespace HRMS.View.Modules
 
             string status = bl.GetShowCauseStatus(USERID);
 
-            if (status == "Show Cause Issued" || status == "Responded" || status == "Response_pending")
+            // Toggle, not two permanently visible buttons - which one shows is
+            // driven entirely by the saved notice_status (SP_GetShowCauseStatus
+            // only considers is_active=1 rows), so it's correct on every page
+            // load/reopen, not just right after a click.
+            bool showCauseIssued = (status == "Show Cause Issued" || status == "Responded" || status == "Response_pending");
+            bool terminated = (status == "Terminated");
+
+            btnSendShowCause.Visible = !showCauseIssued && !terminated;
+            btnRemoveTermination.Visible = showCauseIssued;
+            // Once actually terminated there's nothing left to escalate.
+            btnEscalateShowCause.Visible = !terminated;
+            // Only makes sense once a Show Cause Notice has actually been
+            // sent - disabled beforehand, enabled once it's issued.
+            btnEscalateShowCause.Enabled = showCauseIssued;
+        }
+
+        // Drives the Performance tab's Submit button through the 2 CAP rounds:
+        // 1st save -> CAP1, 2nd -> CAP2, 3rd -> the actual termination. Same
+        // saved-state-driven approach as LoadShowCauseButtonStatus, so the
+        // right label/stage shows on every reopen, not just after a click.
+        public void LoadPerformanceCapButtonStatus()
+        {
+            if (string.IsNullOrEmpty(hfUserId.Value))
+                return;
+
+            HandoverprocessBL bl = new HandoverprocessBL();
+            string status = bl.GetEmployeeTerminationStatus(Convert.ToInt32(hfUserId.Value));
+
+            // Escalate to Termination only makes sense once CAP2 has actually
+            // been processed - disabled for None/CAP1, enabled from CAP2
+            // onward (including after its target date expires).
+            btnEscalateToTerminationPerf.Enabled =
+                (status == "CAP2" || status == "CAP2_EXPIRED" || status == "Terminated");
+
+            switch (status)
             {
-                btnSendShowCause.Text = "Show Cause Issued";
-                btnSendShowCause.Enabled = false;
-                btnSendShowCause.CssClass = "btn btn-danger";
+                case "CAP1":
+                    btnSendTerminationNotice.Text = "Save CAP 2";
+                    btnSendTerminationNotice.Visible = true;
+                    // HR can cancel right after CAP1 too, not just from CAP2 -
+                    // SP_RemovePerformanceCap already clears both CAP1/CAP2.
+                    btnRemovePerformanceCap.Visible = true;
+                    hfCapStage.Value = "2";
+                    break;
+                case "CAP2":
+                    // While CAP2's target date hasn't passed, HR can only
+                    // cancel it here - the actual termination is decided by
+                    // the scheduler once the window expires, not a click here.
+                    btnSendTerminationNotice.Visible = false;
+                    btnRemovePerformanceCap.Visible = true;
+                    hfCapStage.Value = "Final";
+                    break;
+                case "CAP2_EXPIRED":
+                    // CAP2's target date has passed - what happens next is
+                    // handled by a separate scheduler, not from here.
+                    btnSendTerminationNotice.Visible = false;
+                    btnRemovePerformanceCap.Visible = false;
+                    hfCapStage.Value = "Final";
+                    break;
+                case "Terminated":
+                    // Already fully terminated - nothing left to record here.
+                    btnSendTerminationNotice.Visible = false;
+                    btnRemovePerformanceCap.Visible = false;
+                    hfCapStage.Value = "Final";
+                    break;
+                default:
+                    btnSendTerminationNotice.Text = "Save CAP 1";
+                    btnSendTerminationNotice.Visible = true;
+                    btnRemovePerformanceCap.Visible = false;
+                    hfCapStage.Value = "1";
+                    break;
             }
-            else
+        }
+
+        protected void btnRemovePerformanceCap_Click(object sender, EventArgs e)
+        {
+            try
             {
-                btnSendShowCause.Text = "Send Show Cause Notice";
-                btnSendShowCause.Enabled = true;
-                btnSendShowCause.CssClass = "btn btn-danger";
+                int userId = Convert.ToInt32(hfUserId.Value);
+                int updatedBy = Convert.ToInt32(Session["UserId"]);
+
+                HandoverprocessBL bl = new HandoverprocessBL();
+                bool removed = bl.RemovePerformanceCap(userId, updatedBy);
+
+                if (removed)
+                    ShowMessage("CAP termination removed successfully.", "Success");
+                else
+                    ShowMessage("Unable to remove the termination.", "error");
+
+                // Reflects the actual saved state - falls back to "None" once
+                // the CAP row is marked Removed, same lookup used everywhere.
+                LoadPerformanceCapButtonStatus();
+                ScriptManager.RegisterStartupScript(this, GetType(), "reopenPerformance",
+                    "window.addEventListener('DOMContentLoaded', function () { " +
+                    "var m = new bootstrap.Modal(document.getElementById('terminationModal')); m.show(); showPerformanceBased(); " +
+                    "});", true);
+
+                BindGridViewFromAPI(Convert.ToInt32(hfCompanyId.Value));
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "EmployeeAction",
+                    "btnRemovePerformanceCap_Click",
+                    "Exception Message: " + ex.Message + " StackTrace: " + ex.StackTrace,
+                    UserId
+                );
+
+                ShowMessage(ex.Message, "error");
             }
         }
 
@@ -870,7 +1139,7 @@ namespace HRMS.View.Modules
         {
             if (e.CommandName == "SelectEmployee")
             {
-                int index = Convert.ToInt32(e.CommandArgument); 
+                int index = Convert.ToInt32(e.CommandArgument);
 
                 var keys = gridview.DataKeys[index];
 
@@ -881,6 +1150,7 @@ namespace HRMS.View.Modules
                 hfCompanyId.Value = keys["company_id"].ToString();
 
                 LoadShowCauseButtonStatus();
+                LoadPerformanceCapButtonStatus();
 
                 ScriptManager.RegisterStartupScript(
                     this,
@@ -895,6 +1165,42 @@ namespace HRMS.View.Modules
             }
         }
 
+        // Same setup as gvEmployees_RowCommand's SelectEmployee branch, but
+        // for an employee who no longer has a row in this grid (CAP1/CAP2/
+        // Show Cause employees are only listed in Termination History now) -
+        // looked up directly instead of from a clicked grid row.
+        private void OpenManageModalForUser(int userId)
+        {
+            UserDetailsBL userDetailsBL = new UserDetailsBL();
+            var user = userDetailsBL.ViewAllUsers().FirstOrDefault(u => u.UserId == userId);
+
+            if (user == null)
+                return;
+
+            hfUserId.Value = user.UserId.ToString();
+            hfEmployeeCode.Value = user.EmployeeCode;
+            hfEmployeeEmail.Value = user.user_mail_id;
+            hfEmployeeName.Value = user.user_fullname;
+            hfCompanyId.Value = (user.company_id != 0 ? user.company_id : user.CompanyId).ToString();
+
+            LoadShowCauseButtonStatus();
+            LoadPerformanceCapButtonStatus();
+
+            HandoverprocessBL bl = new HandoverprocessBL();
+            string status = bl.GetEmployeeTerminationStatus(userId);
+            string openTabScript = (status == "ShowCauseIssued") ? "showShowCause();" : "showPerformanceBased();";
+
+            ScriptManager.RegisterStartupScript(
+                this,
+                GetType(),
+                "openManageModal",
+                "window.addEventListener('DOMContentLoaded', function () { " +
+                "var myModal = new bootstrap.Modal(document.getElementById('terminationModal')); myModal.show(); " +
+                openTabScript +
+                " });",
+                true
+            );
+        }
 
 
 

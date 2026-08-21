@@ -292,6 +292,8 @@ namespace ProcessModel
                 param.Add(new MySqlParameter("@p_ResponseDeadline", obj.ResponseDeadline.HasValue ? obj.ResponseDeadline.Value : (object)DBNull.Value));
                 param.Add(new MySqlParameter("@p_NoticeLetter", string.IsNullOrEmpty(obj.NoticeLetter) ? (object)DBNull.Value : obj.NoticeLetter));
                 param.Add(new MySqlParameter("@p_inserted_by", obj.InsertedBy));
+                param.Add(new MySqlParameter("@p_termination_type", string.IsNullOrEmpty(obj.TerminationType) ? (object)DBNull.Value : obj.TerminationType));
+                param.Add(new MySqlParameter("@p_cap_round", obj.CapRound.HasValue ? obj.CapRound.Value : (object)DBNull.Value));
 
 
                 list = getDrtolistParam.getdatafromreder<TerminationProcessDO>(
@@ -314,6 +316,47 @@ namespace ProcessModel
             }
 
             return list;
+        }
+
+        // Separate from SaveEmployeeTermination on purpose - the save SP only
+        // inserts + returns the To/CC/letter-preview it resolved, and this SP
+        // builds the actual HTML email subject/body for that saved row. Mirrors
+        // the resignation flow's separate sp_get_resignation_action_mail_details.
+        // Looked up by UserId (the employee just saved) rather than the new row's
+        // id, since UserId is already known to the caller before the save happens.
+        public TerminationProcessDO GetTerminationEmailContent(int userId)
+        {
+            TerminationProcessDO data = null;
+
+            if (userId <= 0)
+                return data;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                data = getDrtolistParam.getdatafromreder<TerminationProcessDO>(
+                    DataClass.GetDataReaderFromSpWithParam(
+                        param,
+                        DBName,
+                        "SP_GetTerminationEmailContent"
+                    )
+                ).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetTerminationEmailContent",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return data;
         }
 
         public List<UserDetailsDO> GetTerminationList(int companyId)
@@ -410,6 +453,7 @@ namespace ProcessModel
                 param.Add(new MySqlParameter("@p_EmployeeCode", obj.EmployeeCode));
                 param.Add(new MySqlParameter("@p_ResponseDeadline", obj.ResponseDeadline.HasValue ? obj.ResponseDeadline.Value : (object)DBNull.Value));
                 param.Add(new MySqlParameter("@p_NoticeLetter", string.IsNullOrEmpty(obj.NoticeLetter) ? (object)DBNull.Value : obj.NoticeLetter));
+                param.Add(new MySqlParameter("@p_NoticePeriodDays", obj.NoticePeriodDays.HasValue ? obj.NoticePeriodDays.Value : (object)DBNull.Value));
                 param.Add(new MySqlParameter("@p_InsertedBy", obj.InsertedBy));
 
 
@@ -434,6 +478,47 @@ namespace ProcessModel
 
             return list;
         }
+
+        // Separate from saveshowcausenotice on purpose - that SP only inserts
+        // into employee_termination_details and returns the new row's id; this
+        // SP reads that row back and builds the email subject/body for it.
+        // Looked up by UserId rather than the new row's id - see
+        // GetTerminationEmailContent for why.
+        public TerminationProcessDO GetShowCauseEmailContent(int userId)
+        {
+            TerminationProcessDO data = null;
+
+            if (userId <= 0)
+                return data;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                data = getDrtolistParam.getdatafromreder<TerminationProcessDO>(
+                    DataClass.GetDataReaderFromSpWithParam(
+                        param,
+                        DBName,
+                        "SP_GetShowCauseEmailContent"
+                    )
+                ).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetShowCauseEmailContent",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return data;
+        }
+
         public string GetShowCauseStatus(string USERID)
         {
             string status = "";
@@ -442,19 +527,315 @@ namespace ProcessModel
 
             param.Add(new MySqlParameter("@p_user_id", USERID));
 
-            var dr = DataClass.GetDataReaderFromSpWithParam(
-                param,
-                DBName,
-                "SP_GetShowCauseStatus"
-            );
-
-            if (dr.Read())
+            try
             {
-                status = dr["notice_status"].ToString();
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_GetShowCauseStatus"
+                );
+
+                // GetDataReaderFromSpWithParam returns null on a connection
+                // failure instead of throwing - guard against that here too.
+                if (dr != null && dr.Read())
+                {
+                    status = dr["notice_status"].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetShowCauseStatus",
+                    ex.Message,
+                    UserId
+                );
             }
 
             return status;
         }
+
+        // Deactivates the current active show cause row for this user (instead
+        // of deleting it) so SP_GetShowCauseStatus - and therefore the toggle
+        // button - goes back to "not issued" without losing history.
+        public bool RemoveShowCauseNotice(int userId, int updatedBy)
+        {
+            bool success = false;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+            param.Add(new MySqlParameter("@p_updated_by", updatedBy));
+
+            try
+            {
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_RemoveShowCauseNotice"
+                );
+
+                // GetDataReaderFromSpWithParam returns null on a connection
+                // failure instead of throwing - guard against that here too.
+                if (dr != null && dr.Read())
+                {
+                    success = Convert.ToInt32(dr["RowsAffected"]) > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "RemoveShowCauseNotice",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return success;
+        }
+
+        // Marks the current show-cause row itself as Terminated (rather than
+        // deactivating it) when it gets escalated straight into a termination -
+        // keeps the show-cause history reflecting its real outcome.
+        public bool MarkShowCauseAsTerminated(int userId, int updatedBy)
+        {
+            bool success = false;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+            param.Add(new MySqlParameter("@p_updated_by", updatedBy));
+
+            try
+            {
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_MarkShowCauseAsTerminated"
+                );
+
+                // GetDataReaderFromSpWithParam returns null on a connection
+                // failure instead of throwing - guard against that here too.
+                if (dr != null && dr.Read())
+                {
+                    success = Convert.ToInt32(dr["RowsAffected"]) > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "MarkShowCauseAsTerminated",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return success;
+        }
+
+        // Cancels the current active CAP round - same is_active soft-delete
+        // pattern as RemoveShowCauseNotice, so GetEmployeeTerminationStatus
+        // falls back to "None" and the Performance tab starts fresh at CAP 1.
+        public bool RemovePerformanceCap(int userId, int updatedBy)
+        {
+            bool success = false;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+            param.Add(new MySqlParameter("@p_updated_by", updatedBy));
+
+            try
+            {
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_RemovePerformanceCap"
+                );
+
+                if (dr != null && dr.Read())
+                {
+                    success = Convert.ToInt32(dr["RowsAffected"]) > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "RemovePerformanceCap",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return success;
+        }
+
+        // Single combined status for the employee list grid's Terminate /
+        // Terminated / View buttons - checks both termination tables since a
+        // Performance/Direct termination only ever writes to
+        // tbl_employee_termination, while a Show Cause notice only ever
+        // writes to employee_termination_details.
+        public string GetEmployeeTerminationStatus(int userId)
+        {
+            string status = "None";
+
+            if (userId <= 0)
+                return status;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+
+            try
+            {
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_GetEmployeeTerminationStatus"
+                );
+
+                // GetDataReaderFromSpWithParam returns null on a connection
+                // failure instead of throwing - guard against that here too.
+                if (dr != null && dr.Read())
+                    {
+                    status = dr["Status"].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetEmployeeTerminationStatus",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return status;
+        }
+
+        // Same status as GetEmployeeTerminationStatus, but for a whole page of
+        // rows in ONE round trip instead of one call per row. Calling
+        // GetEmployeeTerminationStatus in a loop (one connection + several
+        // sequential queries per row) was the actual page-load bottleneck on
+        // the employee list grid - this replaces that N+1 pattern.
+        public Dictionary<int, string> GetEmployeeTerminationStatusBulk(List<int> userIds)
+        {
+            var result = new Dictionary<int, string>();
+
+            if (userIds == null || userIds.Count == 0)
+                return result;
+
+            string idList = string.Join(",", userIds.Distinct());
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_ids", idList));
+
+            try
+            {
+                var dr = DataClass.GetDataReaderFromSpWithParam(
+                    param,
+                    DBName,
+                    "SP_GetEmployeeTerminationStatusBulk"
+                );
+
+                if (dr != null)
+                {
+                    while (dr.Read())
+                    {
+                        int uid = Convert.ToInt32(dr["UserId"]);
+                        result[uid] = dr["Status"].ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetEmployeeTerminationStatusBulk",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return result;
+        }
+
+        // Full audit trail for the Termination History page - every action
+        // ever recorded (CAP1, CAP2, Terminated, Removed, Show Cause, ...)
+        // across both tables, newest first. Nothing here is ever deleted.
+        public List<TerminationHistoryDO> GetTerminationHistory()
+        {
+            List<TerminationHistoryDO> list = new List<TerminationHistoryDO>();
+
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                list = getDrtolistParam.getdatafromreder<TerminationHistoryDO>(
+                    DataClass.GetDataReaderFromSpWithParam(
+                        new List<MySqlParameter>(),
+                        DBName,
+                        "SP_GetTerminationHistory"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetTerminationHistory",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return list;
+        }
+
+        // Full saved record for the View button - Terminated status reads from
+        // tbl_employee_termination, otherwise (Show Cause only) reads from
+        // employee_termination_details. See SP_GetTerminationRecordForView.
+        public TerminationProcessDO GetTerminationRecordForView(int userId)
+        {
+            TerminationProcessDO data = null;
+
+            if (userId <= 0)
+                return data;
+
+            List<MySqlParameter> param = new List<MySqlParameter>();
+            param.Add(new MySqlParameter("@p_user_id", userId));
+
+            try
+            {
+                getDrtolist getDrtolistParam = new getDrtolist();
+                data = getDrtolistParam.getdatafromreder<TerminationProcessDO>(
+                    DataClass.GetDataReaderFromSpWithParam(
+                        param,
+                        DBName,
+                        "SP_GetTerminationRecordForView"
+                    )
+                ).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                CommonBL errorlog = new CommonBL();
+                errorlog.fnStoreErrorLog(
+                    "HandoverprocessBL",
+                    "GetTerminationRecordForView",
+                    ex.Message,
+                    UserId
+                );
+            }
+
+            return data;
+        }
+
         public TerminationProcessDO GetTerminationByUserId(int userId)
         {
             TerminationProcessDO data = null;

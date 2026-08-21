@@ -200,7 +200,13 @@ namespace ProcessModel
                                         }
                                         else
                                         {
-                                            pp.SetValue(objectofclass, Convert.ChangeType(dr[pp.Name], pp.PropertyType), null);
+                                            // Convert.ChangeType throws for Nullable<T> targets (int?,
+                                            // DateTime?, etc.) since Nullable<T> doesn't implement
+                                            // IConvertible - convert to the underlying type instead so
+                                            // nullable columns (PerformanceRating, NoticePeriodDays, ...)
+                                            // actually get populated instead of silently staying null.
+                                            Type targetType = Nullable.GetUnderlyingType(pp.PropertyType) ?? pp.PropertyType;
+                                            pp.SetValue(objectofclass, Convert.ChangeType(dr[pp.Name], targetType), null);
                                         }
                                     }
                                 }
@@ -266,7 +272,10 @@ namespace ProcessModel
                                         }
                                         else
                                         {
-                                            pp.SetValue(objectofclass, Convert.ChangeType(dr[pp.Name], pp.PropertyType), null);
+                                            // See getdatafromreder - Convert.ChangeType throws for
+                                            // Nullable<T> targets, so convert to the underlying type.
+                                            Type targetType = Nullable.GetUnderlyingType(pp.PropertyType) ?? pp.PropertyType;
+                                            pp.SetValue(objectofclass, Convert.ChangeType(dr[pp.Name], targetType), null);
                                         }
                                     }
                                 }

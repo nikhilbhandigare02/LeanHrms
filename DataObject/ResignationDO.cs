@@ -208,6 +208,36 @@ namespace DataObject
         public string EmployeeName { get; set; }
         public string notice_status { get; set; }
 
+        public string ToEmail { get; set; }
+        public string CCEmail { get; set; }
+        public string TerminationType { get; set; }
+        public string TerminationLetterPreview { get; set; }
+
+        public string EmailSubject { get; set; }
+        public string EmailBody { get; set; }
+
+        public int TerminationId { get; set; }
+
+        public string RecordSource { get; set; }
+
+        // 1 = CAP round 1, 2 = CAP round 2, null = final termination.
+        public int? CapRound { get; set; }
+
+    }
+
+    // One row per termination-related action ever recorded, across both
+    // tbl_employee_termination and employee_termination_details - the full
+    // audit trail shown on the Termination History page. Nothing is ever
+    // deleted from the underlying tables; this just reads them back.
+    public class TerminationHistoryDO
+    {
+        public int UserId { get; set; }
+        public string EmployeeCode { get; set; }
+        public string EmployeeName { get; set; }
+        public string ActionType { get; set; }
+        public string Status { get; set; }
+        public DateTime? ActionDate { get; set; }
+        public DateTime? RecordedDate { get; set; }
     }
 
 }

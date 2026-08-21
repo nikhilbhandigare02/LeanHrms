@@ -1763,6 +1763,8 @@
     <Content Include="View\Modules\AssignRights.aspx" />
     <Content Include="View\Modules\assignRole.aspx" />
     <Content Include="View\Modules\EmployeeAction.aspx" />
+    <Content Include="View\Modules\TerminationDetailsView.aspx" />
+    <Content Include="View\Modules\TerminationHistoryList.aspx" />
     <Content Include="View\Modules\EmployeeLeaveView.aspx" />
     <Content Include="View\Modules\HandoverProcess.aspx" />
     <Content Include="View\Modules\Home.aspx" />
@@ -2032,6 +2034,20 @@
     </Compile>
     <Compile Include="View\Modules\EmployeeAction.aspx.designer.cs">
       <DependentUpon>EmployeeAction.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\TerminationDetailsView.aspx.cs">
+      <DependentUpon>TerminationDetailsView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\TerminationDetailsView.aspx.designer.cs">
+      <DependentUpon>TerminationDetailsView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Modules\TerminationHistoryList.aspx.cs">
+      <DependentUpon>TerminationHistoryList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\TerminationHistoryList.aspx.designer.cs">
+      <DependentUpon>TerminationHistoryList.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\EmployeeLeaveView.aspx.cs">
       <DependentUpon>EmployeeLeaveView.aspx</DependentUpon>

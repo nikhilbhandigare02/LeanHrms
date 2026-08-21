@@ -1740,6 +1740,7 @@
     <Content Include="View\Modules\AddAppraisalForm.aspx" />
     <Content Include="View\Modules\AddBioxiasalaryform.aspx" />
     <Content Include="View\Modules\AddEmployee.aspx" />
+    <Content Include="View\Modules\AddFullandFinal.aspx" />
     <Content Include="View\Modules\AddReimbursementForm.aspx" />
     <Content Include="View\Modules\AppraisalDetails.aspx" />
     <Content Include="View\Modules\AppraisalHistory.aspx" />
@@ -1880,6 +1881,13 @@
     <Compile Include="View\Modules\AddEmployee.aspx.cs">
       <DependentUpon>AddEmployee.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddFullandFinal.aspx.cs">
+      <DependentUpon>AddFullandFinal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Modules\AddFullandFinal.aspx.designer.cs">
+      <DependentUpon>AddFullandFinal.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Modules\AddReimbursementForm.aspx.cs">
       <DependentUpon>AddReimbursementForm.aspx</DependentUpon>
